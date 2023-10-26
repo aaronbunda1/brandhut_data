@@ -1,0 +1,27 @@
+
+
+============================== 2023-10-16 17:21:14.366620 | d6635584-ba59-445b-9709-de6c9894e346 ==============================
+[0m17:21:14.366620 [info ] [MainThread]: Running with dbt=1.4.1
+[0m17:21:14.367627 [debug] [MainThread]: running dbt with arguments {'write_json': True, 'use_colors': True, 'printer_width': 80, 'version_check': True, 'partial_parse': True, 'static_parser': True, 'profiles_dir': '/Users/abunda/.dbt', 'send_anonymous_usage_stats': True, 'quiet': False, 'no_print': False, 'cache_selected_only': False, 'project_name': 'bh_dbt', 'skip_profile_setup': False, 'which': 'init', 'indirect_selection': 'eager'}
+[0m17:21:14.367817 [debug] [MainThread]: Tracking: tracking
+[0m17:21:14.386835 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x106a0c940>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x106a0c6d0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x106a0c550>]}
+[0m17:21:14.388577 [debug] [MainThread]: Starter project path: /opt/homebrew/Cellar/dbt-snowflake/1.4.0/libexec/lib/python3.9/site-packages/dbt/include/starter_project
+[0m17:22:51.949098 [info ] [MainThread]: Profile bh_dbt written to /Users/abunda/.dbt/profiles.yml using target's profile_template.yml and your supplied values. Run 'dbt debug' to validate the connection.
+[0m17:22:51.950223 [info ] [MainThread]: 
+Your new dbt project "bh_dbt" was created!
+
+For more information on how to configure the profiles.yml file,
+please consult the dbt documentation here:
+
+  https://docs.getdbt.com/docs/configure-your-profile
+
+One more thing:
+
+Need help? Don't hesitate to reach out to us via GitHub issues or on Slack:
+
+  https://community.getdbt.com/
+
+Happy modeling!
+
+[0m17:22:51.950712 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x106a0c790>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x106a0c4f0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x106a0c430>]}
+[0m17:22:51.951147 [debug] [MainThread]: Flushing usage events
