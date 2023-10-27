@@ -94,7 +94,18 @@ WITH prefinal as (
         CURRENCY,
         rate_to_usd,
         region_name,
-        internal_sku_category) as fractional_gross_sales
+        internal_sku_category)/count(*) over (partition by BRAND,
+        SELLER_NAME,
+        ACCOUNT_KEY,
+        REGION,
+        MARKETPLACE_KEY,
+        DATE_DAY,
+        CHANNEL_PRODUCT_ID,
+        SKU,
+        CURRENCY,
+        rate_to_usd,
+        region_name,
+        internal_sku_category)  as fractional_gross_sales
 from prefinal
 where 1=1 
     and amount !=0 
