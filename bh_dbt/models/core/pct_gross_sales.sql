@@ -53,7 +53,7 @@ brand,
 gross_sales,
 metric_name,
 amount,
-amount/gross_sales as percent_gross_sales
+amount/nullif(gross_sales,0) as percent_gross_sales
 from cte
 unpivot(amount for metric_name in (
     cogs,ad_spend,shipping_costs,amazon_costs,other_marketing_costs,taxes
