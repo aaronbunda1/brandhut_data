@@ -16,6 +16,19 @@ pl.MARKETPLACE_KEY,
 coalesce(pl.DATE_DAY,o.month) as date_day,
 pl.CHANNEL_PRODUCT_ID,
 coalesce(pl.SKU,o.sku) as sku,
+case when coalesce(pl.SKU,o.sku) ilike '%blue%' then 'Blue'
+when coalesce(pl.SKU,o.sku) ilike '%red%' then 'Red'
+when coalesce(pl.SKU,o.sku) ilike '%white%' then 'White'
+when coalesce(pl.SKU,o.sku) ilike '%black%' then 'Black'
+when coalesce(pl.SKU,o.sku) ilike '%green%' then 'Green'
+when coalesce(pl.SKU,o.sku) ilike '%orange%' then 'Orange'
+when coalesce(pl.SKU,o.sku) ilike '%Brown%' then 'Brown'
+when coalesce(pl.SKU,o.sku) ilike '%Grey%' then 'Grey'
+when coalesce(pl.SKU,o.sku) ilike '%Yellow%' then 'Yellow'
+when coalesce(pl.SKU,o.sku) ilike '%black%' then 'Black'
+when coalesce(pl.SKU,o.sku) ilike '%purple%' then 'Purple'
+else 'Other'
+end as color,
 pl.CURRENCY,
 pl.rate_to_usd,
 pl.region_name,
@@ -135,6 +148,7 @@ BRAND,
         date_trunc(month,DATE_DAY) as date_day,
         CHANNEL_PRODUCT_ID,
         SKU,
+        COLOR,
         CURRENCY,
         rate_to_usd,
         region_name,
@@ -203,7 +217,7 @@ BRAND,
         , sum(cast(turner_costs as numeric(18,2))) as turner_costs
         , sum(cast(freight as numeric(18,2))) as freight
 from preagg
-group by 1,2,3,4,5,6,7,8,9,10,11,12
+group by 1,2,3,4,5,6,7,8,9,10,11,12,13
 )
 
 select * from by_month

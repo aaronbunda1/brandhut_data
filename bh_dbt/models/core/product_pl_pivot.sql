@@ -9,6 +9,7 @@ WITH prefinal as (
         DATE_DAY,
         CHANNEL_PRODUCT_ID,
         SKU,
+        COLOR,
         'USD' as CURRENCY,
         rate_to_usd,
         region_name,
