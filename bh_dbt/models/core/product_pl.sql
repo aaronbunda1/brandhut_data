@@ -125,7 +125,10 @@ case
     else 0 
 end as brandhut_commission,
 -coalesce(o.turner_costs,0) as turner_costs,
--coalesce(o.freight,0) as freight
+-coalesce(o.freight,0) as freight,
+-coalesce(o.ad_spend_manual,0) as ad_spend_manual,
+-coalesce(o.product_samples,0) as product_samples,
+-coalesce(o.miscellaneous,0) as miscellaneous_cost
 from {{var('readable')}}.FINANCE.finance_product_profit_loss pl
 left join {{var('readable')}}.reports.report_product_latest_version p
     on p.channel_product_id = pl.channel_product_id
@@ -216,6 +219,9 @@ BRAND,
         , sum(cast(brandhut_commission as numeric(18,2))) as brandhut_commission
         , sum(cast(turner_costs as numeric(18,2))) as turner_costs
         , sum(cast(freight as numeric(18,2))) as freight
+        , sum(cast(freight as numeric(18,2))) as ad_spend_manual
+        , sum(cast(freight as numeric(18,2))) as product_samples
+        , sum(cast(freight as numeric(18,2))) as miscellaneous_cost
 from preagg
 group by 1,2,3,4,5,6,7,8,9,10,11,12,13
 )
