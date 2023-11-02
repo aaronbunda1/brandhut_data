@@ -84,9 +84,11 @@ WITH prefinal as (
                 , ad_spend_manual
                 , product_samples
                 , miscellaneous_cost
-        )))
+     ))
+)
 
-select * 
+select 
+prefinal.*
 from prefinal
 where 1=1 
-and amount !=0 
+and prefinal.amount !=0 
