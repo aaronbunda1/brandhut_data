@@ -5,7 +5,7 @@ date_trunc(month,date_day) as impression_month,
 sum(impressions) as sp_impressions,
 sum(clicks) as sp_clicks,
 sum(units_sold) as unit_sales_ppc
-from datahawk_share_83514.advertising.advertising_product_campaign_metrics
+from {{var('readable')['hawkspace']}}.advertising.advertising_product_campaign_metrics
 group by 1,2
 )
 
@@ -23,7 +23,7 @@ else 'other brand'
 end as brand,
 sum(clicks) as clicks,
 sum(impressions) as impressions
-from datahawk_share_83514.advertising.advertising_campaign_metrics 
+from {{var('readable')['hawkspace']}}.advertising.advertising_campaign_metrics 
 where sponsored_type != 'SponsoredProducts'
 group by 1,2)
 
@@ -170,10 +170,11 @@ oas.clicks / count(*) over (partition by coalesce(
 as other_clicks,
 sp_impressions+other_impressions as total_impressions,
 sp_clicks+other_clicks as total_clicks,
+sp.unit_sales_ppc as units_sold_ppc,
 bsr.rank as best_seller_rank,
 bsr.rating
-from {{var('readable')}}.FINANCE.finance_product_profit_loss pl
-left join {{ref('brand_asin') p
+from {{var('readable')['hawkspace']}}.FINANCE.finance_product_profit_loss pl
+left join {{ref('brand_asin')}} p
     on p.channel_product_id = pl.channel_product_id
     -- and p.MARKETPLACE_KEY = pl.MARKETPLACE_KEY
 left join {{ref('category')}} c
@@ -186,14 +187,9 @@ left join sp
     on pl.channel_product_id = sp.channel_product_id
     and pl.date_day = sp.impression_month
 left join other_ad_spend  oas
-    on oas.brand = coalesce(
-    case 
-        when pl.sku ilike '%ZED%' then 'ZENS'
-        when pl.sku ilike 'BP-%' then 'ONANOFF'
-        else p.brand end,
-        o.brand)
+    on oas.brand = coalesce(p.brand,o.brand)
     and pl.date_day = oas.impression_month
 left join
-(select * from DATAHAWK_SHARE_83514.MARKET.MARKET_BEST_SELLER_RANK 
+(select * from {{var('readable')['hawkspace']}}.MARKET.MARKET_BEST_SELLER_RANK 
 qualify rank() over (partition by channel_product_id order by observation_date desc) =1) bsr
     on bsr.channel_product_id = pl.channel_product_id

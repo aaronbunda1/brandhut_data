@@ -17,10 +17,10 @@ with event_data as (
     e.currency,
     sum(e.amount) as amount,
     sum(e.units_sold) as units_sold
-    from {{var('readable')}}.finance.finance_events e
-    left join {{var('readable')}}.finance.finance_orders_success o
+    from {{var('readable')['hawkspace']}}.finance.finance_events e
+    left join {{var('readable')['hawkspace']}}.finance.finance_orders_success o
         on o.order_id = e.order_id
-    left join {{var('readable')}}.reports.report_product_latest_version p
+    left join {{var('readable')['hawkspace']}}.reports.report_product_latest_version p
         on p.product_key = o.product_key
     and o.purchase_date < date_trunc(month,current_date())
     group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15

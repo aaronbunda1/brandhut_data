@@ -35,4 +35,5 @@ models:
 
 
 vars:
-  readable: datahawk_share_83514
+  readable: 
+    hawkspace: datahawk_share_83514
