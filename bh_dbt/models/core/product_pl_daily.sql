@@ -29,12 +29,7 @@ group by 1,2)
 
 
 select distinct 
-coalesce(
-    case 
-        when pl.sku ilike '%ZED%' then 'ZENS'
-        when pl.sku ilike 'BP-%' then 'ONANOFF'
-        else p.brand end,
-        o.brand) as brand,
+coalesce(p.brand,o.brand) as brand,
 pl.SELLER_NAME,
 pl.ACCOUNT_KEY,
 pl.REGION,
@@ -44,15 +39,16 @@ pl.CHANNEL_PRODUCT_ID,
 min(coalesce(pl.SKU,o.sku)) over (partition by pl.CHANNEL_PRODUCT_ID) as sku,
 case when coalesce(pl.SKU,o.sku) ilike '%blue%' then 'Blue'
 when coalesce(pl.SKU,o.sku) ilike '%red%' then 'Red'
-when coalesce(pl.SKU,o.sku) ilike '%white%' then 'White'
-when coalesce(pl.SKU,o.sku) ilike '%black%' then 'Black'
+when coalesce(pl.SKU,o.sku) ilike any ('%white%','%wht%') then 'White'
+when coalesce(pl.SKU,o.sku) ilike any ('%black%','%blk%') then 'Black'
 when coalesce(pl.SKU,o.sku) ilike '%green%' then 'Green'
 when coalesce(pl.SKU,o.sku) ilike '%orange%' then 'Orange'
 when coalesce(pl.SKU,o.sku) ilike '%Brown%' then 'Brown'
-when coalesce(pl.SKU,o.sku) ilike '%Grey%' then 'Grey'
+when coalesce(pl.SKU,o.sku) ilike any ('%gry%','%Grey%') then 'Grey'
 when coalesce(pl.SKU,o.sku) ilike '%Yellow%' then 'Yellow'
 when coalesce(pl.SKU,o.sku) ilike '%black%' then 'Black'
 when coalesce(pl.SKU,o.sku) ilike '%purple%' then 'Purple'
+when coalesce(pl.SKU,o.sku) ilike '%pink%' then 'Pink'
 else 'Other'
 end as color,
 pl.CURRENCY,
@@ -177,9 +173,9 @@ sp_clicks+other_clicks as total_clicks,
 bsr.rank as best_seller_rank,
 bsr.rating
 from {{var('readable')}}.FINANCE.finance_product_profit_loss pl
-left join {{var('readable')}}.reports.report_product_latest_version p
+left join {{ref('brand_asin') p
     on p.channel_product_id = pl.channel_product_id
-    and p.MARKETPLACE_KEY = pl.MARKETPLACE_KEY
+    -- and p.MARKETPLACE_KEY = pl.MARKETPLACE_KEY
 left join {{ref('category')}} c
     on c.channel_product_id = p.channel_product_id
 full outer join {{ref('manual_metrics_by_brand_and_month')}} o 
