@@ -1,0 +1,8 @@
+version: 2
+
+models:
+  - name: brand_asin
+    columns:
+      - name: key
+        tests:
+          - unique

@@ -9,6 +9,27 @@ from {{var('readable')['hawkspace']}}.advertising.advertising_product_campaign_m
 group by 1,2
 )
 
+, non_sp as (
+    select
+    seller_name,
+    account_key,
+    marketplace_key,
+    brand,
+    date_day,
+     SponsoredBrandsVideo,
+     SponsoredBrands,
+     sponsoreddisplay
+    from {{ref('ad_spend')}}
+    pivot(sum(ad_spend) for sponsored_type in ('SponsoredBrandsVideo','SponsoredBrands','SponsoredDisplay'))
+        as a (seller_name,
+    account_key,
+    marketplace_key,
+    brand,
+    date_day,
+    SponsoredBrandsVideo,
+    SponsoredBrands,
+    SponsoredDisplay)
+)
 
 , other_ad_spend as (
 select
@@ -65,9 +86,9 @@ ORDERS,
 UNITS_SOLD,
 COGS,
 SPONSORED_PRODUCTS_COST,
-DIST_SPONSORED_BRANDS_COST,
-DIST_SPONSORED_BRANDS_VIDEO_COST,
-DIST_SPONSORED_DISPLAY_COST,
+-non_sp.sponsoredbrands/count(*) over (partition by pl.date_day,pl.account_key,pl.marketplace_key,p.brand) as DIST_SPONSORED_BRANDS_COST,
+-non_sp.sponsoredbrandsvideo/count(*) over (partition by pl.date_day,pl.account_key,pl.marketplace_key,p.brand) as DIST_SPONSORED_BRANDS_VIDEO_COST,
+-non_sp.sponsoreddisplay/count(*) over (partition by pl.date_day,pl.account_key,pl.marketplace_key,p.brand) as DIST_SPONSORED_DISPLAY_COST,
 SPONSORED_PRODUCTS_SALES,
 DIST_SPONSORED_BRANDS_SALES,
 DIST_SPONSORED_BRANDS_VIDEO_SALES,
@@ -120,7 +141,7 @@ GROSS_PROFIT,
 -- CONTRIBUTION_PROFIT_ONE,
 -- CONTRIBUTION_PROFIT_TWO,
 -- EBITDA,
-sum(gross_sales) over (partition by date_trunc(month,date_day),p.brand) as monthly_brand_gs,
+sum(gross_sales) over (partition by date_trunc(month,pl.date_day),p.brand) as monthly_brand_gs,
 case 
     when p.brand ilike '%cellini%'
         then -gross_sales*0.1 
@@ -176,7 +197,7 @@ bsr.rating
 from {{var('readable')['hawkspace']}}.FINANCE.finance_product_profit_loss pl
 left join {{ref('brand_asin')}} p
     on p.channel_product_id = pl.channel_product_id
-    -- and p.MARKETPLACE_KEY = pl.MARKETPLACE_KEY
+    and p.MARKETPLACE_KEY = pl.MARKETPLACE_KEY
 left join {{ref('category')}} c
     on c.channel_product_id = p.channel_product_id
 full outer join {{ref('manual_metrics_by_brand_and_month')}} o 
@@ -193,3 +214,8 @@ left join
 (select * from {{var('readable')['hawkspace']}}.MARKET.MARKET_BEST_SELLER_RANK 
 qualify rank() over (partition by channel_product_id order by observation_date desc) =1) bsr
     on bsr.channel_product_id = pl.channel_product_id
+left join non_sp
+    on non_sp.marketplace_key = pl.marketplace_key
+    and non_sp.account_key = pl.account_key
+    and p.brand = non_sp.brand
+    and non_sp.date_day = pl.date_day
