@@ -84,7 +84,7 @@ end as internal_sku_category,
 GROSS_SALES,
 ORDERS,
 UNITS_SOLD,
-COGS,
+coalesce(-pl.net_units_sold*cogs.productcost,pl.COGS) as cogs, 
 SPONSORED_PRODUCTS_COST,
 -non_sp.sponsoredbrands/count(*) over (partition by pl.date_day,pl.account_key,pl.marketplace_key,p.brand) as DIST_SPONSORED_BRANDS_COST,
 -non_sp.sponsoredbrandsvideo/count(*) over (partition by pl.date_day,pl.account_key,pl.marketplace_key,p.brand) as DIST_SPONSORED_BRANDS_VIDEO_COST,
@@ -144,7 +144,7 @@ GROSS_PROFIT,
 sum(gross_sales) over (partition by date_trunc(month,pl.date_day),p.brand) as monthly_brand_gs,
 case 
     when p.brand ilike '%cellini%'
-        then -gross_sales*0.1 
+        then -net_sales*0.1 
     when p.brand ilike any ('%spot%','%zens%')
         then -net_sales*0.15
     when p.brand ilike '%storyphones%'
@@ -219,3 +219,7 @@ left join non_sp
     and non_sp.account_key = pl.account_key
     and p.brand = non_sp.brand
     and non_sp.date_day = pl.date_day
+left join {{ref('cogs')}} cogs
+    on cogs.asin = pl.channel_product_id
+    and pl.account_key = cogs.accountid
+    and pl.date_day BETWEEN cogs.start_date and cogs.end_date
