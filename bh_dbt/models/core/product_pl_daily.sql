@@ -50,7 +50,7 @@ group by 1,2)
 
 
 select distinct 
-coalesce(p.brand,o.brand) as brand,
+case when c.category is null and p.brand = 'ZENS' then 'Zens Legacy' else coalesce(p.brand,o.brand) end as brand,
 pl.SELLER_NAME,
 pl.ACCOUNT_KEY,
 pl.REGION,
