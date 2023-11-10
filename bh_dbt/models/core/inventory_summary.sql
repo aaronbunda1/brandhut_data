@@ -8,14 +8,27 @@ with last_30_day_unit_sales as (
     group by 1
 )
 
+, inventory_current as (
+    select 
+    b.brand,
+    fnsku as asin, 
+    sku,
+    date as as_of_date,
+    sum(ending_warehouse_balance) as ending_warehouse_balance
+    from (
+        select *, 
+        min(msku) over (partition by fnsku) as sku
+        from {{var('readable')['hawkspace']}}.raw_inventory.raw_inventory_ledger_summary) ls
+    left join (select distinct channel_product_id as asin, brand from {{ref('brand_asin')}}) b
+        on b.asin = ls.fnsku 
+    where disposition = 'SELLABLE'
+    group by 1,2,3,4
+)
+
 select 
-brand,
-ls.*,
-units_sold_l30d,
-ending_warehouse_balance/nullif((nullif(units_sold_l30d,0)/30),0) as days_supply
-from {{var('readable')['hawkspace']}}.raw_inventory.raw_inventory_ledger_summary ls
-left join (select distinct channel_product_id as asin, brand from {{var('readable')['hawkspace']}}.reports.report_product_latest_version) bs
-    using(asin)
+inventory_current.*,
+units_sold_l30d
+from inventory_current
 left join last_30_day_unit_sales
     using(asin)
-qualify date = max(date) over (partition by 1=1)
+qualify rank() over (partition by asin order by as_of_date desc) =1
