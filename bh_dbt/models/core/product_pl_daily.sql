@@ -153,17 +153,17 @@ case
             when pl.sku ilike '%storyph%' 
                 then 
                     case
-                        when monthly_brand_gs <= 50000 then -gross_sales*.1
-                        when monthly_brand_gs < 251000 then -gross_sales *.09
-                        else -gross_sales * .06
+                        when monthly_brand_gs <= 50000 then -net_sales*.1
+                        when monthly_brand_gs < 251000 then -net_sales *.09
+                        else -net_sales * .06
                     end
             when pl.sku ilike any ('%SS-%','%STSH-%','%shield%')
                 then 
                     case
-                        when monthly_brand_gs < 251000 then -gross_sales *.12
-                        else -gross_sales * .08
+                        when monthly_brand_gs < 251000 then -net_sales *.12
+                        else -net_sales * .08
                     end
-            else -gross_sales*.1
+            else -net_sales*.1
         end 
     else 0 
 end as brandhut_commission,
