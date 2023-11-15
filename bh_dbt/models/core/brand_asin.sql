@@ -22,17 +22,7 @@ with product_report as (
     distinct 
     channel_product_id,
     marketplace_key,
-    case  
-        when pl.sku ilike '%ZED%' or pl.sku in (
-            'ZEAPM03/00',
-            'ZESC08W') then 'ZENS'
-        when pl.sku ilike any ('%storyph%') then 'Storyphones'
-        when pl.sku ilike any ('%-BP-%','BP-%','%-ON-%','ON-%') then 'ONANOFF'
-        when pl.sku ilike '%POP%' then 'POP'
-        when pl.sku ilike '%SPOT%' then 'SPOT'
-        when pl.sku ilike '%SPOT%' then 'SPOT'
-        when pl.sku ilike '%QI%' then 'Qisten'
-    end as brand
+    {{ get_brand_from_sku('pl.sku') }} as brand
     from {{var('readable')['hawkspace']}}.finance.finance_product_profit_loss pl
 )
 

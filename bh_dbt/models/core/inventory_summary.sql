@@ -10,8 +10,9 @@ with last_30_day_unit_sales as (
 
 , inventory_current as (
     select 
-    b.brand,
-    fnsku as asin, 
+    coalesce(b.brand,{{get_brand_from_sku('sku')}}) as brand,
+    -- fnsku as asin, 
+    ls.asin,
     sku,
     date as as_of_date,
     sum(ending_warehouse_balance) as ending_warehouse_balance
@@ -20,15 +21,23 @@ with last_30_day_unit_sales as (
         min(msku) over (partition by fnsku) as sku
         from {{var('readable')['hawkspace']}}.raw_inventory.raw_inventory_ledger_summary) ls
     left join (select distinct channel_product_id as asin, brand from {{ref('brand_asin')}}) b
-        on b.asin = ls.fnsku 
+        on b.asin = ls.asin 
     where disposition = 'SELLABLE'
     group by 1,2,3,4
 )
 
 select 
 inventory_current.*,
-units_sold_l30d
+units_sold_l30d,
+coalesce(c.category, case 
+    when sku ilike any ('%SS-%','%STSH-%','%shield%') then 'Storyshield' 
+    when inventory_current.brand = 'Storyphones' then 'Storyphones' 
+    when inventory_current.brand = 'ZENS' then 'ZENS Legacy' 
+    end) as internal_sku_category
 from inventory_current
 left join last_30_day_unit_sales
     using(asin)
+left join {{ref('category')}} c
+    on c.channel_product_id = inventory_current.asin
+where ending_warehouse_balance > 0
 qualify rank() over (partition by asin order by as_of_date desc) =1
