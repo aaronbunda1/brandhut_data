@@ -9,6 +9,7 @@ left join (select distinct channel_product_id,sku from {{ref('product_pl')}}) pl
     on pl.channel_product_id = p.channel_product_id
 left join {{ref('brand_asin')}} b
     on b.channel_product_id = pd.channel_product_id
+    and pd.marketplace_key = b.marketplace_key
 left join {{ref('category')}} c
     on c.channel_product_id = pd.channel_product_id
 -- select the row per channel_product_id with the maximum observation_date within its month
