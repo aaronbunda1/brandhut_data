@@ -155,7 +155,7 @@ inner join {{ref('invoice_amounts')}} b
 )
 
 select a.*, 
-coalesce(true_up/count(*) over (partition by a.brand,a.date_day),0) as dist_true_up,
+coalesce(cast(true_up/count(*) over (partition by a.brand,a.date_day) AS NUMERIC(30,2)),0) as dist_true_up,
 current_timestamp() as updated_at 
 from by_month a
 left join true_up_calc b
