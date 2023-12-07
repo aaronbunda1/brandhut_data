@@ -10,10 +10,14 @@ with last_30_day_unit_sales as (
 
 , inventory_current as (
     select 
-    coalesce(b.brand,{{get_brand_from_sku('sku')}}) as brand,
+    coalesce(b.brand,case when b.brand = 'ZENS' and c.category is null then 'Zens Legacy' else {{get_brand_from_sku('sku')}} end) as brand,
     -- fnsku as asin, 
     ls.asin,
     sku,
+    coalesce(c.category, case 
+        when sku ilike any ('%SS-%','%STSH-%','%shield%') then 'Storyshield' 
+        when coalesce(b.brand,{{get_brand_from_sku('sku')}}) = 'Storyphones' then 'Storyphones' 
+        end) as internal_sku_category,
     date as as_of_date,
     sum(ending_warehouse_balance) as ending_warehouse_balance
     from (
@@ -22,22 +26,17 @@ with last_30_day_unit_sales as (
         from {{var('readable')['hawkspace']}}.raw_inventory.raw_inventory_ledger_summary) ls
     left join (select distinct channel_product_id as asin, brand from {{ref('brand_asin')}}) b
         on b.asin = ls.asin 
+    left join {{ref('category')}} c
+    on c.channel_product_id = ls.asin
     where disposition = 'SELLABLE'
-    group by 1,2,3,4
+    group by 1,2,3,4,5
 )
 
 select 
 inventory_current.*,
-units_sold_l30d,
-coalesce(c.category, case 
-    when sku ilike any ('%SS-%','%STSH-%','%shield%') then 'Storyshield' 
-    when inventory_current.brand = 'Storyphones' then 'Storyphones' 
-    when inventory_current.brand = 'ZENS' then 'ZENS Legacy' 
-    end) as internal_sku_category
+units_sold_l30d
 from inventory_current
 left join last_30_day_unit_sales
     using(asin)
-left join {{ref('category')}} c
-    on c.channel_product_id = inventory_current.asin
 where ending_warehouse_balance > 0
 qualify rank() over (partition by asin order by as_of_date desc) =1

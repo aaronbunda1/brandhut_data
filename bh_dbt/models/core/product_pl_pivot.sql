@@ -1,6 +1,14 @@
 {{config(materialized='table')}}
 WITH prefinal as (
     SELECT
+        concat(SELLER_NAME,
+        ACCOUNT_KEY,
+        REGION,
+        MARKETPLACE_KEY,
+        DATE_DAY,
+        CHANNEL_PRODUCT_ID,
+        SKU,
+        REGION_NAME) as key,
         BRAND,
         SELLER_NAME,
         ACCOUNT_KEY,
@@ -15,6 +23,7 @@ WITH prefinal as (
         region_name,
         internal_sku_category,
         metric_name,
+        current_timestamp() as updated_at,
         round(amount/coalesce(rate_to_usd,1),2) as amount
     FROM {{ref('product_pl')}}
     UNPIVOT(amount FOR metric_name IN (

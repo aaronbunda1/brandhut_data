@@ -1,16 +1,13 @@
 {{config(materialized='table')}}
 
-
-
-with by_month as (
+with types as (
 select
-CONCAT(ACCOUNT_KEY,marketplace_key,region,seller_name,CHANNEL_PRODUCT_ID,date_trunc(month,DATE_DAY),SKU,COLOR,CURRENCY) as key,
 BRAND,
 SELLER_NAME,
 ACCOUNT_KEY,
 REGION,
 MARKETPLACE_KEY,
-date_trunc(month,DATE_DAY) as date_day,
+case when date_day < '2023-01-01' then date_trunc(month,date_day) else date_day end as date_day,
 CHANNEL_PRODUCT_ID,
 SKU,
 COLOR,
@@ -90,74 +87,99 @@ sum(cast(GROSS_PROFIT AS NUMERIC(18,2))) AS GROSS_PROFIT--,
 , avg(best_seller_rank) as best_seller_rank
 , avg(rating) as rating
 from {{ref('product_pl_daily')}}
-group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14
-)
-, by_brand as (
-
-    select 
-    brand,
-    date_day, 
-    sum(coalesce(GROSS_SALES,0))
-    +sum(coalesce(COGS,0))
-    +sum(coalesce(SPONSORED_PRODUCTS_COST,0))
-    +sum(coalesce(DIST_SPONSORED_BRANDS_COST,0))
-    +sum(coalesce(DIST_SPONSORED_BRANDS_VIDEO_COST,0))
-    +sum(coalesce(DIST_SPONSORED_DISPLAY_COST,0))
-    +sum(coalesce(GIFT_WRAP,0))
-    +sum(coalesce(REIMBURSED_PRODUCT,0))
-    +sum(coalesce(REIMBURSED_PRODUCT_UNIT,0))
-    +sum(coalesce(REFUND_COMMISSION,0))
-    +sum(coalesce(REFUNDED_REFERRAL_FEES,0))
-    +sum(coalesce(REIMBURSED_SHIPPING,0))
-    +sum(coalesce(REFUND_PROMOTION,0))
-    +sum(coalesce(REFUND_SHIPPING_PROMOTION,0))
-    +sum(coalesce(REFUND_SHIPPING_CHARGEBACK,0))
-    +sum(coalesce(GOODWILL,0))
-    +sum(coalesce(REVERSAL_REIMBURSED,0))
-    +sum(coalesce(GIFT_WRAP_CHARGEBACK,0))
-    +sum(coalesce(SHIPPING,0))
-    +sum(coalesce(SHIPPING_PROMOTION,0))
-    +sum(coalesce(SHIPPING_CHARGEBACK,0))
-    +sum(coalesce(DIST_INBOUND_TRANSPORTATION,0))
-    +sum(coalesce(DIST_FBA_STORAGE_FEE,0))
-    +sum(coalesce(DIST_FBA_INVENTORY_PLACEMENT_SERVICE,0))
-    +sum(coalesce(WAREHOUSE_DAMAGE,0))
-    +sum(coalesce(WAREHOUSE_LOST_MANUAL,0))
-    +sum(coalesce(FBA_PER_UNIT_FULFILMENT_FEE,0))
-    +sum(coalesce(DIST_DISPOSAL_COMPLETE,0))
-    +sum(coalesce(DIST_REMOVAL_COMPLETE,0))
-    +sum(coalesce(REFERRAL_FEE,0))
-    +sum(coalesce(PROMOTION,0))
-    +sum(coalesce(SUBSCRIPTION_FEE,0))
-    +sum(coalesce(TAX_PRINCIPAL,0))
-    +sum(coalesce(TAX_SHIPPING,0))
-    +sum(coalesce(TAX_REIMBURSED,0))
-    +sum(coalesce(TAX_OTHER,0))
-    +sum(coalesce(DIST_OTHER_AMOUNT,0))
-    +sum(coalesce(RESTOCKING_FEE,0))
-    +sum(coalesce(brandhut_commission,0))
-    +sum(coalesce(turner_costs,0))
-    +sum(coalesce(freight,0))
-    +sum(coalesce(ad_spend_manual,0))
-    +sum(coalesce(product_samples,0))
-    +sum(coalesce(miscellaneous_cost,0))
-    as pl
-    from by_month
-    group by 1,2
+group by 1,2,3,4,5,6,7,8,9,10,11,12,13
 )
 
-,true_up_calc as (
-select a.brand, a.date_day, a.pl,b.invoice_amount, b.invoice_amount - a.pl as true_up 
-from by_brand a 
-inner join {{ref('invoice_amounts')}} b
-    on a.brand = b.brand 
-    and a.date_day = b.month
+, prefinal as (
+    SELECT
+        BRAND,
+        SELLER_NAME,
+        ACCOUNT_KEY,
+        REGION,
+        MARKETPLACE_KEY,
+        DATE_DAY,
+        CHANNEL_PRODUCT_ID,
+        SKU,
+        COLOR,
+        'USD' as CURRENCY,
+        rate_to_usd,
+        region_name,
+        internal_sku_category,
+        metric_name,
+        round(amount/coalesce(rate_to_usd,1),2) as amount
+    FROM types
+    UNPIVOT(amount FOR metric_name IN (
+            GROSS_SALES,
+    ORDERS,
+    UNITS_SOLD,
+    COGS,
+    SPONSORED_PRODUCTS_COST,
+    DIST_SPONSORED_BRANDS_COST,
+    DIST_SPONSORED_BRANDS_VIDEO_COST,
+    DIST_SPONSORED_DISPLAY_COST,
+    -- SPONSORED_PRODUCTS_SALES,
+    -- DIST_SPONSORED_BRANDS_SALES,
+    -- DIST_SPONSORED_BRANDS_VIDEO_SALES,
+    -- DIST_SPONSORED_DISPLAY_SALES,
+    GIFT_WRAP,
+    REIMBURSED_PRODUCT,
+    REIMBURSED_PRODUCT_UNIT,
+    REFUND_COMMISSION,
+    REFUNDED_REFERRAL_FEES,
+    REIMBURSED_SHIPPING,
+    REFUND_PROMOTION,
+    REFUND_SHIPPING_PROMOTION,
+    REFUND_SHIPPING_CHARGEBACK,
+    GOODWILL,
+    REVERSAL_REIMBURSED,
+    GIFT_WRAP_CHARGEBACK,
+    SHIPPING,
+    SHIPPING_PROMOTION,
+    SHIPPING_CHARGEBACK,
+    DIST_INBOUND_TRANSPORTATION,
+    DIST_FBA_STORAGE_FEE,
+    DIST_FBA_INVENTORY_PLACEMENT_SERVICE,
+    WAREHOUSE_DAMAGE,
+    WAREHOUSE_LOST_MANUAL,
+    FBA_PER_UNIT_FULFILMENT_FEE,
+    DIST_DISPOSAL_COMPLETE,
+    DIST_REMOVAL_COMPLETE,
+    REFERRAL_FEE,
+    PROMOTION,
+    SUBSCRIPTION_FEE,
+    TAX_PRINCIPAL,
+    TAX_SHIPPING,
+    TAX_REIMBURSED,
+    TAX_OTHER,
+    DIST_OTHER_AMOUNT,
+    RESTOCKING_FEE,
+    -- EARNED_GROSS_SALES,
+    -- EARNED_ORDERS,
+    -- EARNED_UNITS_SOLD,
+    -- TOTAL_ADVERTISING_SALES,
+    -- TOTAL_ADVERTISING_COSTS,
+    -- TOTAL_REFERRAL_FEES,
+    -- TOTAL_OTHER_MARKETING_COSTS,
+    -- TOTAL_WAREHOUSING_COSTS,
+    -- TOTAL_SHIPPING_COSTS,
+    -- TOTAL_TAXES_ON_SALES,
+    NET_SALES,
+    NET_UNITS_SOLD,
+    GROSS_PROFIT
+    -- CONTRIBUTION_PROFIT_ONE,
+    -- CONTRIBUTION_PROFIT_TWO,
+    -- EBITDA,
+                , brandhut_commission
+                , turner_costs
+                , freight
+                , ad_spend_manual
+                , product_samples
+                , miscellaneous_cost
+     ))
 )
 
-select a.*, 
-coalesce(true_up/count(*) over (partition by a.brand,a.date_day),0) as dist_true_up,
-current_timestamp() as updated_at 
-from by_month a
-left join true_up_calc b
-    on a.brand = b.brand
-    and a.date_day = b.date_day
+select 
+prefinal.*
+from prefinal
+where 1=1 
+and prefinal.amount !=0 

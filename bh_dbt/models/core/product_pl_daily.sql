@@ -49,7 +49,7 @@ where sponsored_type != 'SponsoredProducts'
 group by 1,2)
 
 
-select distinct 
+, prefinal as (select distinct 
 case when c.category is null and p.brand = 'ZENS' then 'Zens Legacy' else coalesce(p.brand,o.brand) end as brand,
 pl.SELLER_NAME,
 pl.ACCOUNT_KEY,
@@ -222,4 +222,5 @@ left join non_sp
 left join {{ref('cogs')}} cogs
     on cogs.asin = pl.channel_product_id
     and pl.account_key = cogs.accountid
-    and pl.date_day BETWEEN cogs.start_date and cogs.end_date
+    and pl.date_day BETWEEN cogs.start_date and cogs.end_date)
+select * from prefinal
