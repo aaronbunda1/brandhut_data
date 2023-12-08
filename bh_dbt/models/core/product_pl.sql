@@ -4,7 +4,14 @@
 
 with by_month as (
 select
-CONCAT(ACCOUNT_KEY,marketplace_key,region,seller_name,CHANNEL_PRODUCT_ID,date_trunc(month,DATE_DAY),SKU,COLOR,CURRENCY) as key,
+CONCAT(coalesce(ACCOUNT_KEY,''),
+coalesce(BRAND,''),
+coalesce(marketplace_key,''),
+coalesce(region::STRING,''),
+coalesce(seller_name,''),
+coalesce(CHANNEL_PRODUCT_ID,''),date_trunc(month,DATE_DAY),
+coalesce(SKU,''),
+coalesce(CURRENCY,'')) as key,
 BRAND,
 SELLER_NAME,
 ACCOUNT_KEY,
@@ -15,9 +22,9 @@ CHANNEL_PRODUCT_ID,
 SKU,
 COLOR,
 CURRENCY,
-rate_to_usd,
 region_name,
 internal_sku_category,
+avg(rate_to_usd) as rate_to_usd,
 sum(CAST(GROSS_SALES AS NUMERIC(18,2))) AS GROSS_SALES,
 sum(CAST(ORDERS AS NUMERIC(18,2))) AS ORDERS,
 sum(CAST(UNITS_SOLD AS NUMERIC(18,2))) AS UNITS_SOLD,
@@ -90,7 +97,7 @@ sum(cast(GROSS_PROFIT AS NUMERIC(18,2))) AS GROSS_PROFIT--,
 , avg(best_seller_rank) as best_seller_rank
 , avg(rating) as rating
 from {{ref('product_pl_daily')}}
-group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14
+group by ALL
 )
 , by_brand as (
 
