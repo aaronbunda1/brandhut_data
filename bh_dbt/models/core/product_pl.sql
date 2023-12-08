@@ -105,7 +105,6 @@ group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14
     +sum(coalesce(DIST_SPONSORED_DISPLAY_COST,0))
     +sum(coalesce(GIFT_WRAP,0))
     +sum(coalesce(REIMBURSED_PRODUCT,0))
-    +sum(coalesce(REIMBURSED_PRODUCT_UNIT,0))
     +sum(coalesce(REFUND_COMMISSION,0))
     +sum(coalesce(REFUNDED_REFERRAL_FEES,0))
     +sum(coalesce(REIMBURSED_SHIPPING,0))
