@@ -24,6 +24,7 @@ WITH prefinal as (
         internal_sku_category,
         metric_name,
         current_timestamp() as updated_at,
+        -- round(amount,2) as amount
         round(amount/coalesce(rate_to_usd,1),2) as amount
     FROM {{ref('product_pl')}}
     UNPIVOT(amount FOR metric_name IN (

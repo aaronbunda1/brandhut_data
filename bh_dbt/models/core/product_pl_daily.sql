@@ -38,7 +38,7 @@ case when campaign_name ilike any ('%onanoff%','%buddyph%') then 'ONANOFF'
 when campaign_name ilike '%zens%' then 'ZENS'
 when campaign_name ilike '%storyph%' then 'Storyphones'
 when campaign_name ilike '%cellini%' then 'Cellini'
-when campaign_name ilike '%spot%' then 'Spot'
+when campaign_name ilike '%spot%' then 'SPOT'
 when campaign_name ilike '%qisten%' then 'Qisten'
 else 'other brand' 
 end as brand,
