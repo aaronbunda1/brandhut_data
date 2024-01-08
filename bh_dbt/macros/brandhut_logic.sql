@@ -5,7 +5,8 @@
             'ZEAPM03/00',
             'ZESC08W') 
             or {{ sku_column }} like 'ZE%' then 'ZENS'
-        when {{ sku_column }} ilike any ('%storyph%','%ss-%') then 'Storyphones'
+        when {{ sku_column }} ilike any ('%storyph%','%ss-%') then 'Onanoff 2'
+        when {{ sku_column }} ilike any ('%fokus%') then 'Fokus'
         when {{ sku_column }} like any ('%BP-%','BP-%','%-ON-%','%ON-%') then 'ONANOFF'
         when {{ sku_column }} ilike '%POP%' then 'POP'
         when {{ sku_column }} ilike '%SPOT%' then 'SPOT'

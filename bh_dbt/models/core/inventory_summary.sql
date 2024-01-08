@@ -16,7 +16,7 @@ with last_30_day_unit_sales as (
     sku,
     coalesce(c.category, case 
         when sku ilike any ('%SS-%','%STSH-%','%shield%') then 'Storyshield' 
-        when coalesce(b.brand,{{get_brand_from_sku('sku')}}) = 'Storyphones' then 'Storyphones' 
+        when coalesce(b.brand,{{get_brand_from_sku('sku')}}) = 'Onanoff 2' then 'Onanoff 2' 
         end) as internal_sku_category,
     date as as_of_date,
     sum(ending_warehouse_balance) as ending_warehouse_balance

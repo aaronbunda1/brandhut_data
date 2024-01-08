@@ -36,7 +36,8 @@ select
 date_trunc(month,date_day) as impression_month,
 case when campaign_name ilike any ('%onanoff%','%buddyph%') then 'ONANOFF'
 when campaign_name ilike '%zens%' then 'ZENS'
-when campaign_name ilike '%storyph%' then 'Storyphones'
+when campaign_name ilike '%storyph%' then 'Onanoff 2'
+when campaign_name ilike '%fokus%' then 'Fokus'
 when campaign_name ilike '%cellini%' then 'Cellini'
 when campaign_name ilike '%spot%' then 'SPOT'
 when campaign_name ilike '%qisten%' then 'Qisten'
@@ -77,8 +78,8 @@ pl.rate_to_usd,
 pl.region_name,
 case 
     when c.category is null and p.brand = 'ZENS' then 'Zens Legacy'
-    when p.brand = 'STORYPHONES' and pl.sku ilike any ('%SS-%','%STSH-%','%shield%') then 'StoryShield'
-    when p.brand = 'STORYPHONES' and pl.sku ilike '%storyph%' then 'StoryPhones'
+    when p.brand = 'Onanoff 2' and pl.sku ilike any ('%SS-%','%STSH-%','%shield%') then 'StoryShield'
+    when p.brand = 'Onanoff 2' and pl.sku ilike '%storyph%' then 'StoryPhones'
     else c.category 
 end as internal_sku_category,
 GROSS_SALES,
@@ -147,7 +148,7 @@ case
         then -net_sales*0.1 
     when p.brand ilike any ('%spot%','%zens%')
         then -net_sales*0.15
-    when p.brand ilike '%storyphones%'
+    when p.brand ilike '%onanoff 2%'
         then 
         case 
             when pl.sku ilike '%storyph%' 
