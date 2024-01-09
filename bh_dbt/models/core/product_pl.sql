@@ -167,3 +167,4 @@ from by_month a
 left join true_up_calc b
     on a.brand = b.brand
     and a.date_day = b.date_day
+where channel_product_id is distinct from ('Unknown')
