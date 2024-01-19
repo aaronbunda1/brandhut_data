@@ -9,7 +9,7 @@ with non_sp_data as (
         when campaign_name ilike any ('%quisten%','%qis%') then 'Qisten'
         when campaign_name ilike '%storyph%' then 'Storyphones'
         when campaign_name ilike '%pop%' then 'Onanoff 2'
-        when campaign_name ilike '%fokus'% then 'Fokus'
+        when campaign_name ilike '%fokus%' then 'Fokus'
         when campaign_name ilike '%SPOT%' then 'SPOT'
         when campaign_name ilike any ('%onanoff%','%onanonff%','%onaonff%','%buddyph%','%explore plus%','%explore+%','%playear%','%play+%','%school plus%','%school+%','%Play%','%Cosmos%','%wave%','%headphones%') then 'ONANOFF'
         when campaign_name ilike any ('%health direct%','%urban nomad%','%eukonic%','%frhome%','%thirty%','%ev gear%','%hsa%') then 'Other Brands'
