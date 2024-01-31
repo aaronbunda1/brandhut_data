@@ -10,7 +10,7 @@ replace(project_name,' (from projects)','') as category
 from {{var('readable')['hawkspace']}}.REFERENTIAL.REFERENTIAL_PROJECT
 join onanoff using(product_key)
 join {{var('readable')['hawkspace']}}.reports.report_product_latest_version p using(product_key) 
-where NOT project_name ilike any ('%Onanoff%','%Spot%','%Cellini%')
+where NOT project_name ilike any ('%Onanoff (from projects)%','%Spot (from projects)%','%Cellini (from projects)%')
 )
 
 , with_manual as (select *
