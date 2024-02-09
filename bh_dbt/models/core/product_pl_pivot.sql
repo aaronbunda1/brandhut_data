@@ -18,6 +18,7 @@ WITH prefinal as (
         CHANNEL_PRODUCT_ID,
         SKU,
         COLOR,
+        coalesce(currency,'USD') as currency_original,
         'USD' as CURRENCY,
         rate_to_usd,
         region_name,
