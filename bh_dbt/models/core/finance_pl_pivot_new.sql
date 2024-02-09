@@ -9,7 +9,7 @@ with source as (
       currency,
       metric, 
       amount
-    from CUSTOM_83514.finance_profit_ledger
+    from  datahawk_share_83514.CUSTOM_83514.finance_profit_ledger
 ),
 pivoting as (
   select * 
@@ -120,7 +120,7 @@ sales_data as (
     sku,
     currency,
     sales
-  from FINANCE.finance_product_metrics_daily
+  from  datahawk_share_83514.FINANCE.finance_product_metrics_daily
   where marketplace_key <> 'Unknown' and workspace_id = '83514'
 )
 
