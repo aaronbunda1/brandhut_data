@@ -74,7 +74,7 @@ sum(cast(RESTOCKING_FEE AS NUMERIC(18,2))) AS RESTOCKING_FEE,
 -- sum(cast(EARNED_ORDERS AS NUMERIC(18,2))) AS EARNED_ORDERS,
 -- sum(cast(EARNED_UNITS_SOLD AS NUMERIC(18,2))) AS EARNED_UNITS_SOLD,
 sum(cast(TOTAL_ADVERTISING_SALES AS NUMERIC(18,2))) AS TOTAL_ADVERTISING_SALES,
--- sum(cast(TOTAL_ADVERTISING_COSTS AS NUMERIC(18,2))) AS TOTAL_ADVERTISING_COSTS,
+sum(cast(total_ad_spend_custom AS NUMERIC(18,2))) AS TOTAL_ADVERTISING_COSTS,
 -- sum(cast(TOTAL_REFERRAL_FEES AS NUMERIC(18,2))) AS TOTAL_REFERRAL_FEES,
 -- sum(cast(TOTAL_OTHER_MARKETING_COSTS AS NUMERIC(18,2))) AS TOTAL_OTHER_MARKETING_COSTS,
 -- sum(cast(TOTAL_WAREHOUSING_COSTS AS NUMERIC(18,2))) AS TOTAL_WAREHOUSING_COSTS,
@@ -99,6 +99,7 @@ sum(cast(GROSS_PROFIT AS NUMERIC(18,2))) AS GROSS_PROFIT--,
 from {{ref('product_pl_daily')}}
 group by ALL
 )
+
 , by_brand as (
 
     select 
@@ -153,7 +154,7 @@ group by ALL
 )
 
 ,true_up_calc as (
-select a.brand, a.date_day, a.pl,b.invoice_amount, b.invoice_amount - a.pl as true_up 
+select a.brand, a.date_day, a.pl, 'USD' as currency, b.invoice_amount, b.invoice_amount - a.pl as true_up 
 from by_brand a 
 inner join {{ref('invoice_amounts')}} b
     on a.brand = b.brand 
@@ -161,10 +162,11 @@ inner join {{ref('invoice_amounts')}} b
 )
 
 select a.*, 
-coalesce(cast(true_up/count(*) over (partition by a.brand,a.date_day) AS NUMERIC(30,2)),0) as dist_true_up,
+coalesce(cast(true_up/count(*) over (partition by a.brand,a.date_day,a.currency) AS NUMERIC(30,2)),0) as dist_true_up,
 current_timestamp() as updated_at 
 from by_month a
 left join true_up_calc b
     on a.brand = b.brand
     and a.date_day = b.date_day
+    and a.currency = b.currency
 where channel_product_id is distinct from ('Unknown')
