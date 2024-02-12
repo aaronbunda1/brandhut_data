@@ -7,8 +7,8 @@ with non_sp_data as (
         when campaign_name ilike '%Cellini%' then 'Cellini'
         when campaign_name ilike '%zens%' then 'ZENS'
         when campaign_name ilike any ('%quisten%','%qis%') then 'Qisten'
-        when campaign_name ilike '%storyph%' then 'Storyphones'
-        when campaign_name ilike '%pop%' then 'Onanoff 2'
+        when campaign_name ilike '%storyph%' then 'Onanoff 2'
+        when campaign_name ilike '%pop%' then 'POP'
         when campaign_name ilike '%fokus%' then 'Fokus'
         when campaign_name ilike '%SPOT%' then 'SPOT'
         when campaign_name ilike any ('%onanoff%','%onanonff%','%onaonff%','%buddyph%','%explore plus%','%explore+%','%playear%','%play+%','%school plus%','%school+%','%Play%','%Cosmos%','%wave%','%headphones%') then 'ONANOFF'
@@ -33,7 +33,7 @@ with non_sp_data as (
         date_day,
         sum(costs) as ad_spend
     from datahawk_share_83514.advertising.advertising_product_metrics sp
-    left join datahawk_writable_83514.test.brand_asin b
+    left join {{ref('brand_asin')}} b
         on b.channel_product_id = sp.channel_product_id
         and b.marketplace_key = sp.marketplace_key
     group by 1,2,3,4,5,6

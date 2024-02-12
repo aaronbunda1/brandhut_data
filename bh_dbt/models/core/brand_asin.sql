@@ -5,11 +5,11 @@ with product_report as (
     marketplace_key,
     case 
         when p.brand ilike '%spot%' then 'SPOT'
+        when p.brand ilike '%storyph%' then 'Onanoff 2'
         when p.channel_product_id in ('B0CHY732PN','B0CHY57B3X') then 'Fokus'
         when p.brand ilike any ('%buddyph%','%onanoff%') then 'ONANOFF'
         when p.brand ilike '%cellini%' then 'Cellini'
         when p.brand ilike '%POP%' then 'POP'
-        when p.brand ilike '%storyph%' then 'Onanoff 2'
         when p.brand ilike '%zens%' then 'ZENS'
         when p.brand ilike '%qisten%' then 'Qisten'
     else p.brand

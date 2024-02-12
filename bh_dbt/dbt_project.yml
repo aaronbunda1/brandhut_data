@@ -26,7 +26,7 @@ clean-targets:         # directories to be removed by `dbt clean`
   
 seeds:
   <resource-path>:
-    +full_refresh: false
+    +full_refresh: true
 
 # Configuring models
 # Full documentation: https://docs.getdbt.com/docs/configuring-models

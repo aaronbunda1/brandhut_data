@@ -79,7 +79,7 @@ pl.region_name,
 case 
     when c.category is null and p.brand = 'ZENS' then 'Zens Legacy'
     when p.brand = 'Onanoff 2' and pl.sku ilike any ('%SS-%','%STSH-%','%shield%') then 'StoryShield'
-    when p.brand = 'Onanoff 2' and pl.sku ilike '%storyph%' then 'StoryPhones'
+    when p.brand = 'Onanoff 2' and pl.sku ilike '%storyph%' then 'Storyphones'
     else c.category 
 end as internal_sku_category,
 GROSS_SALES,
@@ -87,9 +87,14 @@ ORDERS,
 UNITS_SOLD,
 coalesce(-pl.net_units_sold*cogs.productcost,pl.COGS) as cogs, 
 SPONSORED_PRODUCTS_COST,
--non_sp.sponsoredbrands/count(*) over (partition by pl.date_day,pl.account_key,pl.marketplace_key,p.brand) as DIST_SPONSORED_BRANDS_COST,
--non_sp.sponsoredbrandsvideo/count(*) over (partition by pl.date_day,pl.account_key,pl.marketplace_key,p.brand) as DIST_SPONSORED_BRANDS_VIDEO_COST,
--non_sp.sponsoreddisplay/count(*) over (partition by pl.date_day,pl.account_key,pl.marketplace_key,p.brand) as DIST_SPONSORED_DISPLAY_COST,
+coalesce(-non_sp.sponsoredbrands/count(*) over (partition by pl.date_day,pl.account_key,pl.marketplace_key,p.brand),0) as DIST_SPONSORED_BRANDS_COST,
+coalesce(-non_sp.sponsoredbrandsvideo/count(*) over (partition by pl.date_day,pl.account_key,pl.marketplace_key,p.brand),0) as DIST_SPONSORED_BRANDS_VIDEO_COST,
+coalesce(-non_sp.sponsoreddisplay/count(*) over (partition by pl.date_day,pl.account_key,pl.marketplace_key,p.brand),0) as DIST_SPONSORED_DISPLAY_COST,
+SPONSORED_PRODUCTS_COST+
+coalesce(-non_sp.sponsoredbrands/count(*) over (partition by pl.date_day,pl.account_key,pl.marketplace_key,p.brand),0) +
+coalesce(-non_sp.sponsoredbrandsvideo/count(*) over (partition by pl.date_day,pl.account_key,pl.marketplace_key,p.brand),0) +
+coalesce(-non_sp.sponsoreddisplay/count(*) over (partition by pl.date_day,pl.account_key,pl.marketplace_key,p.brand),0) 
+as total_ad_spend_custom,
 SPONSORED_PRODUCTS_SALES,
 DIST_SPONSORED_BRANDS_SALES,
 DIST_SPONSORED_BRANDS_VIDEO_SALES,
@@ -120,7 +125,7 @@ DIST_REMOVAL_COMPLETE,
 REFERRAL_FEE,
 PROMOTION,
 SUBSCRIPTION_FEE,
-TAX_PRINCIPAL,
+case when coalesce(p.brand,o.brand) IN ('SPOT','Storyphones','Onanoff 2','ZENS','Cellini') then 0 else TAX_PRINCIPAL end as tax_principal,
 TAX_SHIPPING,
 TAX_REIMBURSED,
 TAX_OTHER,
@@ -170,8 +175,7 @@ case
 end as brandhut_commission,
 coalesce(o.turner_costs,0) as turner_costs,
 coalesce(o.freight,0) as freight,
-coalesce(case when o.month <date_trunc(month,dateadd(MONTH,-4,current_date()))
-then o.ad_spend_manual end,0) as ad_spend_manual,
+coalesce(o.ad_spend_manual,0) as ad_spend_manual_pre,
 coalesce(o.product_samples,0) as product_samples,
 coalesce(o.miscellaneous,0) as miscellaneous_cost,
 sp_impressions,
@@ -224,4 +228,7 @@ left join {{ref('cogs')}} cogs
     on cogs.asin = pl.channel_product_id
     and pl.account_key = cogs.accountid
     and pl.date_day BETWEEN cogs.start_date and cogs.end_date)
-select * from prefinal
+
+select *,
+case when sum(total_ad_spend_custom) over (partition by brand,date_trunc(month,date_day)) = 0 then ad_spend_manual_pre else 0 end as ad_spend_manual
+from prefinal
