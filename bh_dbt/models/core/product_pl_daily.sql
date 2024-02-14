@@ -171,6 +171,23 @@ case
                     end
             else -net_sales*.1
         end 
+    when p.brand = 'Fokus'
+        then 
+        case 
+            when gross_sales/units_sold <= 79.99 then -net_sales*.08
+            when gross_sales/units_sold <= 89.99 then -net_sales*.12
+            when gross_sales/units_sold <= 100 then -net_sales*.18
+            when gross_sales/units_sold <= 109.99 then -net_sales*.2
+            when gross_sales/units_sold <= 119.99 then -net_sales*.22
+            when gross_sales/units_sold <= 129.99 then -net_sales*.24
+            when gross_sales/units_sold <= 139.99 then -net_sales*.25
+            when gross_sales/units_sold <= 149.99 then -net_sales*.26
+            when gross_sales/units_sold <= 159.99 then -net_sales*.26
+            when gross_sales/units_sold <= 169.99 then -net_sales*.28
+            when gross_sales/units_sold <= 179.99 then -net_sales*.28
+            when gross_sales/units_sold <= 189.99 then -net_sales*.29
+            else -net_sales*.3
+        end
     else 0 
 end as brandhut_commission,
 coalesce(o.turner_costs,0) as turner_costs,
