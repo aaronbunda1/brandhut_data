@@ -121,8 +121,7 @@ sales_data as (
     currency,
     sales,
     orders,
-    units_sold,
-    net_units_sold
+    units_sold
   from  datahawk_share_83514.FINANCE.finance_product_metrics_daily
   where marketplace_key <> 'Unknown' and workspace_id = '83514'
 )
@@ -139,8 +138,8 @@ select
       max(s.sales) as earned_gross_sales,
       max(s.orders) as orders,
       max(s.units_sold) as units_sold,
-      max(s.net_units_sold) as net_units_sold,
       max(gross_sales) as gross_sales,
+      max(gross_sales)+max(reversal_reimbursed)+max(reimbursed_product) as net_sales,
       max(case 
           when 
               amazon_region_id != 1
