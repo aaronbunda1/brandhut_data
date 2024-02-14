@@ -170,3 +170,4 @@ left join true_up_calc b
     and a.date_day = b.date_day
     and a.currency = b.currency
 where channel_product_id is distinct from ('Unknown')
+qualify count(*) over (partition by a.brand,a.date_day,a.currency)>0
