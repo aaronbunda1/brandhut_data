@@ -15,7 +15,7 @@ pivoting as (
   select * 
   from source pivot(sum(amount) for metric in (  
       'gross_sales',
---      'orders',
+    --  'orders',
       'gift_wrap',
 
       'reimbursed_product',
@@ -119,21 +119,27 @@ sales_data as (
     channel_product_id,
     sku,
     currency,
-    sales
+    sales,
+    orders,
+    units_sold
   from  datahawk_share_83514.FINANCE.finance_product_metrics_daily
   where marketplace_key <> 'Unknown' and workspace_id = '83514'
 )
 
+, prefinal as (
 select 
       coalesce(d.account_key,s.account_key) as account_key,
       d.amazon_region_id as amazon_region_id,
       coalesce(d.marketplace_key, s.marketplace_key) as marketplace_key,
       coalesce(d.posted_local_date,s.purchase_local_date) as posted_local_date,
-      coalesce(d.asin,s.channel_product_id) as asin,
+      coalesce(d.asin,s.channel_product_id) as channel_product_id,
       coalesce(d.sku,s.sku) as sku, 
       coalesce(d.currency,s.currency) as  currency,
       max(s.sales) as earned_gross_sales,
+      max(s.orders) as orders,
+      max(s.units_sold) as units_sold,
       max(gross_sales) as gross_sales,
+      max(gross_sales)+max(reversal_reimbursed)+max(reimbursed_product) as net_sales,
       max(case 
           when 
               amazon_region_id != 1
@@ -188,3 +194,10 @@ select
     and s.account_key = d.account_key
     and s.currency = d.currency 
 group by 1,2,3,4,5,6,7
+)
+
+select p.*, rate_to_usd
+from prefinal p
+left join (select distinct date_day,currency,rate_to_usd from datahawk_share_83514.finance.finance_product_profit_loss) c
+    on c.date_day = p.posted_local_date 
+    and c.currency = p.currency
