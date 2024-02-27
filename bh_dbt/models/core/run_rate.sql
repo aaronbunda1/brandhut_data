@@ -55,8 +55,40 @@ SUM(SPONSORED_PRODUCTS_COST)+
 SUM(TURNER_COSTS)+
 SUM(DIST_OTHER_AMOUNT)+
 SUM(MISCELLANEOUS_COST)+
-sum(product_samples)+sum(GIFT_WRAP)+sum(GIFT_WRAP_chargeback) as amazon_and_other_costs
-
+sum(product_samples)+sum(GIFT_WRAP)+sum(GIFT_WRAP_chargeback) as amazon_and_other_costs, 
+case when brand = 'ONANOFF' then sum(AD_SPEND_MANUAL) + 
+sum(BRANDHUT_COMMISSION) + 
+sum(COGS) + 
+sum(DIST_OTHER_AMOUNT) + 
+sum(DIST_SPONSORED_BRANDS_COST) + 
+sum(DIST_SPONSORED_DISPLAY_COST) + 
+sum(FBA_PER_UNIT_FULFILMENT_FEE) + 
+sum(FREIGHT) + 
+sum(GIFT_WRAP) + 
+sum(GIFT_WRAP_CHARGEBACK) + 
+sum(GOODWILL) + 
+sum(GROSS_SALES) + 
+sum(MISCELLANEOUS_COST) + 
+sum(PRODUCT_SAMPLES) + 
+sum(PROMOTION) + 
+sum(REFERRAL_FEE) + 
+sum(REFUND_COMMISSION) + 
+sum(REFUND_PROMOTION) + 
+sum(REFUND_SHIPPING_CHARGEBACK) + 
+sum(REFUNDED_REFERRAL_FEES) + 
+sum(REIMBURSED_PRODUCT) + 
+sum(REIMBURSED_SHIPPING) + 
+sum(RESTOCKING_FEE) + 
+sum(SHIPPING) + 
+sum(SHIPPING_CHARGEBACK) + 
+sum(SPONSORED_PRODUCTS_COST) + 
+sum(TAX_OTHER) + 
+sum(TAX_PRINCIPAL) + 
+sum(TAX_REIMBURSED) + 
+sum(TAX_SHIPPING) + 
+sum(TURNER_COSTS) 
+else sum(brandhut_commission)
+end as brandhut_profit
 from {{ref('product_pl_daily')}}
 group by 1,2,3,4,5
 
@@ -116,7 +148,40 @@ SUM(SPONSORED_PRODUCTS_COST)+
 SUM(TURNER_COSTS)+
 SUM(DIST_OTHER_AMOUNT)+
 SUM(MISCELLANEOUS_COST)+
-sum(product_samples)+sum(GIFT_WRAP)+sum(GIFT_WRAP_chargeback) as amazon_and_other_costs
+sum(product_samples)+sum(GIFT_WRAP)+sum(GIFT_WRAP_chargeback) as amazon_and_other_costs, 
+case when brand = 'ONANOFF' then sum(AD_SPEND_MANUAL) + 
+sum(BRANDHUT_COMMISSION) + 
+sum(COGS) + 
+sum(DIST_OTHER_AMOUNT) + 
+sum(DIST_SPONSORED_BRANDS_COST) + 
+sum(DIST_SPONSORED_DISPLAY_COST) + 
+sum(FBA_PER_UNIT_FULFILMENT_FEE) + 
+sum(FREIGHT) + 
+sum(GIFT_WRAP) + 
+sum(GIFT_WRAP_CHARGEBACK) + 
+sum(GOODWILL) + 
+sum(GROSS_SALES) + 
+sum(MISCELLANEOUS_COST) + 
+sum(PRODUCT_SAMPLES) + 
+sum(PROMOTION) + 
+sum(REFERRAL_FEE) + 
+sum(REFUND_COMMISSION) + 
+sum(REFUND_PROMOTION) + 
+sum(REFUND_SHIPPING_CHARGEBACK) + 
+sum(REFUNDED_REFERRAL_FEES) + 
+sum(REIMBURSED_PRODUCT) + 
+sum(REIMBURSED_SHIPPING) + 
+sum(RESTOCKING_FEE) + 
+sum(SHIPPING) + 
+sum(SHIPPING_CHARGEBACK) + 
+sum(SPONSORED_PRODUCTS_COST) + 
+sum(TAX_OTHER) + 
+sum(TAX_PRINCIPAL) + 
+sum(TAX_REIMBURSED) + 
+sum(TAX_SHIPPING) + 
+sum(TURNER_COSTS) 
+else sum(brandhut_commission)
+end as brandhut_profit
 
 from {{ref('product_pl_daily')}}
 where date_day between current_date()-31 and current_date()-1
@@ -178,7 +243,40 @@ SUM(SPONSORED_PRODUCTS_COST)+
 SUM(TURNER_COSTS)+
 SUM(DIST_OTHER_AMOUNT)+
 SUM(MISCELLANEOUS_COST)+
-sum(product_samples)+sum(GIFT_WRAP)+sum(GIFT_WRAP_chargeback) as amazon_and_other_costs
+sum(product_samples)+sum(GIFT_WRAP)+sum(GIFT_WRAP_chargeback) as amazon_and_other_costs, 
+case when brand = 'ONANOFF' then sum(AD_SPEND_MANUAL) + 
+sum(BRANDHUT_COMMISSION) + 
+sum(COGS) + 
+sum(DIST_OTHER_AMOUNT) + 
+sum(DIST_SPONSORED_BRANDS_COST) + 
+sum(DIST_SPONSORED_DISPLAY_COST) + 
+sum(FBA_PER_UNIT_FULFILMENT_FEE) + 
+sum(FREIGHT) + 
+sum(GIFT_WRAP) + 
+sum(GIFT_WRAP_CHARGEBACK) + 
+sum(GOODWILL) + 
+sum(GROSS_SALES) + 
+sum(MISCELLANEOUS_COST) + 
+sum(PRODUCT_SAMPLES) + 
+sum(PROMOTION) + 
+sum(REFERRAL_FEE) + 
+sum(REFUND_COMMISSION) + 
+sum(REFUND_PROMOTION) + 
+sum(REFUND_SHIPPING_CHARGEBACK) + 
+sum(REFUNDED_REFERRAL_FEES) + 
+sum(REIMBURSED_PRODUCT) + 
+sum(REIMBURSED_SHIPPING) + 
+sum(RESTOCKING_FEE) + 
+sum(SHIPPING) + 
+sum(SHIPPING_CHARGEBACK) + 
+sum(SPONSORED_PRODUCTS_COST) + 
+sum(TAX_OTHER) + 
+sum(TAX_PRINCIPAL) + 
+sum(TAX_REIMBURSED) + 
+sum(TAX_SHIPPING) + 
+sum(TURNER_COSTS) 
+else sum(brandhut_commission)
+end as brandhut_profit
 
 from {{ref('product_pl_daily')}}
 where date_day between current_date()-91 and current_date()-1
@@ -240,7 +338,40 @@ SUM(SPONSORED_PRODUCTS_COST)+
 SUM(TURNER_COSTS)+
 SUM(DIST_OTHER_AMOUNT)+
 SUM(MISCELLANEOUS_COST)+
-sum(product_samples)+sum(GIFT_WRAP)+sum(GIFT_WRAP_chargeback) as amazon_and_other_costs
+sum(product_samples)+sum(GIFT_WRAP)+sum(GIFT_WRAP_chargeback) as amazon_and_other_costs, 
+case when brand = 'ONANOFF' then sum(AD_SPEND_MANUAL) + 
+sum(BRANDHUT_COMMISSION) + 
+sum(COGS) + 
+sum(DIST_OTHER_AMOUNT) + 
+sum(DIST_SPONSORED_BRANDS_COST) + 
+sum(DIST_SPONSORED_DISPLAY_COST) + 
+sum(FBA_PER_UNIT_FULFILMENT_FEE) + 
+sum(FREIGHT) + 
+sum(GIFT_WRAP) + 
+sum(GIFT_WRAP_CHARGEBACK) + 
+sum(GOODWILL) + 
+sum(GROSS_SALES) + 
+sum(MISCELLANEOUS_COST) + 
+sum(PRODUCT_SAMPLES) + 
+sum(PROMOTION) + 
+sum(REFERRAL_FEE) + 
+sum(REFUND_COMMISSION) + 
+sum(REFUND_PROMOTION) + 
+sum(REFUND_SHIPPING_CHARGEBACK) + 
+sum(REFUNDED_REFERRAL_FEES) + 
+sum(REIMBURSED_PRODUCT) + 
+sum(REIMBURSED_SHIPPING) + 
+sum(RESTOCKING_FEE) + 
+sum(SHIPPING) + 
+sum(SHIPPING_CHARGEBACK) + 
+sum(SPONSORED_PRODUCTS_COST) + 
+sum(TAX_OTHER) + 
+sum(TAX_PRINCIPAL) + 
+sum(TAX_REIMBURSED) + 
+sum(TAX_SHIPPING) + 
+sum(TURNER_COSTS) 
+else sum(brandhut_commission)
+end as brandhut_profit
 from {{ref('product_pl_daily')}}
 where date_day between current_date()-91-365 and current_date()-1-365
 group by 1,2,3,4,5
@@ -301,7 +432,40 @@ SUM(SPONSORED_PRODUCTS_COST)+
 SUM(TURNER_COSTS)+
 SUM(DIST_OTHER_AMOUNT)+
 SUM(MISCELLANEOUS_COST)+
-sum(product_samples)+sum(GIFT_WRAP)+sum(GIFT_WRAP_chargeback))/(7/30) as amazon_and_other_costs
+sum(product_samples)+sum(GIFT_WRAP)+sum(GIFT_WRAP_chargeback))/(7/30) as amazon_and_other_costs, 
+case when brand = 'ONANOFF' then sum(AD_SPEND_MANUAL) + 
+sum(BRANDHUT_COMMISSION) + 
+sum(COGS) + 
+sum(DIST_OTHER_AMOUNT) + 
+sum(DIST_SPONSORED_BRANDS_COST) + 
+sum(DIST_SPONSORED_DISPLAY_COST) + 
+sum(FBA_PER_UNIT_FULFILMENT_FEE) + 
+sum(FREIGHT) + 
+sum(GIFT_WRAP) + 
+sum(GIFT_WRAP_CHARGEBACK) + 
+sum(GOODWILL) + 
+sum(GROSS_SALES) + 
+sum(MISCELLANEOUS_COST) + 
+sum(PRODUCT_SAMPLES) + 
+sum(PROMOTION) + 
+sum(REFERRAL_FEE) + 
+sum(REFUND_COMMISSION) + 
+sum(REFUND_PROMOTION) + 
+sum(REFUND_SHIPPING_CHARGEBACK) + 
+sum(REFUNDED_REFERRAL_FEES) + 
+sum(REIMBURSED_PRODUCT) + 
+sum(REIMBURSED_SHIPPING) + 
+sum(RESTOCKING_FEE) + 
+sum(SHIPPING) + 
+sum(SHIPPING_CHARGEBACK) + 
+sum(SPONSORED_PRODUCTS_COST) + 
+sum(TAX_OTHER) + 
+sum(TAX_PRINCIPAL) + 
+sum(TAX_REIMBURSED) + 
+sum(TAX_SHIPPING) + 
+sum(TURNER_COSTS) 
+else sum(brandhut_commission)
+end/(7/30) as brandhut_profit
 from {{ref('product_pl_daily')}} pl
 where date_day between current_date()-8 and current_date()-1
 group by 1,2,3,4,5
@@ -362,7 +526,40 @@ SUM(SPONSORED_PRODUCTS_COST)+
 SUM(TURNER_COSTS)+
 SUM(DIST_OTHER_AMOUNT)+
 SUM(MISCELLANEOUS_COST)+
-sum(product_samples)+sum(GIFT_WRAP)+sum(GIFT_WRAP_chargeback))/(7/90) as amazon_and_other_costs
+sum(product_samples)+sum(GIFT_WRAP)+sum(GIFT_WRAP_chargeback))/(7/90) as amazon_and_other_costs, 
+case when brand = 'ONANOFF' then sum(AD_SPEND_MANUAL) + 
+sum(BRANDHUT_COMMISSION) + 
+sum(COGS) + 
+sum(DIST_OTHER_AMOUNT) + 
+sum(DIST_SPONSORED_BRANDS_COST) + 
+sum(DIST_SPONSORED_DISPLAY_COST) + 
+sum(FBA_PER_UNIT_FULFILMENT_FEE) + 
+sum(FREIGHT) + 
+sum(GIFT_WRAP) + 
+sum(GIFT_WRAP_CHARGEBACK) + 
+sum(GOODWILL) + 
+sum(GROSS_SALES) + 
+sum(MISCELLANEOUS_COST) + 
+sum(PRODUCT_SAMPLES) + 
+sum(PROMOTION) + 
+sum(REFERRAL_FEE) + 
+sum(REFUND_COMMISSION) + 
+sum(REFUND_PROMOTION) + 
+sum(REFUND_SHIPPING_CHARGEBACK) + 
+sum(REFUNDED_REFERRAL_FEES) + 
+sum(REIMBURSED_PRODUCT) + 
+sum(REIMBURSED_SHIPPING) + 
+sum(RESTOCKING_FEE) + 
+sum(SHIPPING) + 
+sum(SHIPPING_CHARGEBACK) + 
+sum(SPONSORED_PRODUCTS_COST) + 
+sum(TAX_OTHER) + 
+sum(TAX_PRINCIPAL) + 
+sum(TAX_REIMBURSED) + 
+sum(TAX_SHIPPING) + 
+sum(TURNER_COSTS) 
+else sum(brandhut_commission)
+end/(7/90) as brandhut_profit
 from {{ref('product_pl_daily')}} pl
 where date_day between current_date()-8 and current_date()-1
 group by 1,2,3,4,5
@@ -423,7 +620,40 @@ SUM(SPONSORED_PRODUCTS_COST)+
 SUM(TURNER_COSTS)+
 SUM(DIST_OTHER_AMOUNT)+
 SUM(MISCELLANEOUS_COST)+
-sum(product_samples)+sum(GIFT_WRAP)+sum(GIFT_WRAP_chargeback))/(datediff(day,date_trunc(year,current_date()),current_date()-1)/365) as amazon_and_other_costs
+sum(product_samples)+sum(GIFT_WRAP)+sum(GIFT_WRAP_chargeback))/(datediff(day,date_trunc(year,current_date()),current_date()-1)/365) as amazon_and_other_costs, 
+case when brand = 'ONANOFF' then sum(AD_SPEND_MANUAL) + 
+sum(BRANDHUT_COMMISSION) + 
+sum(COGS) + 
+sum(DIST_OTHER_AMOUNT) + 
+sum(DIST_SPONSORED_BRANDS_COST) + 
+sum(DIST_SPONSORED_DISPLAY_COST) + 
+sum(FBA_PER_UNIT_FULFILMENT_FEE) + 
+sum(FREIGHT) + 
+sum(GIFT_WRAP) + 
+sum(GIFT_WRAP_CHARGEBACK) + 
+sum(GOODWILL) + 
+sum(GROSS_SALES) + 
+sum(MISCELLANEOUS_COST) + 
+sum(PRODUCT_SAMPLES) + 
+sum(PROMOTION) + 
+sum(REFERRAL_FEE) + 
+sum(REFUND_COMMISSION) + 
+sum(REFUND_PROMOTION) + 
+sum(REFUND_SHIPPING_CHARGEBACK) + 
+sum(REFUNDED_REFERRAL_FEES) + 
+sum(REIMBURSED_PRODUCT) + 
+sum(REIMBURSED_SHIPPING) + 
+sum(RESTOCKING_FEE) + 
+sum(SHIPPING) + 
+sum(SHIPPING_CHARGEBACK) + 
+sum(SPONSORED_PRODUCTS_COST) + 
+sum(TAX_OTHER) + 
+sum(TAX_PRINCIPAL) + 
+sum(TAX_REIMBURSED) + 
+sum(TAX_SHIPPING) + 
+sum(TURNER_COSTS) 
+else sum(brandhut_commission)
+end/(datediff(day,date_trunc(year,current_date()),current_date()-1)/365) as brandhut_profit
 from {{ref('product_pl_daily')}} pl
 where date_day between date_trunc(year,current_date()) and current_date()-1
 group by 1,2,3,4,5
@@ -485,7 +715,40 @@ SUM(SPONSORED_PRODUCTS_COST)+
 SUM(TURNER_COSTS)+
 SUM(DIST_OTHER_AMOUNT)+
 SUM(MISCELLANEOUS_COST)+
-sum(product_samples)+sum(GIFT_WRAP)+sum(GIFT_WRAP_chargeback) as amazon_and_other_costs
+sum(product_samples)+sum(GIFT_WRAP)+sum(GIFT_WRAP_chargeback) as amazon_and_other_costs, 
+case when brand = 'ONANOFF' then sum(AD_SPEND_MANUAL) + 
+sum(BRANDHUT_COMMISSION) + 
+sum(COGS) + 
+sum(DIST_OTHER_AMOUNT) + 
+sum(DIST_SPONSORED_BRANDS_COST) + 
+sum(DIST_SPONSORED_DISPLAY_COST) + 
+sum(FBA_PER_UNIT_FULFILMENT_FEE) + 
+sum(FREIGHT) + 
+sum(GIFT_WRAP) + 
+sum(GIFT_WRAP_CHARGEBACK) + 
+sum(GOODWILL) + 
+sum(GROSS_SALES) + 
+sum(MISCELLANEOUS_COST) + 
+sum(PRODUCT_SAMPLES) + 
+sum(PROMOTION) + 
+sum(REFERRAL_FEE) + 
+sum(REFUND_COMMISSION) + 
+sum(REFUND_PROMOTION) + 
+sum(REFUND_SHIPPING_CHARGEBACK) + 
+sum(REFUNDED_REFERRAL_FEES) + 
+sum(REIMBURSED_PRODUCT) + 
+sum(REIMBURSED_SHIPPING) + 
+sum(RESTOCKING_FEE) + 
+sum(SHIPPING) + 
+sum(SHIPPING_CHARGEBACK) + 
+sum(SPONSORED_PRODUCTS_COST) + 
+sum(TAX_OTHER) + 
+sum(TAX_PRINCIPAL) + 
+sum(TAX_REIMBURSED) + 
+sum(TAX_SHIPPING) + 
+sum(TURNER_COSTS) 
+else sum(brandhut_commission)
+end as brandhut_profit
 from {{ref('product_pl_daily')}}
 where date_trunc(year,date_day) = date_trunc(year,date_day-365-1)
 group by 1,2,3,4,5
