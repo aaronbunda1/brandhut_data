@@ -83,7 +83,7 @@ case
     when p.brand = 'Onanoff 2' and pl.sku ilike '%storyph%' then 'Storyphones'
     else c.category 
 end as internal_sku_category,
-GROSS_SALES,
+pl.EARNED_GROSS_SALES as GROSS_SALES,
 ORDERS,
 UNITS_SOLD,
 coalesce(-pl.net_units_sold*cogs.productcost,pl.COGS) as cogs, 
@@ -148,7 +148,7 @@ GROSS_PROFIT,
 -- CONTRIBUTION_PROFIT_ONE,
 -- CONTRIBUTION_PROFIT_TWO,
 -- EBITDA,
-sum(gross_sales) over (partition by date_trunc(month,pl.date_day),p.brand) as monthly_brand_gs,
+sum(EARNED_GROSS_SALES) over (partition by date_trunc(month,pl.date_day),p.brand) as monthly_brand_gs,
 case 
     when p.brand ilike '%cellini%'
         then -net_sales*0.1 
@@ -175,18 +175,18 @@ case
     when p.brand = 'Fokus'
         then 
         case 
-            when gross_sales/nullif(greatest(units_sold,1),1) <= 79.99 then -net_sales*.08
-            when gross_sales/nullif(greatest(units_sold,1),1) <= 89.99 then -net_sales*.12
-            when gross_sales/nullif(greatest(units_sold,1),1) <= 100 then -net_sales*.18
-            when gross_sales/nullif(greatest(units_sold,1),1) <= 109.99 then -net_sales*.2
-            when gross_sales/nullif(greatest(units_sold,1),1) <= 119.99 then -net_sales*.22
-            when gross_sales/nullif(greatest(units_sold,1),1) <= 129.99 then -net_sales*.24
-            when gross_sales/nullif(greatest(units_sold,1),1) <= 139.99 then -net_sales*.25
-            when gross_sales/nullif(greatest(units_sold,1),1) <= 149.99 then -net_sales*.26
-            when gross_sales/nullif(greatest(units_sold,1),1) <= 159.99 then -net_sales*.26
-            when gross_sales/nullif(greatest(units_sold,1),1) <= 169.99 then -net_sales*.28
-            when gross_sales/nullif(greatest(units_sold,1),1) <= 179.99 then -net_sales*.28
-            when gross_sales/nullif(greatest(units_sold,1),1) <= 189.99 then -net_sales*.29
+            when EARNED_GROSS_SALES/nullif(greatest(units_sold,1),1) <= 79.99 then -net_sales*.08
+            when EARNED_GROSS_SALES/nullif(greatest(units_sold,1),1) <= 89.99 then -net_sales*.12
+            when EARNED_GROSS_SALES/nullif(greatest(units_sold,1),1) <= 100 then -net_sales*.18
+            when EARNED_GROSS_SALES/nullif(greatest(units_sold,1),1) <= 109.99 then -net_sales*.2
+            when EARNED_GROSS_SALES/nullif(greatest(units_sold,1),1) <= 119.99 then -net_sales*.22
+            when EARNED_GROSS_SALES/nullif(greatest(units_sold,1),1) <= 129.99 then -net_sales*.24
+            when EARNED_GROSS_SALES/nullif(greatest(units_sold,1),1) <= 139.99 then -net_sales*.25
+            when EARNED_GROSS_SALES/nullif(greatest(units_sold,1),1) <= 149.99 then -net_sales*.26
+            when EARNED_GROSS_SALES/nullif(greatest(units_sold,1),1) <= 159.99 then -net_sales*.26
+            when EARNED_GROSS_SALES/nullif(greatest(units_sold,1),1) <= 169.99 then -net_sales*.28
+            when EARNED_GROSS_SALES/nullif(greatest(units_sold,1),1) <= 179.99 then -net_sales*.28
+            when EARNED_GROSS_SALES/nullif(greatest(units_sold,1),1) <= 189.99 then -net_sales*.29
             else -net_sales*.3
         end
     else 0 
