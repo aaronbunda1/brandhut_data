@@ -83,7 +83,7 @@ case
     when p.brand = 'Onanoff 2' and pl.sku ilike '%storyph%' then 'Storyphones'
     else c.category 
 end as internal_sku_category,
-pl.EARNED_GROSS_SALES as GROSS_SALES,
+pl.GROSS_SALES as GROSS_SALES,
 ORDERS,
 UNITS_SOLD,
 coalesce(-pl.net_units_sold*cogs.productcost,pl.COGS) as cogs, 
