@@ -84,6 +84,7 @@ case
     else c.category 
 end as internal_sku_category,
 pl.GROSS_SALES as GROSS_SALES,
+-- earned_gross_sales,
 ORDERS,
 UNITS_SOLD,
 coalesce(-pl.net_units_sold*cogs.productcost,pl.COGS) as cogs, 
