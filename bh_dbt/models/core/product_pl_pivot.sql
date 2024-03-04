@@ -30,6 +30,7 @@ WITH prefinal as (
     FROM {{ref('product_pl')}}
     UNPIVOT(amount FOR metric_name IN (
 GROSS_SALES,
+earned_GROSS_SALES,
 ORDERS,
 UNITS_SOLD,
 COGS,
