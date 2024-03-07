@@ -7,10 +7,11 @@ with source as (
       asin,
       sku,
       currency,
-      metric, 
+      case when original_description = 'Other-ServiceFeeEvent-PaidServicesFee' then 'other_amount_distributable' else metric end as metric, 
       amount
     from DATAHAWK_SHARE_83514.CUSTOM_83514.finance_profit_ledger
 ),
+
 pivoting as (
   select * 
   from source pivot(sum(amount) for metric in (  
@@ -50,7 +51,7 @@ pivoting as (
 
       'referral_fee',
       'promotion',
-      'subscription_fee',
+    --   'subscription_fee',
 
       'tax_principal',
       'tax_principal_collected',
@@ -59,6 +60,7 @@ pivoting as (
       'tax_other',
 
       'other_amount',
+      'other_amount_distributable',
       'restocking_fee'
 
         )) 
@@ -100,13 +102,14 @@ pivoting as (
       sponsored_brands_cost,
       referral_fee,
       promotion,
-      subscription_fee,
+    --   subscription_fee,
       tax_principal,
       tax_principal_collected,
       tax_shipping,
       tax_reimbursed,
       tax_other,
       other_amount,
+      other_amount_distributable,
       restocking_fee
   )
 
@@ -174,13 +177,14 @@ select
       max(sponsored_brands_cost) as sponsored_brands_cost,
       max(referral_fee) as referral_fee,
       max(promotion) as promotion,
-      max(subscription_fee) as subscription_fee,
+    --   max(subscription_fee) as subscription_fee,
       max(tax_principal) as tax_principal,
       max(tax_principal_collected) as tax_principal_collected,
       max(tax_shipping) as tax_shipping,
       max(tax_reimbursed) as tax_reimbursed,
       max(tax_other) as tax_other,
       max(other_amount) as other_amount,
+      max(other_amount_distributable) as other_amount_distributable,
       max(restocking_fee) as restocking_fee
     from pivoting d
     full outer join sales_data s

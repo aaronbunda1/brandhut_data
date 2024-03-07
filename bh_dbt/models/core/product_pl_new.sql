@@ -66,7 +66,7 @@ l.REVERSAL_REIMBURSED as ledger_REVERSAL_REIMBURSED,
 l.GIFT_WRAP_CHARGEBACK as ledger_GIFT_WRAP_CHARGEBACK,
 l.shipping as ledger_shipping,
 l.SHIPPING_CHARGEBACK as ledger_SHIPPING_CHARGEBACK,
-l.inbound_transportation as ledger_inbound_transportation,
+-- l.inbound_transportation as ledger_inbound_transportation,
 coalesce(l.FBA_STORAGE_FEE,0)+coalesce(l.fba_long_storage_fee,0) as ledger_fba_storage_fee,
 l.FBA_INVENTORY_PLACEMENT_SERVICE as ledger_FBA_INVENTORY_PLACEMENT_SERVICE,
 l.WAREHOUSE_DAMAGE as ledger_WAREHOUSE_DAMAGE,
@@ -76,13 +76,13 @@ l.disposal_complete as ledger_disposal_complete,
 l.removal_complete as ledger_removal_complete,
 l.REFERRAL_FEE as ledger_referral_fee,
 l.promotion as ledger_promotion,
-l.SUBSCRIPTION_FEE as ledger_subscription_fee,
+-- l.SUBSCRIPTION_FEE as ledger_subscription_fee,
 l.tax_principal_collected as ledger_tax_principal,
 l.tax_shipping as ledger_tax_shipping,
 l.TAX_REIMBURSED as ledger_tax_reimbursed,
 l.tax_other as ledger_tax_other,
 case when l.asin is null and (l.sku is null or l.sku ilike '%uncommingled%') then 0 else l.other_amount end as ledger_other_amount,
-case when l.asin is null and (l.sku is null or l.sku ilike '%uncommingled%') then l.other_amount else 0 end as ledger_other_amount_unmapped,
+l.other_amount_distributable as ledger_other_amount_distributable,
 l.restocking_fee as ledger_restocking_fee,
 coalesce(l.gross_sales,0) + coalesce(l.REIMBURSED_PRODUCT,0) + coalesce(l.REVERSAL_REIMBURSED,0) as net_sales,
 coalesce(l.earned_gross_sales,0) + coalesce(l.REIMBURSED_PRODUCT,0) + coalesce(l.REVERSAL_REIMBURSED,0) as earned_net_sales,
@@ -235,7 +235,7 @@ sum(CAST(ledger_REVERSAL_REIMBURSED AS NUMERIC(18,2))) AS ledger_REVERSAL_REIMBU
 sum(CAST(ledger_GIFT_WRAP_CHARGEBACK AS NUMERIC(18,2))) AS ledger_GIFT_WRAP_CHARGEBACK,
 sum(CAST(ledger_shipping AS NUMERIC(18,2))) AS ledger_shipping,
 sum(CAST(ledger_SHIPPING_CHARGEBACK AS NUMERIC(18,2))) AS ledger_SHIPPING_CHARGEBACK,
-sum(CAST(ledger_inbound_transportation AS NUMERIC(18,2))) AS ledger_inbound_transportation,
+-- sum(CAST(ledger_inbound_transportation AS NUMERIC(18,2))) AS ledger_inbound_transportation,
 sum(CAST(ledger_fba_storage_fee AS NUMERIC(18,2))) AS ledger_fba_storage_fee,
 sum(CAST(ledger_FBA_INVENTORY_PLACEMENT_SERVICE AS NUMERIC(18,2))) AS ledger_FBA_INVENTORY_PLACEMENT_SERVICE,
 sum(CAST(ledger_WAREHOUSE_DAMAGE AS NUMERIC(18,2))) AS ledger_WAREHOUSE_DAMAGE,
@@ -245,13 +245,13 @@ sum(CAST(ledger_disposal_complete AS NUMERIC(18,2))) AS ledger_disposal_complete
 sum(CAST(ledger_removal_complete AS NUMERIC(18,2))) AS ledger_removal_complete,
 sum(CAST(ledger_referral_fee AS NUMERIC(18,2))) AS ledger_referral_fee,
 sum(CAST(ledger_promotion AS NUMERIC(18,2))) AS ledger_promotion,
-sum(CAST(ledger_subscription_fee AS NUMERIC(18,2))) AS ledger_subscription_fee,
+-- sum(CAST(ledger_subscription_fee AS NUMERIC(18,2))) AS ledger_subscription_fee,
 sum(CAST(ledger_tax_principal AS NUMERIC(18,2))) AS ledger_tax_principal,
 sum(CAST(ledger_tax_shipping AS NUMERIC(18,2))) AS ledger_tax_shipping,
 sum(CAST(ledger_tax_reimbursed AS NUMERIC(18,2))) AS ledger_tax_reimbursed,
 sum(CAST(ledger_tax_other AS NUMERIC(18,2))) AS ledger_tax_other,
 sum(CAST(ledger_other_amount AS NUMERIC(18,2))) AS ledger_other_amount,
-sum(CAST(ledger_other_amount_unmapped AS NUMERIC(18,2))) AS ledger_other_amount_unmapped,
+sum(CAST(ledger_other_amount_distributable AS NUMERIC(18,2))) AS ledger_other_amount_distributable,
 sum(CAST(ledger_restocking_fee AS NUMERIC(18,2))) AS ledger_restocking_fee,
 sum(CAST(ledger_brandhut_commission AS NUMERIC(18,2))) AS ledger_brandhut_commission,
 sum(CAST(EARNED_BRANDHUT_COMMISSION AS NUMERIC(18,2))) AS EARNED_BRANDHUT_COMMISSION,
@@ -274,7 +274,7 @@ group by all
 , fix as (
     select 
     *,
-    cast(nullif(sum(ledger_other_amount_unmapped) over (partition by date_day,currency)*(ledger_gross_sales/sum(ledger_gross_sales) over (partition by date_day,currency)),0) as NUMERIC(30,2)) as dist_ledger_other_amount,
+    cast(nullif(sum(ledger_other_amount_distributable) over (partition by date_day,currency)*(ledger_gross_sales/sum(ledger_gross_sales) over (partition by date_day,currency)),0) as NUMERIC(30,2)) as dist_ledger_other_amount,
     case when coalesce(sum(ad_spend_total) over (partition by date_day, brand),0) = 0 then manual_ad_spend_temp else 0 end as manual_ad_spend
     from by_month
 
@@ -323,7 +323,7 @@ ledger_REVERSAL_REIMBURSED,
 ledger_GIFT_WRAP_CHARGEBACK,
 ledger_shipping,
 ledger_SHIPPING_CHARGEBACK,
-ledger_inbound_transportation,
+-- ledger_inbound_transportation,
 ledger_fba_storage_fee,
 ledger_FBA_INVENTORY_PLACEMENT_SERVICE,
 ledger_WAREHOUSE_DAMAGE,
@@ -333,7 +333,7 @@ ledger_disposal_complete,
 ledger_removal_complete,
 ledger_referral_fee,
 ledger_promotion,
-ledger_subscription_fee,
+-- ledger_subscription_fee,
 -- ledger_tax_principal,
 -- ledger_tax_shipping,
 -- ledger_tax_reimbursed,
@@ -370,7 +370,7 @@ when metric_name in (
 'EARNED_BRANDHUT_COMMISSION',
 'MANUAL_ONANOFF_COGS',
 'MANUAL_MISCELLANEOUS_COST',
-'LEDGER_SUBSCRIPTION_FEE',
+-- 'LEDGER_SUBSCRIPTION_FEE',
 'DIST_LEDGER_OTHER_AMOUNT',
 'LEDGER_OTHER_AMOUNT',
 'MANUAL_PRODUCT_SAMPLES',
@@ -383,7 +383,7 @@ when metric_name in (
 'LEDGER_REFUND_COMMISSION',
 'LEDGER_REFUNDED_REFERRAL_FEES',
 'LEDGER_FBA_PER_UNIT_FULFILMENT_FEE',
-'LEDGER_INBOUND_TRANSPORTATION',
+-- 'LEDGER_INBOUND_TRANSPORTATION',
 'LEDGER_REFUND_SHIPPING_CHARGEBACK',
 'LEDGER_REIMBURSED_SHIPPING',
 'LEDGER_SHIPPING',
@@ -432,8 +432,7 @@ when metric_name IN (
 'DIST_LEDGER_OTHER_AMOUNT',
 'LEDGER_OTHER_AMOUNT',
 'MANUAL_PRODUCT_SAMPLES',
-'MANUAL_TURNER_COSTS',
-'LEDGER_SUBSCRIPTION_FEE'
+'MANUAL_TURNER_COSTS'
 )
 then 'Other Expenses'
 when metric_name in (
@@ -470,7 +469,7 @@ when metric_name in ('LEDGER_TAX_OTHER',
 'LEDGER_TAX_SHIPPING')
 then 'Taxes'
 when metric_name in (
-    'LEDGER_INBOUND_TRANSPORTATION',
+    -- 'LEDGER_INBOUND_TRANSPORTATION',
 'LEDGER_FBA_INVENTORY_PLACEMENT_SERVICE',
 'LEDGER_FBA_STORAGE_FEE',
 'LEDGER_RESTOCKING_FEE',
@@ -500,7 +499,7 @@ concat(i.brand,i.month,'TRUE_UP') as key,
         null as ACCOUNT_KEY,
         null as REGION,
         null as MARKETPLACE_KEY,
-        p.DATE_DAY,
+        dateadd(month,1,p.DATE_DAY) as date_day,
         null as CHANNEL_PRODUCT_ID,
         null as SKU,
         null as COLOR,
@@ -518,6 +517,7 @@ left join {{ref('invoice_amounts')}} i
     on i.month = p.date_day
     and i.brand = p.brand
 where i.brand is not null 
+and date_day >= '2024-01-01'
 
 )
 
