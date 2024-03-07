@@ -66,6 +66,7 @@ sku,
 metric,
 original_description,
 order_id,
+current_timestamp() as updated_at,
 sum(amount) as amount, 
 sum(amount_usd) as amount_usd,
 sum(quantity) as quantity
