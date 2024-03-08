@@ -11,8 +11,8 @@ month,brand,sku,freight,turner_costs,ad_spend_manual,product_samples,miscellaneo
 2023-10-01,SPOT,all,0,0,0,0,0
 2023-11-01,SPOT,all,-477.93,,0,0,0
 2023-12-01,SPOT,all,-208.95298245614,-2802.44105263158,0,0,0
-2024-01-01,SPOT,all,-385.61,-136.453916849015,0,0,0
-2024-02-01,SPOT,all,-108.94,-230.5,0,0,0
+2024-01-01,SPOT,all,-385.61,-263.12,0,0,-4.07
+2024-02-01,SPOT,all,-108.94,-309.45,0,0,-6.51
 2023-01-01,ONANOFF,all,0,0,-3727.32,0,0
 2023-02-01,ONANOFF,all,0,0,-2918.91,0,0
 2023-03-01,ONANOFF,all,0,0,-4624.86999999999,0,0
@@ -23,10 +23,10 @@ month,brand,sku,freight,turner_costs,ad_spend_manual,product_samples,miscellaneo
 2023-08-01,ONANOFF,all,0,0,-8170.48,0,0
 2023-09-01,ONANOFF,all,0,0,-3659.04,0,0
 2023-10-01,ONANOFF,all,0,0,0,0,0
-2024-01-01,ONANOFF,all,-258.24,-96.1953610503282,0,0,0
-2024-02-01,ONANOFF,all,-225.86,-68.06,0,0,0
-2023-01-01,ZENS,all,0,0,0,0,0
-2023-02-01,ZENS,all,0,0,0,0,0
+2024-01-01,ONANOFF,all,-258.24,-1.02,0,0,-1181.76
+2024-02-01,ONANOFF,all,-225.86,-27.63,0,0,-202.91
+2023-01-01,ZENS,all,0,0,0,0,-26.87
+2023-02-01,ZENS,all,0,0,0,0,-27.17
 2023-03-01,ZENS,all,0,0,0,0,0
 2023-04-01,ZENS,all,0,0,-180.1,0,0
 2023-05-01,ZENS,all,0,0,-464.99,0,0
@@ -35,7 +35,7 @@ month,brand,sku,freight,turner_costs,ad_spend_manual,product_samples,miscellaneo
 2023-08-01,ZENS,all,0,0,0,0,0
 2023-09-01,ZENS,all,0,0,0,0,0
 2023-10-01,ZENS,all,0,0,0,0,0
-2024-01-01,ZENS,all,0,-20.4614442013129,0,0,0
+2024-01-01,ZENS,all,0,-39.46,0,0,0
 2023-01-01,Cellini,all,0,0,0,0,0
 2023-02-01,Cellini,all,0,0,0,0,0
 2023-03-01,Cellini,all,0,0,0,0,0
@@ -62,5 +62,5 @@ month,brand,sku,freight,turner_costs,ad_spend_manual,product_samples,miscellaneo
 2023-10-01,Onanoff 2,all,0,0,0,0,0
 2023-11-01,Onanoff 2,all,0,0,0,0,0
 2023-12-01,Onanoff 2,all,-95.71,0,0,0,0
-2024-01-01,Onanoff 2,all,-42.7971428571429,-14.6153172866521,0,0,0
-2024-02-01,Onanoff 2,all,0,-7.63,0,0,0
+2024-01-01,Onanoff 2,all,-42.7971428571429,0,0,0,0
+2024-02-01,Onanoff 2,all,0,0,0,0,-4.16
