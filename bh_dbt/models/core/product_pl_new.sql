@@ -509,6 +509,35 @@ concat(i.brand,i.month,'TRUE_UP') as key,
         null as internal_sku_category,
         'TRUE_UP' as metric_name,
         current_timestamp() as updated_at,
+        -(i.invoice_amount - p.pl) as amount,
+        'Expenses' as metric_group_1,
+        'Other Expenses' as metric_group_2
+from pl_brand_month p
+left join {{ref('invoice_amounts')}} i
+    on i.month = p.date_day
+    and i.brand = p.brand
+where i.brand is not null 
+and date_day >= '2024-01-01'
+
+)
+
+, data_movements as (
+select
+concat(i.brand,i.month,'TRUE_UP') as key,
+        p.BRAND,
+        null as ACCOUNT_KEY,
+        null as REGION,
+        null as MARKETPLACE_KEY,
+        p.DATE_DAY as date_day,
+        null as CHANNEL_PRODUCT_ID,
+        null as SKU,
+        null as COLOR,
+        null as currency_original,
+        'USD' as CURRENCY,
+        null as rate_to_usd,
+        null as internal_sku_category,
+        'DATA_MOVEMENTS' as metric_name,
+        current_timestamp() as updated_at,
         i.invoice_amount - p.pl as amount,
         'Expenses' as metric_group_1,
         'Other Expenses' as metric_group_2
@@ -526,3 +555,6 @@ from final_without_true_up
 union all
 select * 
 from true_up
+union all
+select * 
+from data_movements
