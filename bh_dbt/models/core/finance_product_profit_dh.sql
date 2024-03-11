@@ -8,7 +8,7 @@ with source as (
       sku,
       currency,
       case when original_description = 'Other-ServiceFeeEvent-PaidServicesFee' then 'other_amount_distributable' else metric end as metric, 
-      amount
+      amount_usd as amount
     from DATAHAWK_SHARE_83514.CUSTOM_83514.finance_profit_ledger
 ),
 
