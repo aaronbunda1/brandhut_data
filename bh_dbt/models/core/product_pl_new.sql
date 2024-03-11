@@ -284,13 +284,15 @@ group by all
 , prefinal as (
     SELECT
         concat(
+        coalesce(BRAND,''),
         coalesce(ACCOUNT_KEY,''),
         coalesce(cast(REGION as varchar(12)),''),
         coalesce(MARKETPLACE_KEY,''),
         coalesce(cast(DATE_DAY as varchar(12)),''),
         coalesce(CHANNEL_PRODUCT_ID,''),
         coalesce(SKU,''),
-        coalesce(metric_name,''))
+        coalesce(metric_name,''),
+        coalesce(currency,''))
         as key,
         BRAND,
         ACCOUNT_KEY,
@@ -306,7 +308,8 @@ group by all
         internal_sku_category,
         metric_name,
         current_timestamp() as updated_at,
-        round(amount/coalesce(rate_to_usd,1),2) as amount
+        -- round(amount/coalesce(rate_to_usd,1),2) as amount
+        round(amount,2) as amount
     FROM fix
     UNPIVOT(amount FOR metric_name IN (
 ledger_gross_sales,
@@ -523,7 +526,7 @@ and date_day >= '2024-01-01'
 
 , data_movements as (
 select
-concat(i.brand,i.month,'TRUE_UP') as key,
+concat(i.brand,i.month,'DATA_MOVEMENTS') as key,
         p.BRAND,
         null as ACCOUNT_KEY,
         null as REGION,
