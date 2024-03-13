@@ -84,48 +84,48 @@ l.tax_other as ledger_tax_other,
 case when l.asin is null and (l.sku is null or l.sku ilike '%uncommingled%') then 0 else l.other_amount end as ledger_other_amount,
 l.other_amount_distributable as ledger_other_amount_distributable,
 l.restocking_fee as ledger_restocking_fee,
-coalesce(l.gross_sales,0) + coalesce(l.REIMBURSED_PRODUCT,0) + coalesce(l.REVERSAL_REIMBURSED,0) as net_sales,
+coalesce(l.gross_sales,0) + coalesce(l.REIMBURSED_PRODUCT,0) + coalesce(l.REVERSAL_REIMBURSED,0) as ledger_net_sales,
 coalesce(l.earned_gross_sales,0) + coalesce(l.REIMBURSED_PRODUCT,0) + coalesce(l.REVERSAL_REIMBURSED,0) as earned_net_sales,
 sum(l.EARNED_GROSS_SALES) over (partition by date_trunc(month,l.posted_local_date),l.brand) as monthly_brand_gs,
 case 
     when l.brand ilike '%cellini%'
-        then -net_sales*0.1 
+        then -ledger_net_sales*0.1 
     when l.brand ilike any ('%spot%','%zens%')
-        then -net_sales*0.15
+        then -ledger_net_sales*0.15
     when l.brand ilike '%onanoff 2%'
         then 
         case 
             when l.sku ilike '%storyph%' 
                 then 
                     case
-                        when monthly_brand_gs <= 50000 then -net_sales*.1
-                        when monthly_brand_gs < 251000 then -net_sales *.09
-                        else -net_sales * .06
+                        when monthly_brand_gs <= 50000 then -ledger_net_sales*.1
+                        when monthly_brand_gs < 251000 then -ledger_net_sales *.09
+                        else -ledger_net_sales * .06
                     end
             when l.sku ilike any ('%SS-%','%STSH-%','%shield%')
                 then 
                     case
-                        when monthly_brand_gs < 251000 then -net_sales *.12
-                        else -net_sales * .08
+                        when monthly_brand_gs < 251000 then -ledger_net_sales *.12
+                        else -ledger_net_sales * .08
                     end
-            else -net_sales*.1
+            else -ledger_net_sales*.1
         end 
     when l.brand = 'Fokus'
         then 
         case 
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 79.99 then -net_sales*.08
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 89.99 then -net_sales*.12
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 100 then -net_sales*.18
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 109.99 then -net_sales*.2
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 119.99 then -net_sales*.22
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 129.99 then -net_sales*.24
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 149.99 then -net_sales*.26
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 159.99 then -net_sales*.26
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 139.99 then -net_sales*.25
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 169.99 then -net_sales*.28
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 179.99 then -net_sales*.28
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 189.99 then -net_sales*.29
-            else -net_sales*.3
+            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 79.99 then -ledger_net_sales*.08
+            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 89.99 then -ledger_net_sales*.12
+            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 100 then -ledger_net_sales*.18
+            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 109.99 then -ledger_net_sales*.2
+            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 119.99 then -ledger_net_sales*.22
+            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 129.99 then -ledger_net_sales*.24
+            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 149.99 then -ledger_net_sales*.26
+            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 159.99 then -ledger_net_sales*.26
+            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 139.99 then -ledger_net_sales*.25
+            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 169.99 then -ledger_net_sales*.28
+            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 179.99 then -ledger_net_sales*.28
+            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 189.99 then -ledger_net_sales*.29
+            else -ledger_net_sales*.3
         end
     else 0 
 end as ledger_brandhut_commission,
