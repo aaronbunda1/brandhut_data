@@ -176,6 +176,7 @@ coalesce(o.freight,0) as manual_freight,
 coalesce(o.ad_spend_manual,0) as manual_ad_spend,
 coalesce(o.product_samples,0) as manual_product_samples,
 coalesce(o.miscellaneous,0) as manual_miscellaneous_cost,
+coalesce(o.true_up_invoiced,0) as true_up_invoiced,
 coalesce(-pl.net_units_sold*cogs.productcost,pl.COGS) as MANUAL_ONANOFF_COGS,
 l.SPONSORED_PRODUCTS_COST,
 coalesce(-non_sp.sponsoredbrands/count(*) over (partition by l.posted_local_date,l.account_key,l.marketplace_key,l.brand),0) as DIST_SPONSORED_BRANDS_COST,
@@ -259,6 +260,7 @@ SUM(CAST(manual_turner_costs AS NUMERIC(18,2))) AS manual_turner_costs,
 SUM(CAST(manual_freight AS NUMERIC(18,2))) AS manual_freight,
 SUM(CAST(manual_product_samples AS NUMERIC(18,2))) AS manual_product_samples,
 SUM(CAST(manual_miscellaneous_cost AS NUMERIC(18,2))) AS manual_miscellaneous_cost,
+SUM(CAST(true_up_invoiced AS NUMERIC(18,2))) AS true_up_invoiced,
 SUM(CAST(MANUAL_ONANOFF_COGS AS NUMERIC(18,2))) AS MANUAL_ONANOFF_COGS,
 SUM(CAST(SPONSORED_PRODUCTS_COST AS NUMERIC(18,2))) AS SPONSORED_PRODUCTS_COST,
 SUM(CAST(DIST_SPONSORED_BRANDS_COST AS NUMERIC(18,2))) AS DIST_SPONSORED_BRANDS_COST,
@@ -351,6 +353,7 @@ manual_freight,
 manual_ad_spend,
 manual_product_samples,
 manual_miscellaneous_cost,
+true_up_invoiced,
 MANUAL_ONANOFF_COGS,
 SPONSORED_PRODUCTS_COST,
 DIST_SPONSORED_BRANDS_COST,
@@ -373,6 +376,7 @@ when metric_name in (
 'EARNED_BRANDHUT_COMMISSION',
 'MANUAL_ONANOFF_COGS',
 'MANUAL_MISCELLANEOUS_COST',
+'TRUE_UP_INVOICED',
 -- 'LEDGER_SUBSCRIPTION_FEE',
 'DIST_LEDGER_OTHER_AMOUNT',
 'LEDGER_OTHER_AMOUNT',
@@ -432,6 +436,7 @@ then 'Gross Sales'
 when metric_name = 'MANUAL_ONANOFF_COGS' then 'COGS'
 when metric_name IN (
     'MANUAL_MISCELLANEOUS_COST',
+    'TRUE_UP_INVOICED',
 'DIST_LEDGER_OTHER_AMOUNT',
 'LEDGER_OTHER_AMOUNT',
 'MANUAL_PRODUCT_SAMPLES',
@@ -502,7 +507,7 @@ concat(i.brand,i.month,'TRUE_UP') as key,
         null as ACCOUNT_KEY,
         null as REGION,
         null as MARKETPLACE_KEY,
-        dateadd(month,1,p.DATE_DAY) as date_day,
+        dateadd(month,-1,date_trunc(month,current_date())) as date_day,
         null as CHANNEL_PRODUCT_ID,
         null as SKU,
         null as COLOR,
@@ -510,7 +515,7 @@ concat(i.brand,i.month,'TRUE_UP') as key,
         'USD' as CURRENCY,
         null as rate_to_usd,
         null as internal_sku_category,
-        'TRUE_UP' as metric_name,
+        'TRUE_UP_LIVE_CALCULATED' as metric_name,
         current_timestamp() as updated_at,
         -(i.invoice_amount - p.pl) as amount,
         'Expenses' as metric_group_1,
@@ -521,8 +526,11 @@ left join {{ref('invoice_amounts')}} i
     and i.brand = p.brand
 where i.brand is not null 
 and date_day >= '2024-01-01'
+and date_day < date_trunc(month,current_date())
 
 )
+
+
 
 , data_movements as (
 select
