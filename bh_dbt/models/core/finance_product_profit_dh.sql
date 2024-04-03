@@ -7,7 +7,9 @@ with source as (
       asin,
       sku,
       currency,
-      case when original_description = 'Other-ServiceFeeEvent-PaidServicesFee' then 'other_amount_distributable' else metric end as metric, 
+      case when original_description  IN ('Other-ServiceFeeEvent-PaidServicesFee','Other-ServiceFeeEvent-Subscription') then 'other_amount_distributable' 
+      when original_description IN ('Other-ServiceFeeEvent-AmazonUpstreamProcessingFee','Other-ServiceFeeEvent-AmazonUpstreamStorageTransportationFee') then 'other_amount_spot_only'
+      else metric end as metric, 
       amount_usd as amount
     from DATAHAWK_SHARE_83514.CUSTOM_83514.finance_profit_ledger
 ),
@@ -61,6 +63,7 @@ pivoting as (
 
       'other_amount',
       'other_amount_distributable',
+      'other_amount_spot_only',
       'restocking_fee'
 
         )) 
@@ -110,6 +113,7 @@ pivoting as (
       tax_other,
       other_amount,
       other_amount_distributable,
+      other_amount_spot_only,
       restocking_fee
   )
 
@@ -185,6 +189,7 @@ select
       max(tax_other) as tax_other,
       max(other_amount) as other_amount,
       max(other_amount_distributable) as other_amount_distributable,
+      max(other_amount_spot_only) as other_amount_spot_only,
       max(restocking_fee) as restocking_fee
     from pivoting d
     full outer join sales_data s

@@ -83,6 +83,7 @@ l.TAX_REIMBURSED as ledger_tax_reimbursed,
 l.tax_other as ledger_tax_other,
 case when l.asin is null and (l.sku is null or l.sku ilike '%uncommingled%') then 0 else l.other_amount end as ledger_other_amount,
 l.other_amount_distributable as ledger_other_amount_distributable,
+l.other_amount_spot_only,
 l.restocking_fee as ledger_restocking_fee,
 coalesce(l.gross_sales,0) + coalesce(l.REIMBURSED_PRODUCT,0) + coalesce(l.REVERSAL_REIMBURSED,0) as ledger_net_sales,
 coalesce(l.earned_gross_sales,0) + coalesce(l.REIMBURSED_PRODUCT,0) + coalesce(l.REVERSAL_REIMBURSED,0) as earned_net_sales,
@@ -176,6 +177,7 @@ coalesce(o.freight,0) as manual_freight,
 coalesce(o.ad_spend_manual,0) as manual_ad_spend,
 coalesce(o.product_samples,0) as manual_product_samples,
 coalesce(o.miscellaneous,0) as manual_miscellaneous_cost,
+coalesce(o.true_up_invoiced,0) as true_up_invoiced,
 coalesce(-pl.net_units_sold*cogs.productcost,pl.COGS) as MANUAL_ONANOFF_COGS,
 l.SPONSORED_PRODUCTS_COST,
 coalesce(-non_sp.sponsoredbrands/count(*) over (partition by l.posted_local_date,l.account_key,l.marketplace_key,l.brand),0) as DIST_SPONSORED_BRANDS_COST,
@@ -252,6 +254,7 @@ sum(CAST(ledger_tax_reimbursed AS NUMERIC(18,2))) AS ledger_tax_reimbursed,
 sum(CAST(ledger_tax_other AS NUMERIC(18,2))) AS ledger_tax_other,
 sum(CAST(ledger_other_amount AS NUMERIC(18,2))) AS ledger_other_amount,
 sum(CAST(ledger_other_amount_distributable AS NUMERIC(18,2))) AS ledger_other_amount_distributable,
+sum(CAST(other_amount_spot_only AS NUMERIC(18,2))) AS other_amount_spot_only,
 sum(CAST(ledger_restocking_fee AS NUMERIC(18,2))) AS ledger_restocking_fee,
 sum(CAST(ledger_brandhut_commission AS NUMERIC(18,2))) AS ledger_brandhut_commission,
 sum(CAST(EARNED_BRANDHUT_COMMISSION AS NUMERIC(18,2))) AS EARNED_BRANDHUT_COMMISSION,
@@ -259,6 +262,7 @@ SUM(CAST(manual_turner_costs AS NUMERIC(18,2))) AS manual_turner_costs,
 SUM(CAST(manual_freight AS NUMERIC(18,2))) AS manual_freight,
 SUM(CAST(manual_product_samples AS NUMERIC(18,2))) AS manual_product_samples,
 SUM(CAST(manual_miscellaneous_cost AS NUMERIC(18,2))) AS manual_miscellaneous_cost,
+SUM(CAST(true_up_invoiced AS NUMERIC(18,2))) AS true_up_invoiced,
 SUM(CAST(MANUAL_ONANOFF_COGS AS NUMERIC(18,2))) AS MANUAL_ONANOFF_COGS,
 SUM(CAST(SPONSORED_PRODUCTS_COST AS NUMERIC(18,2))) AS SPONSORED_PRODUCTS_COST,
 SUM(CAST(DIST_SPONSORED_BRANDS_COST AS NUMERIC(18,2))) AS DIST_SPONSORED_BRANDS_COST,
@@ -275,6 +279,7 @@ group by all
     select 
     *,
     cast(nullif(sum(ledger_other_amount_distributable) over (partition by date_day,currency)*(ledger_gross_sales/sum(ledger_gross_sales) over (partition by date_day,currency)),0) as NUMERIC(30,2)) as dist_ledger_other_amount,
+    cast(nullif(sum(other_amount_spot_only) over (partition by date_day,currency)*(IFF(brand='SPOT',ledger_gross_sales,0)/nullif(sum(IFF(brand='SPOT',ledger_gross_sales,0)) over (partition by date_day,currency),0)),0) as NUMERIC(30,2)) as dist_other_amount_spot_only,
     case when coalesce(sum(ad_spend_total) over (partition by date_day, brand),0) = 0 then manual_ad_spend_temp else 0 end as manual_ad_spend
     from by_month
 
@@ -343,6 +348,7 @@ ledger_promotion,
 -- ledger_tax_other,
 ledger_other_amount,
 dist_ledger_other_amount,
+dist_other_amount_spot_only,
 ledger_restocking_fee,
 ledger_brandhut_commission,
 EARNED_BRANDHUT_COMMISSION,
@@ -351,6 +357,7 @@ manual_freight,
 manual_ad_spend,
 manual_product_samples,
 manual_miscellaneous_cost,
+true_up_invoiced,
 MANUAL_ONANOFF_COGS,
 SPONSORED_PRODUCTS_COST,
 DIST_SPONSORED_BRANDS_COST,
@@ -373,8 +380,10 @@ when metric_name in (
 'EARNED_BRANDHUT_COMMISSION',
 'MANUAL_ONANOFF_COGS',
 'MANUAL_MISCELLANEOUS_COST',
+'TRUE_UP_INVOICED',
 -- 'LEDGER_SUBSCRIPTION_FEE',
 'DIST_LEDGER_OTHER_AMOUNT',
+'DIST_OTHER_AMOUNT_SPOT_ONLY',
 'LEDGER_OTHER_AMOUNT',
 'MANUAL_PRODUCT_SAMPLES',
 'LEDGER_GIFT_WRAP',
@@ -432,10 +441,14 @@ then 'Gross Sales'
 when metric_name = 'MANUAL_ONANOFF_COGS' then 'COGS'
 when metric_name IN (
     'MANUAL_MISCELLANEOUS_COST',
+    'TRUE_UP_INVOICED',
 'DIST_LEDGER_OTHER_AMOUNT',
+'DIST_OTHER_AMOUNT_SPOT_ONLY',
 'LEDGER_OTHER_AMOUNT',
 'MANUAL_PRODUCT_SAMPLES',
-'MANUAL_TURNER_COSTS'
+'MANUAL_TURNER_COSTS',
+'LEDGER_REMOVAL_COMPLETE',
+'LEDGER_DISPOSAL_COMPLETE'
 )
 then 'Other Expenses'
 when metric_name in (
@@ -502,7 +515,7 @@ concat(i.brand,i.month,'TRUE_UP') as key,
         null as ACCOUNT_KEY,
         null as REGION,
         null as MARKETPLACE_KEY,
-        dateadd(month,1,p.DATE_DAY) as date_day,
+        dateadd(month,-1,date_trunc(month,current_date())) as date_day,
         null as CHANNEL_PRODUCT_ID,
         null as SKU,
         null as COLOR,
@@ -510,7 +523,7 @@ concat(i.brand,i.month,'TRUE_UP') as key,
         'USD' as CURRENCY,
         null as rate_to_usd,
         null as internal_sku_category,
-        'TRUE_UP' as metric_name,
+        'TRUE_UP_LIVE_CALCULATED' as metric_name,
         current_timestamp() as updated_at,
         -(i.invoice_amount - p.pl) as amount,
         'Expenses' as metric_group_1,
@@ -521,8 +534,11 @@ left join {{ref('invoice_amounts')}} i
     and i.brand = p.brand
 where i.brand is not null 
 and date_day >= '2024-01-01'
+and date_day < date_trunc(month,current_date())
 
 )
+
+
 
 , data_movements as (
 select
