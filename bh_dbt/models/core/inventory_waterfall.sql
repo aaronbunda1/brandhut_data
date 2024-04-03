@@ -5,13 +5,14 @@ a.account_key,
 a.region_seller_name,
 date_trunc(month,a.date) as month,
 a.asin,
-b.brand,
+case when b.brand = 'ZENS' and c.category is null then 'ZENS Legacy' else b.brand end as brand,
 c.category,
 a.msku,
 a.disposition,
 sum(case when a.date = a.starting_balance_date then a.starting_warehouse_balance end) as starting_warehouse_balance,
 sum(a.receipts) as receipts,
 sum(a.customer_shipments) as customer_shipments,
+sum(a.customer_returns) as customer_returns,
 sum(a.vendor_returns) as vendor_returns,
 sum(a.warehouse_transfer_in_out) as warehouse_transfer_in_out,
 sum(a.found) as found,
@@ -33,4 +34,4 @@ group by all)
 select 
 *
 from inventory_data 
-unpivot(amount for movement_type in (STARTING_WAREHOUSE_BALANCE,RECEIPTS,CuSTOMER_SHIPMENTS,VENDOR_RETURNS,WAREHOUSE_TRANSFER_IN_OUT,FOUND,LOST,DAMAGED,DISPOSED,OTHER,UNKNOWN))
+unpivot(amount for movement_type in (STARTING_WAREHOUSE_BALANCE,RECEIPTS,CUSTOMER_SHIPMENTS,CUSTOMER_RETURNS,VENDOR_RETURNS,WAREHOUSE_TRANSFER_IN_OUT,FOUND,LOST,DAMAGED,DISPOSED,OTHER,UNKNOWN))
