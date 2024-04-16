@@ -217,10 +217,7 @@ left join non_sp_sd
 left join sp_sd
     on sp_sd.channel_product_id = l.asin
     and sp_sd.date_day = l.posted_local_date
-<<<<<<< HEAD
     and sp_sd.marketplace_key = l.marketplace_key
-=======
->>>>>>> 7e91c70811214853bf6dae81aeb16178324a2be1
 full outer join {{ref('manual_metrics_by_brand_and_month')}} o 
     on o.brand = l.brand
     and l.sku = o.sku
