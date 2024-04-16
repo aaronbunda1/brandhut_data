@@ -1,6 +1,6 @@
 {{config(materialized='table')}}
 
-with non_sp as (
+with non_sp_sd as (
     select
     seller_name,
     account_key,
@@ -8,18 +8,28 @@ with non_sp as (
     brand,
     date_day,
      SponsoredBrandsVideo,
-     SponsoredBrands,
-     sponsoreddisplay
+     SponsoredBrands
     from {{ref('ad_spend')}}
-    pivot(sum(ad_spend) for sponsored_type in ('SponsoredBrandsVideo','SponsoredBrands','SponsoredDisplay'))
+    pivot(sum(ad_spend) for sponsored_type in ('SponsoredBrandsVideo','SponsoredBrands'))
         as a (seller_name,
     account_key,
     marketplace_key,
     brand,
     date_day,
     SponsoredBrandsVideo,
-    SponsoredBrands,
-    SponsoredDisplay)
+    SponsoredBrands)
+)
+
+, sp_sd as (
+    select 
+    date_day,
+    channel_product_id,
+    coalesce(sum("'SponsoredProducts'"),0) as SponsoredProductsCost,
+    coalesce(sum("'SponsoredDisplay'"),0) as SponsoredDisplayCost
+    from datahawk_share_83514.advertising.advertising_product_campaign_metrics
+        pivot(sum(costs) for sponsored_type in ('SponsoredProducts','SponsoredDisplay')) as p
+    group by all
+
 )
 
 , all_fields as (select 
@@ -47,6 +57,7 @@ else 'Other'
 end as color,
 cr.rate as rate_to_usd,
 case 
+    when l.sku = 'ZEDC21B/00' then 'ZENS'
     when c.category is null and l.brand = 'ZENS' then 'Zens Legacy'
     when l.brand = 'Onanoff 2' and l.sku ilike any ('%SS-%','%STSH-%','%shield%') then 'StoryShield'
     when l.brand = 'Onanoff 2' and l.sku ilike '%storyph%' then 'Storyphones'
@@ -179,19 +190,24 @@ coalesce(o.product_samples,0) as manual_product_samples,
 coalesce(o.miscellaneous,0) as manual_miscellaneous_cost,
 coalesce(o.true_up_invoiced,0) as true_up_invoiced,
 coalesce(-pl.net_units_sold*cogs.productcost,pl.COGS) as MANUAL_ONANOFF_COGS,
-l.SPONSORED_PRODUCTS_COST,
-coalesce(-non_sp.sponsoredbrands/count(*) over (partition by l.posted_local_date,l.account_key,l.marketplace_key,l.brand),0) as DIST_SPONSORED_BRANDS_COST,
-coalesce(-non_sp.sponsoredbrandsvideo/count(*) over (partition by l.posted_local_date,l.account_key,l.marketplace_key,l.brand),0) as DIST_SPONSORED_BRANDS_VIDEO_COST,
-coalesce(-non_sp.sponsoreddisplay/count(*) over (partition by l.posted_local_date,l.account_key,l.marketplace_key,l.brand),0) as DIST_SPONSORED_DISPLAY_COST,
+-- l.SPONSORED_PRODUCTS_COST/2 as SPONSORED_PRODUCTS_COST,
+sp_sd.sponsoredproductscost/count(*) over (partition by l.posted_local_date,l.asin) as SPONSORED_PRODUCTS_COST,
+sp_sd.sponsoreddisplaycost/count(*) over (partition by l.posted_local_date,l.asin) as sponsored_display_cost,
+-coalesce(-non_sp_sd.sponsoredbrands/count(*) over (partition by l.posted_local_date,l.account_key,l.marketplace_key,l.brand),0) as DIST_SPONSORED_BRANDS_COST,
+-coalesce(-non_sp_sd.sponsoredbrandsvideo/count(*) over (partition by l.posted_local_date,l.account_key,l.marketplace_key,l.brand),0) as DIST_SPONSORED_BRANDS_VIDEO_COST,
+-- coalesce(-non_sp_sd.sponsoreddisplay/count(*) over (partition by l.posted_local_date,l.account_key,l.marketplace_key,l.brand),0) as DIST_SPONSORED_DISPLAY_COST,
 from {{ref('finance_pl_pivot_new')}} l
 left join datahawk_share_83514.referential.referential_currency_rate cr on l.posted_local_date = cr.date_day and l.currency  = cr.currency
 left join {{ref('category')}} c
     on c.channel_product_id = l.asin
-left join non_sp
-    on non_sp.marketplace_key = l.marketplace_key
-    and non_sp.account_key = l.account_key
-    and l.brand = non_sp.brand
-    and non_sp.date_day = l.posted_local_date
+left join non_sp_sd
+    on non_sp_sd.marketplace_key = l.marketplace_key
+    and non_sp_sd.account_key = l.account_key
+    and l.brand = non_sp_sd.brand
+    and non_sp_sd.date_day = l.posted_local_date
+left join sp_sd
+    on sp_sd.channel_product_id = l.asin
+    and sp_sd.date_day = l.posted_local_date
 full outer join {{ref('manual_metrics_by_brand_and_month')}} o 
     on o.brand = l.brand
     and l.sku = o.sku
@@ -267,9 +283,9 @@ SUM(CAST(MANUAL_ONANOFF_COGS AS NUMERIC(18,2))) AS MANUAL_ONANOFF_COGS,
 SUM(CAST(SPONSORED_PRODUCTS_COST AS NUMERIC(18,2))) AS SPONSORED_PRODUCTS_COST,
 SUM(CAST(DIST_SPONSORED_BRANDS_COST AS NUMERIC(18,2))) AS DIST_SPONSORED_BRANDS_COST,
 SUM(CAST(DIST_SPONSORED_BRANDS_VIDEO_COST AS NUMERIC(18,2))) AS DIST_SPONSORED_BRANDS_VIDEO_COST,
-SUM(CAST(DIST_SPONSORED_DISPLAY_COST AS NUMERIC(18,2))) AS DIST_SPONSORED_DISPLAY_COST,
+SUM(CAST(SPONSORED_DISPLAY_COST AS NUMERIC(18,2))) AS SPONSORED_DISPLAY_COST,
 SUM(CAST(SPONSORED_PRODUCTS_COST AS NUMERIC(18,2)))+SUM(CAST(DIST_SPONSORED_BRANDS_COST AS NUMERIC(18,2)))+SUM(CAST(DIST_SPONSORED_BRANDS_VIDEO_COST AS NUMERIC(18,2)))+
-SUM(CAST(DIST_SPONSORED_DISPLAY_COST AS NUMERIC(18,2))) as ad_spend_total,
+SUM(CAST(SPONSORED_DISPLAY_COST AS NUMERIC(18,2))) as ad_spend_total,
 SUM(CAST(manual_ad_spend AS NUMERIC(18,2))) as manual_ad_spend_temp
 from all_fields
 group by all
@@ -362,7 +378,7 @@ MANUAL_ONANOFF_COGS,
 SPONSORED_PRODUCTS_COST,
 DIST_SPONSORED_BRANDS_COST,
 DIST_SPONSORED_BRANDS_VIDEO_COST,
-DIST_SPONSORED_DISPLAY_COST
+SPONSORED_DISPLAY_COST
 ))
 )
 
@@ -373,7 +389,7 @@ case
 when metric_name in (
     'MANUAL_AD_SPEND',
 'DIST_SPONSORED_BRANDS_COST',
-'DIST_SPONSORED_DISPLAY_COST',
+'SPONSORED_DISPLAY_COST',
 'DIST_SPONOSORED_VIDEO_COST',
 'SPONSORED_PRODUCTS_COST',
 'LEDGER_BRANDHUT_COMMISSION',
@@ -425,7 +441,7 @@ case
     when metric_name in (
         'MANUAL_AD_SPEND',
     'DIST_SPONSORED_BRANDS_COST',
-    'DIST_SPONSORED_DISPLAY_COST',
+    'SPONSORED_DISPLAY_COST',
     'DIST_SPONOSORED_VIDEO_COST',
     'SPONSORED_PRODUCTS_COST'
     )
