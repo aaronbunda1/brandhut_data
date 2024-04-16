@@ -1,4 +1,4 @@
-with non_sp_data as (
+with non_sp_sd_data as (
     select
     seller_name,
     account_key,
@@ -19,11 +19,11 @@ with non_sp_data as (
     c.date_day,
     sum(c.costs) as ad_spend
     from datahawk_share_83514.advertising.advertising_campaign_metrics c
-    where c.sponsored_type != 'SponoredProducts'
+    where c.sponsored_type NOT IN ('SponoredProducts','SponsoredDisplay')
     group by 1,2,3,4,5,6
 )
 
-,sp as (
+,sp_sd as (
     select
     seller_name,
         account_key,
@@ -36,9 +36,10 @@ with non_sp_data as (
     left join {{ref('brand_asin')}} b
         on b.channel_product_id = sp.channel_product_id
         and b.marketplace_key = sp.marketplace_key
+    where sponsored_type IN ('SponsoredDisplay','SponsoredProducts')
     group by 1,2,3,4,5,6
 )
 
-select * from non_sp_data 
+select * from non_sp_sd_data 
 union all 
-select * from sp
+select * from sp_sd
