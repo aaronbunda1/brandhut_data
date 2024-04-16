@@ -24,7 +24,10 @@ with non_sp_sd as (
     select 
     date_day,
     channel_product_id,
+<<<<<<< HEAD
     marketplace_key,
+=======
+>>>>>>> 7e91c70811214853bf6dae81aeb16178324a2be1
     coalesce(sum("'SponsoredProducts'"),0) as SponsoredProductsCost,
     coalesce(sum("'SponsoredDisplay'"),0) as SponsoredDisplayCost
     from datahawk_share_83514.advertising.advertising_product_campaign_metrics
@@ -192,8 +195,13 @@ coalesce(o.miscellaneous,0) as manual_miscellaneous_cost,
 coalesce(o.true_up_invoiced,0) as true_up_invoiced,
 coalesce(-pl.net_units_sold*cogs.productcost,pl.COGS) as MANUAL_ONANOFF_COGS,
 -- l.SPONSORED_PRODUCTS_COST/2 as SPONSORED_PRODUCTS_COST,
+<<<<<<< HEAD
 sp_sd.sponsoredproductscost/count(*) over (partition by l.posted_local_date,l.asin,l.marketplace_key) as SPONSORED_PRODUCTS_COST,
 sp_sd.sponsoreddisplaycost/count(*) over (partition by l.posted_local_date,l.asin,l.marketplace_key) as sponsored_display_cost,
+=======
+sp_sd.sponsoredproductscost/count(*) over (partition by l.posted_local_date,l.asin) as SPONSORED_PRODUCTS_COST,
+sp_sd.sponsoreddisplaycost/count(*) over (partition by l.posted_local_date,l.asin) as sponsored_display_cost,
+>>>>>>> 7e91c70811214853bf6dae81aeb16178324a2be1
 -coalesce(-non_sp_sd.sponsoredbrands/count(*) over (partition by l.posted_local_date,l.account_key,l.marketplace_key,l.brand),0) as DIST_SPONSORED_BRANDS_COST,
 -coalesce(-non_sp_sd.sponsoredbrandsvideo/count(*) over (partition by l.posted_local_date,l.account_key,l.marketplace_key,l.brand),0) as DIST_SPONSORED_BRANDS_VIDEO_COST,
 -- coalesce(-non_sp_sd.sponsoreddisplay/count(*) over (partition by l.posted_local_date,l.account_key,l.marketplace_key,l.brand),0) as DIST_SPONSORED_DISPLAY_COST,
@@ -209,7 +217,10 @@ left join non_sp_sd
 left join sp_sd
     on sp_sd.channel_product_id = l.asin
     and sp_sd.date_day = l.posted_local_date
+<<<<<<< HEAD
     and sp_sd.marketplace_key = l.marketplace_key
+=======
+>>>>>>> 7e91c70811214853bf6dae81aeb16178324a2be1
 full outer join {{ref('manual_metrics_by_brand_and_month')}} o 
     on o.brand = l.brand
     and l.sku = o.sku
