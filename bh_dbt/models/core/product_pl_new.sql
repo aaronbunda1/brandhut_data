@@ -193,8 +193,8 @@ coalesce(o.true_up_invoiced,0) as true_up_invoiced,
 coalesce(-pl.net_units_sold*cogs.productcost,pl.COGS) as MANUAL_ONANOFF_COGS,
 -sp_sd.sponsoredproductscost/count(*) over (partition by l.posted_local_date,l.asin,l.marketplace_key) as SPONSORED_PRODUCTS_COST,
 -sp_sd.sponsoreddisplaycost/count(*) over (partition by l.posted_local_date,l.asin,l.marketplace_key) as sponsored_display_cost,
--coalesce(-non_sp_sd.sponsoredbrands/count(*) over (partition by l.posted_local_date,l.account_key,l.marketplace_key,l.brand),0) as DIST_SPONSORED_BRANDS_COST,
--coalesce(-non_sp_sd.sponsoredbrandsvideo/count(*) over (partition by l.posted_local_date,l.account_key,l.marketplace_key,l.brand),0) as DIST_SPONSORED_BRANDS_VIDEO_COST,
+coalesce(-non_sp_sd.sponsoredbrands/count(*) over (partition by l.posted_local_date,l.account_key,l.marketplace_key,l.brand),0) as DIST_SPONSORED_BRANDS_COST,
+coalesce(-non_sp_sd.sponsoredbrandsvideo/count(*) over (partition by l.posted_local_date,l.account_key,l.marketplace_key,l.brand),0) as DIST_SPONSORED_BRANDS_VIDEO_COST,
 from {{ref('finance_pl_pivot_new')}} l
 left join datahawk_share_83514.referential.referential_currency_rate cr on l.posted_local_date = cr.date_day and l.currency  = cr.currency
 left join {{ref('category')}} c
