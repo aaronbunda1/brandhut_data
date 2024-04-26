@@ -26,7 +26,7 @@ select * from datahawk_writable_83514.brandhut.product_pl
     )
 }}
 
-select * from datahawk_writable_83514.brandhut.product_pl_new
+select distinct * from datahawk_writable_83514.brandhut.product_pl_new
 
 {% endsnapshot %}
 
