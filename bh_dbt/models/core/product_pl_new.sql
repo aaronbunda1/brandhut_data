@@ -520,7 +520,7 @@ and prefinal.amount !=0
     brand,
     sum(amount) as pl
     from final_without_true_up f
-    where metric_group_1 in ('Net Sales','Expenses') and metric_name NOT IN ('EARNED_GROSS_SALES','EARNED_BRANDHUT_COMMISSION')
+    where metric_group_1 in ('Net Sales','Expenses') and metric_name NOT IN ('EARNED_GROSS_SALES','EARNED_BRANDHUT_COMMISSION','TRUE_UP_INVOICED')
     group by all
 )
 
