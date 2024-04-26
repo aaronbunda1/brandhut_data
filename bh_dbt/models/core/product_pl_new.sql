@@ -531,7 +531,7 @@ concat(i.brand,i.month,'TRUE_UP') as key,
         null as ACCOUNT_KEY,
         null as REGION,
         null as MARKETPLACE_KEY,
-        dateadd(month,-1,date_trunc(month,current_date())) as date_day,
+        dateadd(month,1,max(i.month) over (partition by i.brand)) as date_day,
         null as CHANNEL_PRODUCT_ID,
         null as SKU,
         null as COLOR,
@@ -549,8 +549,8 @@ left join {{ref('invoice_amounts')}} i
     on i.month = p.date_day
     and i.brand = p.brand
 where i.brand is not null 
-and date_day >= '2024-01-01'
-and date_day < date_trunc(month,current_date())
+and p.date_day >= '2024-01-01'
+and p.date_day < date_trunc(month,current_date())
 
 )
 
