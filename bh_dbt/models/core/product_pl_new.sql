@@ -549,8 +549,8 @@ left join {{ref('invoice_amounts')}} i
     on i.month = p.date_day
     and i.brand = p.brand
 where i.brand is not null 
-and date_day >= '2024-01-01'
-and date_day < date_trunc(month,current_date())
+and p.date_day >= '2024-01-01'
+and p.date_day < date_trunc(month,current_date())
 
 )
 
