@@ -454,8 +454,8 @@ then 'Brandhut Commission'
 when metric_name in ('EARNED_GROSS_SALES',
 'LEDGER_GROSS_SALES')
 then 'Gross Sales'
-when metric_name = 'MANUAL_ONANOFF_COGS' then 'COGS'
 when metric_name IN (
+    'MANUAL_ONANOFF_COGS' ,
     'MANUAL_MISCELLANEOUS_COST',
     'TRUE_UP_INVOICED',
 'DIST_LEDGER_OTHER_AMOUNT',
@@ -520,7 +520,7 @@ and prefinal.amount !=0
     brand,
     sum(amount) as pl
     from final_without_true_up f
-    where metric_group_1 in ('Net Sales','Expenses') and metric_name NOT IN ('EARNED_GROSS_SALES','EARNED_BRANDHUT_COMMISSION','TRUE_UP_INVOICED')
+    where metric_group_1 in ('Net Sales','Expenses') and metric_name NOT IN ('EARNED_GROSS_SALES','EARNED_BRANDHUT_COMMISSION')
     group by all
 )
 
