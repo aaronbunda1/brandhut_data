@@ -4,7 +4,7 @@
 select
 brand,
 internal_sku_category,
-sku, 
+sku, currency,  
 year(date_day)::string as period,
 month(date_day)::string as sub_period,
 sum(units_sold) as units_sold,
@@ -90,14 +90,14 @@ sum(TURNER_COSTS)
 else sum(brandhut_commission)
 end as brandhut_profit
 from {{ref('product_pl_daily')}}
-group by 1,2,3,4,5
+group by all
 
 union all 
 
 select
 brand,
 internal_sku_category,
-sku, 
+sku, currency,  
 'L30D' as period,
 NULL as sub_period,
 sum(units_sold) as units_sold,
@@ -185,14 +185,14 @@ end as brandhut_profit
 
 from {{ref('product_pl_daily')}}
 where date_day between current_date()-31 and current_date()-1
-group by 1,2,3,4,5
+group by all
 
 union all 
 
 select
 brand,
 internal_sku_category,
-sku, 
+sku, currency,  
 'L90D' as period,
 NULL as sub_period,
 sum(units_sold) as units_sold,
@@ -280,14 +280,14 @@ end as brandhut_profit
 
 from {{ref('product_pl_daily')}}
 where date_day between current_date()-91 and current_date()-1
-group by 1,2,3,4,5
+group by all
 
 union all 
 
 select
 brand,
 internal_sku_category,
-sku, 
+sku, currency,  
 'LY L90D' as period,
 NULL as sub_period,
 sum(units_sold) as units_sold,
@@ -374,14 +374,14 @@ else sum(brandhut_commission)
 end as brandhut_profit
 from {{ref('product_pl_daily')}}
 where date_day between current_date()-91-365 and current_date()-1-365
-group by 1,2,3,4,5
+group by all
 
 union all 
 
 select
 brand,
 internal_sku_category,
-sku, 
+sku, currency,  
 '30D Run Rate' as period,
 NULL as sub_period,
 sum(units_sold)/(7/30) as units_sold,
@@ -468,14 +468,14 @@ else sum(brandhut_commission)
 end/(7/30) as brandhut_profit
 from {{ref('product_pl_daily')}} pl
 where date_day between current_date()-8 and current_date()-1
-group by 1,2,3,4,5
+group by all
 
 union all 
 
 select
 brand,
 internal_sku_category,
-sku, 
+sku, currency,  
 '90D Run Rate' as period,
 NULL as sub_period,
 sum(units_sold)/(7/90) as units_sold,
@@ -562,14 +562,14 @@ else sum(brandhut_commission)
 end/(7/90) as brandhut_profit
 from {{ref('product_pl_daily')}} pl
 where date_day between current_date()-8 and current_date()-1
-group by 1,2,3,4,5
+group by all
 
 union all
 
 select
 brand,
 internal_sku_category,
-sku, 
+sku, currency,  
 'YTD Run Rate' as period,
 NULL as sub_period,
 sum(units_sold)/(datediff(day,date_trunc(year,current_date()),current_date()-1)/365) as units_sold,
@@ -656,7 +656,7 @@ else sum(brandhut_commission)
 end/(datediff(day,date_trunc(year,current_date()),current_date()-1)/365) as brandhut_profit
 from {{ref('product_pl_daily')}} pl
 where date_day between date_trunc(year,current_date()) and current_date()-1
-group by 1,2,3,4,5
+group by all
 
 
 union all 
@@ -664,7 +664,7 @@ union all
 select
 brand,
 internal_sku_category,
-sku, 
+sku, currency,  
 'LY' as period,
 NULL as sub_period,
 sum(units_sold) as units_sold,
@@ -751,7 +751,7 @@ else sum(brandhut_commission)
 end as brandhut_profit
 from {{ref('product_pl_daily')}}
 where date_trunc(year,date_day) = date_trunc(year,date_day-365-1)
-group by 1,2,3,4,5
+group by all
 
 
 
