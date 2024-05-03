@@ -426,7 +426,9 @@ when metric_name in (
 'LEDGER_FBA_STORAGE_FEE',
 'LEDGER_RESTOCKING_FEE',
 'LEDGER_WAREHOUSE_DAMAGE',
-'LEDGER_WAREHOUSE_LOST_MANUAL'
+'LEDGER_WAREHOUSE_LOST_MANUAL',
+'LEDGER_DISPOSAL_COMPLETE',
+'LEDGER_REMOVAL_COMPLETE'
 )
  then 'Expenses'
 when metric_name in (
@@ -454,8 +456,8 @@ then 'Brandhut Commission'
 when metric_name in ('EARNED_GROSS_SALES',
 'LEDGER_GROSS_SALES')
 then 'Gross Sales'
-when metric_name = 'MANUAL_ONANOFF_COGS' then 'COGS'
 when metric_name IN (
+    'MANUAL_ONANOFF_COGS' ,
     'MANUAL_MISCELLANEOUS_COST',
     'TRUE_UP_INVOICED',
 'DIST_LEDGER_OTHER_AMOUNT',
@@ -524,37 +526,6 @@ and prefinal.amount !=0
     group by all
 )
 
-, true_up as (
-select
-concat(i.brand,i.month,'TRUE_UP') as key,
-        p.BRAND,
-        null as ACCOUNT_KEY,
-        null as REGION,
-        null as MARKETPLACE_KEY,
-        dateadd(month,-1,date_trunc(month,current_date())) as date_day,
-        null as CHANNEL_PRODUCT_ID,
-        null as SKU,
-        null as COLOR,
-        null as currency_original,
-        'USD' as CURRENCY,
-        null as rate_to_usd,
-        null as internal_sku_category,
-        'TRUE_UP_LIVE_CALCULATED' as metric_name,
-        current_timestamp() as updated_at,
-        -(i.invoice_amount - p.pl) as amount,
-        'Expenses' as metric_group_1,
-        'Other Expenses' as metric_group_2
-from pl_brand_month p
-left join {{ref('invoice_amounts')}} i
-    on i.month = p.date_day
-    and i.brand = p.brand
-where i.brand is not null 
-and date_day >= '2024-01-01'
-and date_day < date_trunc(month,current_date())
-
-)
-
-
 
 , data_movements as (
 select
@@ -582,14 +553,59 @@ left join {{ref('invoice_amounts')}} i
     and i.brand = p.brand
 where i.brand is not null 
 and date_day >= '2024-01-01'
-
 )
 
+, final_without_true_up_with_data_movements as (
 select * 
 from final_without_true_up
 union all
 select * 
-from true_up
+from data_movements
+)
+
+
+, pl_brand_month_with_data_movements as (
+    select date_day,
+    brand,
+    sum(amount) as pl
+    from final_without_true_up_with_data_movements f
+    where metric_group_1 in ('Net Sales','Expenses') and metric_name NOT IN ('EARNED_GROSS_SALES','EARNED_BRANDHUT_COMMISSION','DATA_MOVEMENTS','TRUE_UP_INVOICED')
+    group by all
+)
+
+, true_up_live as (
+select
+concat(i.brand,i.month,'TRUE_UP') as key,
+        p.BRAND,
+        null as ACCOUNT_KEY,
+        null as REGION,
+        null as MARKETPLACE_KEY,
+        dateadd(month,1,max(i.month) over (partition by i.brand)) as date_day,
+        null as CHANNEL_PRODUCT_ID,
+        null as SKU,
+        null as COLOR,
+        null as currency_original,
+        'USD' as CURRENCY,
+        null as rate_to_usd,
+        null as internal_sku_category,
+        'TRUE_UP_LIVE_CALCULATED' as metric_name,
+        current_timestamp() as updated_at,
+        -(i.invoice_amount - p.pl) as amount,
+        'Expenses' as metric_group_1,
+        'Other Expenses' as metric_group_2
+from pl_brand_month_with_data_movements p
+left join {{ref('invoice_amounts')}} i
+    on i.month = p.date_day
+    and i.brand = p.brand
+where i.brand is not null 
+and p.date_day >= '2024-01-01'
+and p.date_day < date_trunc(month,current_date())
+
+)
+
+
+select * 
+from final_without_true_up_with_data_movements
 union all
 select * 
-from data_movements
+from true_up_live
