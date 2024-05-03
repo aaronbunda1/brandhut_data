@@ -3,6 +3,7 @@ with inventory_data as (
 select 
 a.account_key,
 a.region_seller_name,
+country.country,
 date_trunc(month,a.date) as month,
 a.asin,
 case when b.brand = 'ZENS' and c.category is null then 'ZENS Legacy' else b.brand end as brand,
@@ -22,13 +23,15 @@ sum(a.disposed) as disposed,
 sum(a.other_events) as other,
 sum(a.unknown_events) as unknown
 from 
-(select *, min(date) over (partition by date_trunc(month,date),asin,disposition) as starting_balance_date,
-max(date) over (partition by date_trunc(month,date),asin,disposition) as ending_balance_date 
+(select *, min(date) over (partition by date_trunc(month,date),asin,disposition,location) as starting_balance_date,
+max(date) over (partition by date_trunc(month,date),asin,disposition,location) as ending_balance_date 
 from datahawk_share_83514.raw_inventory.raw_inventory_ledger_summary) a
 left join (select distinct brand, channel_product_id from datahawk_writable_83514.brandhut.brand_asin) b 
     on b.channel_product_id = a.asin
 left join {{ref('category')}} c
     on c.channel_product_id = a.asin
+left join (select distinct fulfillment_center, country from datahawk_share_83514.raw_inventory.raw_inventory_ledger_detail) country
+    on country.fulfillment_center = a.location
 group by all)
 
 select 
