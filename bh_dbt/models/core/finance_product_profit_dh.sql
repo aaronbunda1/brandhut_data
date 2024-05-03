@@ -7,7 +7,7 @@ with source as (
       asin,
       sku,
       currency,
-      case when original_description  IN ('Other-ServiceFeeEvent-PaidServicesFee','Other-ServiceFeeEvent-Subscription') then 'other_amount_distributable' 
+      case when original_description  IN ('Other-ServiceFeeEvent-PaidServicesFee','Other-ServiceFeeEvent-Subscription','Other-ServiceFeeEvent-STARStorageFee') then 'other_amount_distributable' 
       when original_description IN ('Other-ServiceFeeEvent-AmazonUpstreamProcessingFee','Other-ServiceFeeEvent-AmazonUpstreamStorageTransportationFee') then 'other_amount_spot_only'
       else metric end as metric, 
       amount_usd as amount
