@@ -134,6 +134,7 @@ case
                     end
             else -ledger_net_sales*.1
         end 
+    when l.brand = 'Pablo Artists'' Choice' then -ledger_net_SALEs *.15
     when l.brand = 'Fokus'
         then 
         case 
