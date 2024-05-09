@@ -620,9 +620,75 @@ and p.date_day < date_trunc(month,current_date())
 
 )
 
+, units as (
+    select
+    concat(b.brand,date_trunc(month,posted_local_date),case metric 
+        when 'gross_sales' then 'Units for Settled Gross Sales'
+        when 'reimbursed_product' then 'Units for Settled Refunds' 
+    end) as key, 
+    b.brand,
+    account_key,
+    amazon_region_id as region,
+    marketplace_key,
+    date_trunc(month,posted_local_date) as date_day,
+    coalesce(asin,'') as channel_product_id,
+    sku,
+    null as color,
+    currency as currency_original,
+    null as currency,
+    null as rate_to_usd,
+    b.internal_sku_category,
+    case metric 
+        when 'gross_sales' then 'Units for Settled Gross Sales'
+        when 'reimbursed_product' then 'Units for Settled Refunds' 
+    end as metric_name,
+    current_timestamp() as updated_at,
+    sum(quantity) as amount,
+    'Other' as metric_group_1,
+    'Other' as metric_group_2,
+    from DATAHAWK_SHARE_83514.CUSTOM_83514.finance_profit_ledger
+    left join (select distinct brand, sku,internal_sku_category from final_without_true_up_with_data_movements) b
+        using(sku)
+    where metric IN ('gross_sales','reimbursed_product')
+    group by all
+)
+, orders as (
+    select
+    concat(b.brand,date_trunc(month,posted_local_date),case metric 
+        when 'gross_sales' then 'Units for Settled Gross Sales'
+        when 'reimbursed_product' then 'Units for Settled Refunds' 
+    end ) as key, 
+    b.brand,
+    account_key,
+    amazon_region_id as region,
+    marketplace_key,
+    date_trunc(month,posted_local_date) as date_day,
+    coalesce(asin,'') as channel_product_id,
+    sku,
+    null as color,
+    currency as currency_original,
+    null as currency,
+    null as rate_to_usd,
+    b.internal_sku_category,
+    'Orders for Settled Gross Sales' metric_name,
+    current_timestamp() as updated_at,
+    count(distinct order_id) as amount,
+    'Other' as metric_group_1,
+    'Other' as metric_group_2,
+    from DATAHAWK_SHARE_83514.CUSTOM_83514.finance_profit_ledger
+    left join (select distinct brand, sku,internal_sku_category from final_without_true_up_with_data_movements) b
+        using(sku)
+    where metric IN ('gross_sales')
+    group by all
+)
+
 
 select * 
 from final_without_true_up_with_data_movements
 union all
 select * 
 from true_up_live
+union all
+select * from units
+union all
+select * from orders
