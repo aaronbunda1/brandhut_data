@@ -632,7 +632,7 @@ and p.date_day < date_trunc(month,current_date())
     marketplace_key,
     date_trunc(month,posted_local_date) as date_day,
     coalesce(asin,'') as channel_product_id,
-    sku,
+    l.sku,
     null as color,
     currency as currency_original,
     null as currency,
@@ -646,9 +646,9 @@ and p.date_day < date_trunc(month,current_date())
     sum(quantity) as amount,
     'Other' as metric_group_1,
     'Other' as metric_group_2,
-    from DATAHAWK_SHARE_83514.CUSTOM_83514.finance_profit_ledger
-    left join (select distinct brand, sku,max(internal_sku_category) as internal_sku_category from final_without_true_up_with_data_movements group by all) b
-        using(sku)
+    from DATAHAWK_SHARE_83514.CUSTOM_83514.finance_profit_ledger l
+    left join (select distinct brand, case when sku ilike 'Uncommingled%' then NULL else sku end as sku,max(internal_sku_category) as internal_sku_category from final_without_true_up_with_data_movements group by all) b
+        on coalesce(l.sku,'') = coalesce(b.sku,'')
     where metric IN ('gross_sales','reimbursed_product')
     group by all
 )
@@ -664,7 +664,7 @@ and p.date_day < date_trunc(month,current_date())
     marketplace_key,
     date_trunc(month,posted_local_date) as date_day,
     coalesce(asin,'') as channel_product_id,
-    sku,
+    l.sku,
     null as color,
     currency as currency_original,
     null as currency,
@@ -675,9 +675,9 @@ and p.date_day < date_trunc(month,current_date())
     count(distinct order_id) as amount,
     'Other' as metric_group_1,
     'Other' as metric_group_2,
-    from DATAHAWK_SHARE_83514.CUSTOM_83514.finance_profit_ledger
-    left join (select distinct brand, sku,max(internal_sku_category) as internal_sku_category from final_without_true_up_with_data_movements group by all) b
-        using(sku)
+    from DATAHAWK_SHARE_83514.CUSTOM_83514.finance_profit_ledger l
+    left join (select distinct brand, case when sku ilike 'Uncommingled%' then NULL else sku end as sku,max(internal_sku_category) as internal_sku_category from final_without_true_up_with_data_movements group by all) b
+        on coalesce(l.sku,'') = coalesce(b.sku,'')
     where metric IN ('gross_sales')
     group by all
 )
