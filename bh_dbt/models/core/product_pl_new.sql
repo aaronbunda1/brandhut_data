@@ -622,13 +622,14 @@ and p.date_day < date_trunc(month,current_date())
 
 , units as (
     select
-     concat(b.brand,date_trunc(month,posted_local_date),case metric 
+     concat(b.brand,
+     date_trunc(month,posted_local_date),
+     case metric 
         when 'gross_sales' then 'Units for Settled Gross Sales'
         when 'reimbursed_product' then 'Units for Settled Refunds' 
     end,
     coalesce(channel_product_id,''),
     coalesce(sku,''),
-    coalesce(date_trunc(month,posted_local_date),''),
     coalesce(currency,'')
     ) as key, 
     b.brand,
@@ -659,13 +660,11 @@ and p.date_day < date_trunc(month,current_date())
 )
 , orders as (
     select
-    concat(b.brand,date_trunc(month,posted_local_date),case metric 
-        when 'gross_sales' then 'Units for Settled Gross Sales'
-        when 'reimbursed_product' then 'Units for Settled Refunds' 
-    end,
+    concat(b.brand,
+    date_trunc(month,posted_local_date),
+    'Orders for Settled Gross Sales',
     coalesce(channel_product_id,''),
     coalesce(sku,''),
-    coalesce(date_trunc(month,posted_local_date),''),
     coalesce(currency,'')
     ) as key, 
     b.brand,
