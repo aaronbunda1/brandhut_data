@@ -622,10 +622,16 @@ and p.date_day < date_trunc(month,current_date())
 
 , units as (
     select
-    concat(b.brand,date_trunc(month,posted_local_date),case metric 
+     concat(b.brand,
+     date_trunc(month,posted_local_date),
+     case metric 
         when 'gross_sales' then 'Units for Settled Gross Sales'
         when 'reimbursed_product' then 'Units for Settled Refunds' 
-    end) as key, 
+    end,
+    coalesce(channel_product_id,''),
+    coalesce(sku,''),
+    coalesce(currency,'')
+    ) as key, 
     b.brand,
     account_key,
     amazon_region_id as region,
@@ -654,10 +660,13 @@ and p.date_day < date_trunc(month,current_date())
 )
 , orders as (
     select
-    concat(b.brand,date_trunc(month,posted_local_date),case metric 
-        when 'gross_sales' then 'Units for Settled Gross Sales'
-        when 'reimbursed_product' then 'Units for Settled Refunds' 
-    end ) as key, 
+    concat(b.brand,
+    date_trunc(month,posted_local_date),
+    'Orders for Settled Gross Sales',
+    coalesce(channel_product_id,''),
+    coalesce(sku,''),
+    coalesce(currency,'')
+    ) as key, 
     b.brand,
     account_key,
     amazon_region_id as region,
@@ -685,10 +694,14 @@ and p.date_day < date_trunc(month,current_date())
 
 select * 
 from final_without_true_up_with_data_movements
+where amount != 0
 union all
 select * 
 from true_up_live
+where amount != 0
 union all
 select * from units
+where amount != 0
 union all
 select * from orders
+where amount != 0
