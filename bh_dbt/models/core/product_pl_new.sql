@@ -694,10 +694,14 @@ and p.date_day < date_trunc(month,current_date())
 
 select * 
 from final_without_true_up_with_data_movements
+where amount != 0
 union all
 select * 
 from true_up_live
+where amount != 0
 union all
 select * from units
+where amount != 0
 union all
 select * from orders
+where amount != 0
