@@ -6,3 +6,8 @@ models:
       - name: key
         tests:
           - unique
+  - name: category
+    columns:
+      - name: channel_product_id
+        tests:
+          - unique
