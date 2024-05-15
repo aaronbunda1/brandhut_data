@@ -647,8 +647,8 @@ and p.date_day < date_trunc(month,current_date())
     'Other' as metric_group_1,
     'Other' as metric_group_2,
     from DATAHAWK_SHARE_83514.CUSTOM_83514.finance_profit_ledger l
-    left join (select distinct brand, case when sku ilike 'Uncommingled%' then NULL else sku end as sku,max(internal_sku_category) as internal_sku_category from final_without_true_up_with_data_movements group by all) b
-        on coalesce(l.sku,'') = coalesce(b.sku,'')
+    left join (select distinct brand, channel_product_id,max(internal_sku_category) as internal_sku_category from datahawk_writable_83514.brandhut.product_pl_new group by all) b
+        on coalesce(l.asin,'') = coalesce(b.channel_product_id,'')
     where metric IN ('gross_sales','reimbursed_product')
     group by all
 )
@@ -676,8 +676,8 @@ and p.date_day < date_trunc(month,current_date())
     'Other' as metric_group_1,
     'Other' as metric_group_2,
     from DATAHAWK_SHARE_83514.CUSTOM_83514.finance_profit_ledger l
-    left join (select distinct brand, case when sku ilike 'Uncommingled%' then NULL else sku end as sku,max(internal_sku_category) as internal_sku_category from final_without_true_up_with_data_movements group by all) b
-        on coalesce(l.sku,'') = coalesce(b.sku,'')
+    left join (select distinct brand, channel_product_id,max(internal_sku_category) as internal_sku_category from datahawk_writable_83514.brandhut.product_pl_new group by all) b
+        on coalesce(l.asin,'') = coalesce(b.channel_product_id,'')
     where metric IN ('gross_sales')
     group by all
 )
