@@ -630,7 +630,10 @@ and p.date_day < date_trunc(month,current_date())
     end,
     coalesce(channel_product_id,''),
     coalesce(sku,''),
-    coalesce(currency,'')
+    coalesce(currency,''),
+    coalesce(marketplace_key,''),
+    coalesce(amazon_region_id,''),
+    coalesce(account_key,'')
     ) as key, 
     b.brand,
     account_key,
@@ -665,7 +668,10 @@ and p.date_day < date_trunc(month,current_date())
     'Orders for Settled Gross Sales',
     coalesce(channel_product_id,''),
     coalesce(sku,''),
-    coalesce(currency,'')
+    coalesce(currency,''),
+    coalesce(marketplace_key,''),
+    coalesce(amazon_region_id,''),
+    coalesce(account_key,'')
     ) as key, 
     b.brand,
     account_key,
