@@ -23,6 +23,10 @@ with source as (
       else metric end as metric, 
       amount_usd as amount
     from DATAHAWK_SHARE_83514.CUSTOM_83514.finance_profit_ledger
+    where original_description NOT IN (
+        'Other-AdjustmentEvent-Cellini Caffè Mixed Variety Aluminum Nespresso Pods, 8 Distintive Italian Flavors, 100% Nespresso Original Machine Compatible, 80 Count, Medium to Strong Roast Coffee Capsules',
+        'Other-AdjustmentEvent-Cellini Caffè Mixed Variety Aluminum Nespresso Pods, 8 Distintive Italian Flavors, 100% Nespresso Original Machine Compatible, 120 Count, Medium to Strong Roast Coffee Capsules'
+    )
 ),
 
 pivoting as (
