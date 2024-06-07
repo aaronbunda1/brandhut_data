@@ -586,7 +586,7 @@ from data_movements
     brand,
     sum(amount) as pl
     from final_without_true_up_with_data_movements f
-    where metric_group_1 in ('Net Sales','Expenses') and metric_name NOT IN ('EARNED_GROSS_SALES','EARNED_BRANDHUT_COMMISSION','DATA_MOVEMENTS','TRUE_UP_INVOICED')
+    where metric_group_1 in ('Net Sales','Expenses') and metric_name NOT IN ('EARNED_GROSS_SALES','EARNED_BRANDHUT_COMMISSION','DATA_MOVEMENTS','TRUE_UP_INVOICED','MANUAL_UNALLOCATED_COSTS')
     group by all
 )
 
