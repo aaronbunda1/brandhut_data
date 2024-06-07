@@ -150,7 +150,7 @@ select
       coalesce(d.marketplace_key, s.marketplace_key) as marketplace_key,
       coalesce(d.posted_local_date,s.purchase_local_date) as posted_local_date,
       coalesce(d.asin,s.channel_product_id) as asin,
-      coalesce(d.sku,s.sku) end as sku, 
+      coalesce(d.sku,s.sku) as sku, 
       coalesce(d.currency,s.currency) as  currency,
       max(s.sales) as earned_gross_sales,
       max(s.units_sold) as earned_units_sold,
