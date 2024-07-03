@@ -1,4 +1,4 @@
-month,brand,sku,freight,turner_costs,ad_spend_manual,product_samples,total_invoice_amount,true_up_invoiced,miscellaneousmanual_unallocated_costs
+month,brand,sku,freight,turner_costs,ad_spend_manual,product_samples,total_invoice_amount,true_up_invoiced,miscellaneous,manual_unallocated_costs
 2023-01-01,SPOT,all,-439.68,0,-483.1,0,1319.19,0,00
 2023-01-01,ONANOFF,all,0,0,-3727.32,0,0,0,0,0
 2023-01-01,ZENS,all,0,0,0,0,2270.18,0,-26.87,0
