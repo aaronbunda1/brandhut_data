@@ -11,6 +11,7 @@ with non_sp_sd_data as (
         when campaign_name ilike '%pop%' then 'POP'
         when campaign_name ilike '%fokus%' then 'Fokus'
         when campaign_name ilike '%SPOT%' then 'SPOT'
+        when campaign_name ilike any ('%roku%','73%','%sunny%') then '73&Sunny'
         when campaign_name ilike any ('%onanoff%','%onanonff%','%onaonff%','%buddyph%','%explore plus%','%explore+%','%playear%','%play+%','%school plus%','%school+%','%Play%','%Cosmos%','%wave%','%headphones%') then 'ONANOFF'
         when campaign_name ilike any ('%health direct%','%urban nomad%','%eukonic%','%frhome%','%thirty%','%ev gear%','%hsa%') then 'Other Brands'
     else 'Unknown'

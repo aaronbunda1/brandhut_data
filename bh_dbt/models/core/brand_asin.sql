@@ -12,6 +12,7 @@ with product_report as (
         when p.brand ilike '%POP%' then 'POP'
         when p.brand ilike '%zens%' then 'ZENS'
         when p.brand ilike '%qisten%' then 'Qisten'
+        when p.brand ilike any ('%roku%','73%','%sunny%') then '73&Sunny'
     else p.brand
     end as brand
     from {{var('readable')['hawkspace']}}.reports.report_product_latest_version p
