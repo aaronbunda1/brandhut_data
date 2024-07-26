@@ -13,6 +13,7 @@
         when {{ sku_column }} ilike '%SPOT%' then 'SPOT'
         when {{ sku_column }} ilike '%QI%' then 'Qisten'
         when {{ sku_column }} ilike 'CL%' then 'Cellini'
+        when {{ sku_column }} ilike any ('%roku%','%sunny%') then '73&Sunny'
         when {{ sku_column }} IN ('1005-30oz-SB') then 'Legacy'
     end
 {% endmacro %}
