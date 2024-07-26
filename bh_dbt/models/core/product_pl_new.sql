@@ -34,6 +34,7 @@ when campaign_name ilike '%POP%' then 'POP'
 when campaign_name ilike '%SPOT%' then 'SPOT'
 when campaign_name ilike '%ZENS%' then 'ZENS'
 when campaign_name ilike any ('%onanoff%','%sp%','%sb%') then 'ONANOFF'
+when campaign_name ilike any ('%73%','%roku%') then '73&Sunny'
 else 'Other'
 end as brand,
 coalesce(sum(case when sponsored_type = 'SponsoredProducts' then costs end),0) as SponsoredProductsCost,

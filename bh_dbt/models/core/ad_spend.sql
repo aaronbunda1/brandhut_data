@@ -11,15 +11,17 @@ with non_sp_sd_data as (
         when campaign_name ilike '%pop%' then 'POP'
         when campaign_name ilike '%fokus%' then 'Fokus'
         when campaign_name ilike '%SPOT%' then 'SPOT'
+        when campaign_name ilike any ('%roku%','73%','%sunny%') then '73&Sunny'
         when campaign_name ilike any ('%onanoff%','%onanonff%','%onaonff%','%buddyph%','%explore plus%','%explore+%','%playear%','%play+%','%school plus%','%school+%','%Play%','%Cosmos%','%wave%','%headphones%') then 'ONANOFF'
         when campaign_name ilike any ('%health direct%','%urban nomad%','%eukonic%','%frhome%','%thirty%','%ev gear%','%hsa%') then 'Other Brands'
     else 'Unknown'
     end as brand,
     sponsored_type,
     c.date_day,
-    sum(c.costs) as ad_spend
+    sum(c.costs) as ad_spend,
+    sum(c.orders) as ad_orders
     from datahawk_share_83514.advertising.advertising_campaign_metrics c
-    where c.sponsored_type NOT IN ('SponoredProducts','SponsoredDisplay')
+    where c.sponsored_type NOT IN ('SponsoredProducts','SponsoredDisplay')
     group by 1,2,3,4,5,6
 )
 
@@ -31,7 +33,8 @@ with non_sp_sd_data as (
         b.brand,
         sponsored_type,
         date_day,
-        sum(costs) as ad_spend
+        sum(costs) as ad_spend,
+        sum(orders) as ad_orders
     from datahawk_share_83514.advertising.advertising_product_metrics sp
     left join {{ref('brand_asin')}} b
         on b.channel_product_id = sp.channel_product_id
