@@ -7,8 +7,8 @@ with non_sp_sd as (
     marketplace_key,
     brand,
     date_day,
-     SponsoredBrandsVideo,
-     SponsoredBrands
+    sum(SponsoredBrandsVideo) as SponsoredBrandsVideo,
+     sum(SponsoredBrands) as SponsoredBrands
     from {{ref('ad_spend')}}
     pivot(sum(ad_spend) for sponsored_type in ('SponsoredBrandsVideo','SponsoredBrands'))
         as a (seller_name,
@@ -18,6 +18,7 @@ with non_sp_sd as (
     date_day,
     SponsoredBrandsVideo,
     SponsoredBrands)
+    GROUP BY ALL
 )
 
 , sp_sd as (
