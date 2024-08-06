@@ -50,7 +50,8 @@ group by all
 case when c.category is null and l.brand = 'ZENS' then 'Zens Legacy' else coalesce(l.brand,o.brand) end as brand,
 l.account_key as account_key,
 l.amazon_region_id as region,
-l.marketplace_key as marketplace_key,
+-- case when fr.freight is not null and fr.freight <0 then 'Amazon-CA' else l.marketplace_key end as marketplace_key,
+l.marketplace_key,
 coalesce(l.posted_local_date,o.month) as date_day,
 l.asin as channel_product_id,
 l.sku as sku,
@@ -199,7 +200,7 @@ case
     else 0 
 end as EARNED_BRANDHUT_COMMISSION,
 coalesce(o.turner_costs,0) as manual_turner_costs,
-coalesce(o.freight,0) as manual_freight,
+-- coalesce(fr.freight,0) as manual_freight,
 coalesce(o.ad_spend_manual,0) as manual_ad_spend,
 coalesce(o.product_samples,0) as manual_product_samples,
 coalesce(o.miscellaneous,0) as manual_miscellaneous_cost,
@@ -290,7 +291,7 @@ sum(CAST(ledger_restocking_fee AS NUMERIC(18,2))) AS ledger_restocking_fee,
 sum(CAST(ledger_brandhut_commission AS NUMERIC(18,2))) AS ledger_brandhut_commission,
 sum(CAST(EARNED_BRANDHUT_COMMISSION AS NUMERIC(18,2))) AS EARNED_BRANDHUT_COMMISSION,
 SUM(CAST(manual_turner_costs AS NUMERIC(18,2))) AS manual_turner_costs,
-SUM(CAST(manual_freight AS NUMERIC(18,2))) AS manual_freight,
+-- SUM(CAST(manual_freight AS NUMERIC(18,2))) AS manual_freight,
 SUM(CAST(manual_product_samples AS NUMERIC(18,2))) AS manual_product_samples,
 SUM(CAST(manual_miscellaneous_cost AS NUMERIC(18,2))) AS manual_miscellaneous_cost,
 SUM(CAST(manual_unallocated_costs AS NUMERIC(18,2))) AS manual_unallocated_costs,
@@ -318,7 +319,7 @@ group by all
 )
 
 
-, prefinal as (
+, prefinal_2 as (
     SELECT
         concat(
         coalesce(BRAND,''),
@@ -385,7 +386,7 @@ ledger_restocking_fee,
 ledger_brandhut_commission,
 EARNED_BRANDHUT_COMMISSION,
 manual_turner_costs,
-manual_freight,
+-- manual_freight,
 manual_ad_spend,
 manual_product_samples,
 manual_miscellaneous_cost,
@@ -397,6 +398,40 @@ DIST_SPONSORED_BRANDS_COST,
 DIST_SPONSORED_BRANDS_VIDEO_COST,
 SPONSORED_DISPLAY_COST
 ))
+)
+
+, prefinal AS (
+--
+    SELECT
+    concat(
+        m.brand,
+        'Amazon-CA',
+        m.month,
+        'MANUAL_FREIGHT'
+    ) AS key,
+    m.brand,
+    '' AS account_key,
+    NULL AS Region,
+    'Amazon-CA' AS marketplace_key,
+    m.month AS date_day,
+    '' AS channel_product_id,
+    m.sku AS sku,
+    '' AS color,
+    'USD' as currency_original,
+    'USD' as currency_rate,
+    1 as rate_to_usd,
+    '' AS internal_sku_category,
+    'MANUAL_FREIGHT' as metric_name,
+    current_timestamp() AS updated_at,
+    m.freight AS amount
+    FROM datahawk_writable_83514.brandhut.manual_metrics_by_brand_and_month m
+    WHERE m.freight <0
+ 
+
+    UNION ALL 
+
+    SELECT * FROM prefinal_2
+
 )
 
 , final_without_true_up as (
