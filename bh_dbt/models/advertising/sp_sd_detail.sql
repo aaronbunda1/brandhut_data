@@ -28,7 +28,7 @@ case
     then round(acm.sales*(egs.earned_gross_sales/sum(egs.earned_gross_sales) OVER (partition by date_day,campaign_id)),100)
     else round(acm.sales/number_of_asins_represented_by_campaign,100)
     end AS assumed_ad_sales_for_asin_for_day,
-round(egs.earned_gross_sales,100) as earned_gross_sales_for_asin_for_day,
+nullif(round(egs.earned_gross_sales,100)/count(*) over (partition by date_day,channel_product_id)) as earned_gross_sales_for_asin_for_day,
 acm.orders as total_ad_orders_for_campaign_for_day,
 round(acm.orders/number_of_asins_represented_by_campaign,100) AS assumed_ad_orders_for_asin_for_day,
 acm.units_sold as total_ad_units_for_campaign_for_day,
