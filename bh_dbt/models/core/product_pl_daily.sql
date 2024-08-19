@@ -12,24 +12,21 @@ group by 1,2
 
 , non_sp as (
     select
-    seller_name,
-    account_key,
-    marketplace_key,
-    brand,
-    date_day,
-     SponsoredBrandsVideo,
-     SponsoredBrands,
-     sponsoreddisplay
-    from {{ref('ad_spend')}}
-    pivot(sum(ad_spend) for sponsored_type in ('SponsoredBrandsVideo','SponsoredBrands','SponsoredDisplay'))
-        as a (seller_name,
-    account_key,
-    marketplace_key,
-    brand,
-    date_day,
-    SponsoredBrandsVideo,
-    SponsoredBrands,
-    SponsoredDisplay)
+        seller_name,
+        account_key,
+        marketplace_key,
+        brand,
+        date_day,
+        sum(case when sponsored_type = 'SponsoredBrandsVideo' then ad_spend else 0 end) as SponsoredBrandsVideo,
+        sum(case when sponsored_type = 'SponsoredBrands' then ad_spend else 0 end) as SponsoredBrands,
+        sum(case when sponsored_type = 'SponsoredDisplay' then ad_spend else 0 end) as SponsoredDisplay
+    from datahawk_writable_83514.dev_brandhut.ad_spend
+    group by 
+        seller_name,
+        account_key,
+        marketplace_key,
+        brand,
+        date_day
 )
 
 , other_ad_spend as (
