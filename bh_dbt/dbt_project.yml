@@ -35,6 +35,8 @@ models:
   bh_dbt:
     core:
       +materialized: view
+    advertising:
+      schema: advertising
 
 
 vars:

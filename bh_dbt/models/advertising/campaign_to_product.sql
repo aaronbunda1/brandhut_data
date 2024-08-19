@@ -1,0 +1,7 @@
+SELECT 
+DISTINCT 
+campaign_name,
+channel_product_id,
+marketplace_key,
+account_key
+FROM datahawk_share_83514.advertising.advertising_product_campaign_metrics
