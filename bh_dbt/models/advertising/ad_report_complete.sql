@@ -34,3 +34,4 @@ FULL OUTER JOIN activities a
     AND ad.marketplace_key = a.marketplace_key
     AND ad.asin = a.asin
     AND ad.date_day = a.date_day
+    and ad.brand is null
