@@ -2,35 +2,40 @@ WITH daily_revenue_products AS (
     SELECT
         account_key,
         marketplace_key,
+        brand,
         channel_product_id,
         date_day,
-        SUM(earned_gross_sales) AS total_gross_sales
+        SUM(amount) AS total_gross_sales
     FROM
-        datahawk_share_83514.finance.finance_product_profit_loss
+        {{ref('product_pl_new')}}
+    WHERE metric_name = 'EARNED_GROSS_SALES'
     GROUP BY
         account_key,
         marketplace_key,
+        brand,
         channel_product_id,
         date_day
     HAVING
-        SUM(earned_gross_sales) > 0
+        SUM(amount) > 0
 ),
 monthly_revenue_products AS (
     SELECT
         account_key,
         marketplace_key,
+        brand,
         channel_product_id,
         TO_CHAR(date_day, 'YYYY-MM') AS month,
-        SUM(earned_gross_sales) AS total_gross_sales
+        SUM(amount) AS total_gross_sales
     FROM
-        datahawk_share_83514.finance.finance_product_profit_loss
+        {{ref('product_pl_new')}}
     GROUP BY
         account_key,
         marketplace_key,
+        brand,
         channel_product_id,
         TO_CHAR(date_day, 'YYYY-MM')
     HAVING
-        SUM(earned_gross_sales) > 0
+        SUM(amount) > 0
 ),
 sponsored_brands_campaigns AS (
     SELECT
@@ -38,6 +43,7 @@ sponsored_brands_campaigns AS (
         account_key,
         marketplace_key,
         campaign_name,
+        {{get_brand_from_sku('campaign_name')}} as brand,
         sponsored_type,
         date_day,
         costs AS daily_costs,
@@ -62,12 +68,12 @@ daily_distribution AS (
         s.campaign_name,
         s.sponsored_type,
         s.date_day,
-        s.daily_costs / COUNT(d.channel_product_id) OVER (PARTITION BY s.campaign_id, s.account_key, s.marketplace_key, s.date_day) AS distributed_costs,
-        s.daily_sales / COUNT(d.channel_product_id) OVER (PARTITION BY s.campaign_id, s.account_key, s.marketplace_key, s.date_day) AS distributed_sales,
-        s.daily_orders / COUNT(d.channel_product_id) OVER (PARTITION BY s.campaign_id, s.account_key, s.marketplace_key, s.date_day) AS distributed_orders,
-        s.daily_units / COUNT(d.channel_product_id) OVER (PARTITION BY s.campaign_id, s.account_key, s.marketplace_key, s.date_day) AS distributed_units,
-        s.daily_clicks / COUNT(d.channel_product_id) OVER (PARTITION BY s.campaign_id, s.account_key, s.marketplace_key, s.date_day) AS distributed_clicks,
-        s.daily_impressions / COUNT(d.channel_product_id) OVER (PARTITION BY s.campaign_id, s.account_key, s.marketplace_key, s.date_day) AS distributed_impressions
+        s.daily_costs / COUNT(d.channel_product_id) OVER (PARTITION BY s.brand,s.campaign_id, s.account_key, s.marketplace_key, s.date_day) AS distributed_costs,
+        s.daily_sales / COUNT(d.channel_product_id) OVER (PARTITION BY s.brand,s.campaign_id, s.account_key, s.marketplace_key, s.date_day) AS distributed_sales,
+        s.daily_orders / COUNT(d.channel_product_id) OVER (PARTITION BY s.brand,s.campaign_id, s.account_key, s.marketplace_key, s.date_day) AS distributed_orders,
+        s.daily_units / COUNT(d.channel_product_id) OVER (PARTITION BY s.brand,s.campaign_id, s.account_key, s.marketplace_key, s.date_day) AS distributed_units,
+        s.daily_clicks / COUNT(d.channel_product_id) OVER (PARTITION BY s.brand,s.campaign_id, s.account_key, s.marketplace_key, s.date_day) AS distributed_clicks,
+        s.daily_impressions / COUNT(d.channel_product_id) OVER (PARTITION BY s.brand,s.campaign_id, s.account_key, s.marketplace_key, s.date_day) AS distributed_impressions
  
  
  
@@ -78,6 +84,7 @@ daily_distribution AS (
     ON
         s.account_key = d.account_key
         AND s.marketplace_key = d.marketplace_key
+        and s.brand = d.brand
         AND s.date_day = d.date_day
     LEFT JOIN
         (SELECT DISTINCT brand, internal_sku_category AS category, channel_product_id FROM {{ref('product_pl_new')}}) b
@@ -94,12 +101,12 @@ monthly_distribution AS (
         s.campaign_name,
         s.sponsored_type,
         s.date_day,
-        s.daily_costs / COUNT(m.channel_product_id) OVER (PARTITION BY s.campaign_id, s.account_key, s.marketplace_key, TO_CHAR(s.date_day, 'YYYY-MM')) AS distributed_costs,
-        s.daily_sales / COUNT(m.channel_product_id) OVER (PARTITION BY s.campaign_id, s.account_key, s.marketplace_key, TO_CHAR(s.date_day, 'YYYY-MM')) AS distributed_sales,
-        s.daily_orders / COUNT(m.channel_product_id) OVER (PARTITION BY s.campaign_id, s.account_key, s.marketplace_key, TO_CHAR(s.date_day, 'YYYY-MM')) AS distributed_orders,
-        s.daily_units / COUNT(m.channel_product_id) OVER (PARTITION BY s.campaign_id, s.account_key, s.marketplace_key, TO_CHAR(s.date_day, 'YYYY-MM')) AS distributed_units,
-        s.daily_clicks / COUNT(m.channel_product_id) OVER (PARTITION BY s.campaign_id, s.account_key, s.marketplace_key, TO_CHAR(s.date_day, 'YYYY-MM')) AS distributed_clicks,
-        s.daily_impressions / COUNT(m.channel_product_id) OVER (PARTITION BY s.campaign_id, s.account_key, s.marketplace_key, TO_CHAR(s.date_day, 'YYYY-MM')) AS distributed_impressions
+        s.daily_costs / COUNT(m.channel_product_id) OVER (PARTITION BY s.brand,s.campaign_id, s.account_key, s.marketplace_key, TO_CHAR(s.date_day, 'YYYY-MM')) AS distributed_costs,
+        s.daily_sales / COUNT(m.channel_product_id) OVER (PARTITION BY s.brand,s.campaign_id, s.account_key, s.marketplace_key, TO_CHAR(s.date_day, 'YYYY-MM')) AS distributed_sales,
+        s.daily_orders / COUNT(m.channel_product_id) OVER (PARTITION BY s.brand,s.campaign_id, s.account_key, s.marketplace_key, TO_CHAR(s.date_day, 'YYYY-MM')) AS distributed_orders,
+        s.daily_units / COUNT(m.channel_product_id) OVER (PARTITION BY s.brand,s.campaign_id, s.account_key, s.marketplace_key, TO_CHAR(s.date_day, 'YYYY-MM')) AS distributed_units,
+        s.daily_clicks / COUNT(m.channel_product_id) OVER (PARTITION BY s.brand,s.campaign_id, s.account_key, s.marketplace_key, TO_CHAR(s.date_day, 'YYYY-MM')) AS distributed_clicks,
+        s.daily_impressions / COUNT(m.channel_product_id) OVER (PARTITION BY s.brand,s.campaign_id, s.account_key, s.marketplace_key, TO_CHAR(s.date_day, 'YYYY-MM')) AS distributed_impressions
     FROM
         sponsored_brands_campaigns s
     JOIN
@@ -108,6 +115,7 @@ monthly_distribution AS (
         s.account_key = m.account_key
         AND s.marketplace_key = m.marketplace_key
         AND TO_CHAR(s.date_day, 'YYYY-MM') = m.month
+        and s.brand = m.brand
     LEFT JOIN
         (SELECT DISTINCT brand, internal_sku_category AS category, channel_product_id FROM {{ref('product_pl_new')}}) b
     USING(channel_product_id)
@@ -118,6 +126,7 @@ monthly_distribution AS (
             WHERE s.account_key = d.account_key
               AND s.marketplace_key = d.marketplace_key
               AND s.date_day = d.date_day
+              and s.brand=d.brand
         )
 )
 -- Final result with the specified fields and order

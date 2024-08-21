@@ -1,2 +1,2 @@
-select * from {{ref('ad_report_complete')}}
+select * from {{ref('ad_report_new')}}
 where brand is null

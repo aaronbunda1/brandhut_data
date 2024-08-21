@@ -16,8 +16,8 @@ account_key,
 marketplace_key,
 date_day,
 sponsored_type,
-sum(assumed_ad_spend_for_asin_for_day) as ad_spend_ad_report
-from {{ref('ad_report_complete')}} ad
+sum(ad_spend) as ad_spend_ad_report
+from {{ref('ad_report_new')}} ad
 group by all
 )
 

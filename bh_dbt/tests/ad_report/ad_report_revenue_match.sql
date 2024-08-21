@@ -12,8 +12,8 @@ group by all
 SELECT
 account_key,marketplace_key,date_trunc(month,date_day) as month,
 asin as channel_product_id,
-sum(a.earned_gross_sales_for_asin_for_day) as earned_gross_sales_ad_report,
-FROM {{ref('ad_report_complete')}} a
+sum(a.earned_gross_sales) as earned_gross_sales_ad_report,
+FROM {{ref('ad_report_new')}} a
 group by all
 )
 
