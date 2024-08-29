@@ -24,6 +24,7 @@ date_day,
 -- account_key,
 marketplace_key,
 case 
+when campaign_name ilike any ('%73%','%roku%') then '73&Sunny'
 when campaign_name ilike '%storyph%' then 'Onanoff 2'
 when campaign_name ilike '%cellini%' then 'Cellini'
 when campaign_name ilike '%fokus%' then 'Fokus'
@@ -31,8 +32,7 @@ when campaign_name ilike '%pablo%' then 'Pablo Artists'' Choice'
 when campaign_name ilike '%POP%' then 'POP'
 when campaign_name ilike '%SPOT%' then 'SPOT'
 when campaign_name ilike '%ZENS%' then 'ZENS'
-when campaign_name ilike any ('%onanoff%','%sp%','%sb%') then 'ONANOFF'
-when campaign_name ilike any ('%73%','%roku%') then '73&Sunny'
+when campaign_name ilike any ('%onanoff%','%on-%','%bp-%','%play%','%fun%','%school%','%onanff%','%Onaonff%','%cosmo%','%explore%','%buddy%','%phones%') then 'ONANOFF'
 else 'Other'
 end as brand,
 coalesce(sum(case when sponsored_type = 'SponsoredProducts' then costs end),0) as SponsoredProductsCost,
