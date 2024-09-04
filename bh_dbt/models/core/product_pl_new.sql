@@ -48,7 +48,7 @@ case when c.category is null and l.brand = 'ZENS' then 'Zens Legacy' else coales
 l.account_key as account_key,
 l.amazon_region_id as region,
 -- case when fr.freight is not null and fr.freight <0 then 'Amazon-CA' else l.marketplace_key end as marketplace_key,
-l.marketplace_key,
+coalesce(l.marketplace_key,o.marketplace_key) as marketplace_key,
 coalesce(l.posted_local_date,o.month) as date_day,
 l.asin as channel_product_id,
 l.sku as sku,
@@ -223,8 +223,9 @@ left join sp_sd
     and sp_sd.marketplace_key = l.marketplace_key
 full outer join {{ref('manual_metrics_by_brand_and_month')}} o 
     on o.brand = l.brand
-    and l.sku = o.sku
+    and l.marketplace_key = o.marketplace_key
     and l.posted_local_date = o.month
+    and l.marketplace_key is null
 left join datahawk_share_83514.finance.finance_product_profit_loss pl
     on pl.marketplace_key = l.marketplace_key
     and pl.date_day = l.posted_local_date
