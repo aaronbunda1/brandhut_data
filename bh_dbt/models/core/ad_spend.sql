@@ -8,11 +8,10 @@ with non_sp_sd_data as (
         when campaign_name ilike '%zens%' then 'ZENS'
         when campaign_name ilike any ('%quisten%','%qis%') then 'Qisten'
         when campaign_name ilike '%storyph%' then 'Onanoff 2'
-        when campaign_name ilike '%pop%' then 'POP'
         when campaign_name ilike '%fokus%' then 'Fokus'
         when campaign_name ilike '%SPOT%' then 'SPOT'
         when campaign_name ilike any ('%roku%','73%','%sunny%') then '73&Sunny'
-        when campaign_name ilike any ('%onanoff%','%onanonff%','%onaonff%','%buddyph%','%explore plus%','%explore+%','%playear%','%play+%','%school plus%','%school+%','%Play%','%Cosmos%','%wave%','%headphones%') then 'ONANOFF'
+        when campaign_name ilike any ('%pop%','%onanoff%','%onanonff%','%onaonff%','%buddyph%','%explore plus%','%explore+%','%playear%','%play+%','%school plus%','%school+%','%Play%','%Cosmos%','%wave%','%headphones%') then 'ONANOFF'
         when campaign_name ilike any ('%health direct%','%urban nomad%','%eukonic%','%frhome%','%thirty%','%ev gear%','%hsa%') then 'Other Brands'
     else 'Unknown'
     end as brand,

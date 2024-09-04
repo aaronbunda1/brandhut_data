@@ -9,7 +9,7 @@ with product_report as (
         when p.channel_product_id in ('B0CHY732PN','B0CHY57B3X') then 'Fokus'
         when p.brand ilike any ('%buddyph%','%onanoff%') then 'ONANOFF'
         when p.brand ilike '%cellini%' then 'Cellini'
-        when p.brand ilike '%POP%' then 'POP'
+        when p.brand ilike '%POP%' then 'ONANOFF'
         when p.brand ilike '%zens%' then 'ZENS'
         when p.brand ilike '%qisten%' then 'Qisten'
         when p.brand ilike any ('%roku%','73%','%sunny%') then '73&Sunny'
