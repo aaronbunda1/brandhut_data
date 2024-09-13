@@ -412,7 +412,7 @@ SPONSORED_DISPLAY_COST
     'Amazon-CA' AS marketplace_key,
     m.month AS date_day,
     '' AS channel_product_id,
-    m.sku AS sku,
+    '' AS sku,
     '' AS color,
     'USD' as currency_original,
     'USD' as currency_rate,
