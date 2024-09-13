@@ -56,19 +56,19 @@ pl.REGION,
 pl.MARKETPLACE_KEY,
 coalesce(pl.DATE_DAY,o.month) as date_day,
 pl.CHANNEL_PRODUCT_ID,
-min(coalesce(pl.SKU,o.sku)) over (partition by pl.CHANNEL_PRODUCT_ID) as sku,
-case when coalesce(pl.SKU,o.sku) ilike '%blue%' then 'Blue'
-when coalesce(pl.SKU,o.sku) ilike '%red%' then 'Red'
-when coalesce(pl.SKU,o.sku) ilike any ('%white%','%wht%') then 'White'
-when coalesce(pl.SKU,o.sku) ilike any ('%black%','%blk%') then 'Black'
-when coalesce(pl.SKU,o.sku) ilike '%green%' then 'Green'
-when coalesce(pl.SKU,o.sku) ilike '%orange%' then 'Orange'
-when coalesce(pl.SKU,o.sku) ilike '%Brown%' then 'Brown'
-when coalesce(pl.SKU,o.sku) ilike any ('%gry%','%Grey%') then 'Grey'
-when coalesce(pl.SKU,o.sku) ilike '%Yellow%' then 'Yellow'
-when coalesce(pl.SKU,o.sku) ilike '%black%' then 'Black'
-when coalesce(pl.SKU,o.sku) ilike '%purple%' then 'Purple'
-when coalesce(pl.SKU,o.sku) ilike '%pink%' then 'Pink'
+min(pl.SKU) over (partition by pl.CHANNEL_PRODUCT_ID) as sku,
+case when pl.sku ilike '%blue%' then 'Blue'
+when pl.sku ilike '%red%' then 'Red'
+when pl.sku ilike any ('%white%','%wht%') then 'White'
+when pl.sku ilike any ('%black%','%blk%') then 'Black'
+when pl.sku ilike '%green%' then 'Green'
+when pl.sku ilike '%orange%' then 'Orange'
+when pl.sku ilike '%Brown%' then 'Brown'
+when pl.sku ilike any ('%gry%','%Grey%') then 'Grey'
+when pl.sku ilike '%Yellow%' then 'Yellow'
+when pl.sku ilike '%black%' then 'Black'
+when pl.sku ilike '%purple%' then 'Purple'
+when pl.sku ilike '%pink%' then 'Pink'
 else 'Other'
 end as color,
 pl.CURRENCY,
@@ -223,8 +223,9 @@ left join {{ref('category')}} c
     on c.channel_product_id = p.channel_product_id
 full outer join {{ref('manual_metrics_by_brand_and_month')}} o 
     on o.brand = p.brand
-    and pl.sku = o.sku
+    and o.marketplace_key = p.marketplace_key
     and pl.date_day = o.month
+    and o.brand is null
 left join sp 
     on pl.channel_product_id = sp.channel_product_id
     and pl.date_day = sp.impression_month
