@@ -103,15 +103,27 @@ month,brand,marketplace_key,freight,turner_costs,ad_spend_manual,product_samples
 2024-07-01,SPOT,Amazon-US,0,0,0,0,,-59.23,-3.62,0
 2024-07-01,Woodmaster,Amazon-US,0,0,0,0,,0,0,0
 2024-07-01,ZENS,Amazon-US,-78.3,0,0,0,,-15,-12.14,0
-2024-08-01,73&Sunny,Amazon-US,-1937.9,0,1589,0,,0,0,0
-2024-08-01,73&Sunny,Amazon-CA,-625,0,0,0,,0,0,0
-2024-08-01,Cellini,Amazon-US,,0,23,0,,0,0,0
-2024-08-01,Fokus,Amazon-US,0,0,144,0,,0,0,0
-2024-08-01,ONANOFF,Amazon-CA,-1775.36,0,0,0,,0,0,0
-2024-08-01,ONANOFF,Amazon-US,379.51,-196.63,924,0,,0,-9.6,0
-2024-08-01,Onanoff 2,Amazon-CA,-1149.21,0,0,0,,0,0,0
-2024-08-01,Onanoff 2,Amazon-US,-22.3,0,0,0,,0,0,0
-2024-08-01,Pablo Artists' Choice,Amazon-US,0,0,0,0,,0,0,0
-2024-08-01,SPOT,Amazon-US,0,0,154,0,,0,-13.39,0
-2024-08-01,Woodmaster,Amazon-US,0,0,0,0,,0,0,0
-2024-08-01,ZENS,Amazon-US,0,-164.29,71,0,,0,0,0
+2024-08-01,73&Sunny,Amazon-US,-1937.9,0,1589,0,0,0,0,0
+2024-08-01,73&Sunny,Amazon-CA,-625,0,0,0,0,0,0,0
+2024-08-01,Cellini,Amazon-US,,0,23,0,0,-76.06,0,0
+2024-08-01,Fokus,Amazon-US,0,0,144,0,0,0,0,0
+2024-08-01,ONANOFF,Amazon-CA,-1775.36,0,0,0,0,0,0,0
+2024-08-01,ONANOFF,Amazon-US,379.51,-196.63,924,0,0,0,-9.6,0
+2024-08-01,Onanoff 2,Amazon-CA,-1149.21,0,0,0,0,0,0,0
+2024-08-01,Onanoff 2,Amazon-US,-22.3,0,0,0,0,0,0,0
+2024-08-01,Pablo Artists' Choice,Amazon-US,0,0,0,0,0,0,0,0
+2024-08-01,SPOT,Amazon-US,0,0,154,0,0,0,-13.39,0
+2024-08-01,Woodmaster,Amazon-US,0,0,0,0,0,0,0,0
+2024-08-01,ZENS,Amazon-US,0,-164.29,71,0,0,0,0,0
+2024-09-01,73&Sunny,Amazon-US,0,0,16,0,0,0,-1.04,0
+2024-09-01,73&Sunny,Amazon-CA,0,0,0,0,0,0,0,0
+2024-09-01,Cellini,Amazon-US,-484.8,0,0,0,0,0,0,0
+2024-09-01,Fokus,Amazon-US,0,0,0,0,0,0,0,0
+2024-09-01,ONANOFF,Amazon-CA,0,0,3,0,0,0,0,0
+2024-09-01,ONANOFF,Amazon-US,-2065.71,-128.36,53,0,0,0,-306.935,0
+2024-09-01,Onanoff 2,Amazon-CA,0,0,0,0,0,0,0,0
+2024-09-01,Onanoff 2,Amazon-US,0,0,0,0,0,0,0,0
+2024-09-01,Pablo Artists' Choice,Amazon-US,0,0,0,0,0,0,0,0
+2024-09-01,SPOT,Amazon-US,0,0,7,0,0,0,-5.75,0
+2024-09-01,Woodmaster,Amazon-US,0,0,0,0,0,0,0,0
+2024-09-01,ZENS,Amazon-US,0,-107.24,0,0,0,0,-2.27,0
