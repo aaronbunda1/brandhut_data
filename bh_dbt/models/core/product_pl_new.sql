@@ -1,318 +1,276 @@
 {{config(materialized='table')}}
 
-with non_sp_sd as (
-     select
-        seller_name,
-        account_key,
-        marketplace_key,
-        brand,
-        date_day,
-        sum(case when sponsored_type = 'SponsoredBrandsVideo' then ad_spend else 0 end) as SponsoredBrandsVideo,
-        sum(case when sponsored_type = 'SponsoredBrands' then ad_spend else 0 end) as SponsoredBrands
-    from datahawk_writable_83514.dev_brandhut.ad_spend
-    group by 
-        seller_name,
-        account_key,
-        marketplace_key,
-        brand,
-        date_day
-)
+-- with other_ad_spend as (
+--     select 
+--     date_day,
+--     -- account_key,
+--     marketplace_key,
+--     case 
+--     when campaign_name ilike any ('%73%','%roku%','%siri%') then '73&Sunny'
+--     when campaign_name ilike '%storyph%' then 'Onanoff 2'
+--     when campaign_name ilike '%cellini%' then 'Cellini'
+--     when campaign_name ilike '%fokus%' then 'Fokus'
+--     when campaign_name ilike '%pablo%' then 'Pablo Artists'' Choice'
+--     when campaign_name ilike '%SPOT%' then 'SPOT'
+--     when campaign_name ilike '%ZENS%' then 'ZENS'
+--     when campaign_name ilike any ('%onanoff%','%pop%','%on-%','%bp-%','%play%','%fun%','%school%','%onanff%','%Onaonff%','%cosmo%','%explore%','%buddy%','%phones%') then 'ONANOFF'
+--     else 'Other'
+--     end as brand,
+--     coalesce(sum(case when sponsored_type = 'SponsoredBrands' then costs end),0) as SponsoredBrandsCost,
+--     coalesce(sum(case when sponsored_type = 'SponsoredDisplay' then costs end),0) as SponsoredDisplayCost
+--     from datahawk_share_83514.advertising.advertising_campaign_metrics a
+--     group by all
+-- )
 
-, sp_sd as (
-select 
-date_day,
--- account_key,
-marketplace_key,
-case 
-when campaign_name ilike any ('%73%','%roku%') then '73&Sunny'
-when campaign_name ilike '%storyph%' then 'Onanoff 2'
-when campaign_name ilike '%cellini%' then 'Cellini'
-when campaign_name ilike '%fokus%' then 'Fokus'
-when campaign_name ilike '%pablo%' then 'Pablo Artists'' Choice'
-when campaign_name ilike '%SPOT%' then 'SPOT'
-when campaign_name ilike '%ZENS%' then 'ZENS'
-when campaign_name ilike any ('%onanoff%','%pop%','%on-%','%bp-%','%play%','%fun%','%school%','%onanff%','%Onaonff%','%cosmo%','%explore%','%buddy%','%phones%') then 'ONANOFF'
-else 'Other'
-end as brand,
-coalesce(sum(case when sponsored_type = 'SponsoredProducts' then costs end),0) as SponsoredProductsCost,
-coalesce(sum(case when sponsored_type = 'SponsoredDisplay' then costs end),0) as SponsoredDisplayCost
-from datahawk_share_83514.advertising.advertising_campaign_metrics a
-group by all
-
-
-)
-
-, all_fields as (select 
-case when c.category is null and l.brand = 'ZENS' then 'Zens Legacy' else coalesce(l.brand,o.brand) end as brand,
-l.account_key as account_key,
-l.amazon_region_id as region,
--- case when fr.freight is not null and fr.freight <0 then 'Amazon-CA' else l.marketplace_key end as marketplace_key,
-coalesce(l.marketplace_key,o.marketplace_key) as marketplace_key,
-coalesce(l.posted_local_date,o.month) as date_day,
-l.asin as channel_product_id,
-l.sku as sku,
-l.currency as currency,
-case when l.sku ilike '%blue%' then 'Blue'
-when l.sku ilike '%red%' then 'Red'
-when l.sku ilike any ('%white%','%wht%') then 'White'
-when l.sku ilike any ('%black%','%blk%') then 'Black'
-when l.sku ilike '%green%' then 'Green'
-when l.sku ilike '%orange%' then 'Orange'
-when l.sku ilike '%Brown%' then 'Brown'
-when l.sku ilike any ('%gry%','%Grey%') then 'Grey'
-when l.sku ilike '%Yellow%' then 'Yellow'
-when l.sku ilike '%black%' then 'Black'
-when l.sku ilike '%purple%' then 'Purple'
-when l.sku ilike '%pink%' then 'Pink'
-else 'Other'
-end as color,
-cr.rate as rate_to_usd,
-case 
-    when l.sku = 'ZEDC21B/00' then 'ZENS'
-    when c.category is null and l.brand = 'ZENS' then 'Zens Legacy'
-    when l.brand = 'Onanoff 2' and l.sku ilike any ('%SS-%','%STSH-%','%shield%') then 'StoryShield'
-    when l.brand = 'Onanoff 2' and l.sku ilike '%storyph%' then 'Storyphones'
-    else c.category 
-end as internal_sku_category,
-l.gross_sales as ledger_gross_sales,
-l.earned_gross_sales as EARNED_GROSS_SALES,
-l.GIFT_WRAP as ledger_gift_wrap,
-l.REIMBURSED_PRODUCT as ledger_reimbursed_product,
-l.refund_comission as ledger_REFUND_COMMISSION,
-l.REFUNDED_REFERRAL_FEES as ledger_REFUNDED_REFERRAL_FEES,
-l.REIMBURSED_SHIPPING as ledger_REIMBURSED_SHIPPING,
-l.REFUND_PROMOTION as ledger_REFUND_PROMOTION,
-l.REFUND_SHIPPING_CHARGEBACK as ledger_REFUND_SHIPPING_CHARGEBACK,
-l.GOODWILL as ledger_GOODWILL,
-l.REVERSAL_REIMBURSED as ledger_REVERSAL_REIMBURSED,
-l.GIFT_WRAP_CHARGEBACK as ledger_GIFT_WRAP_CHARGEBACK,
-l.shipping as ledger_shipping,
-l.SHIPPING_CHARGEBACK as ledger_SHIPPING_CHARGEBACK,
--- l.inbound_transportation as ledger_inbound_transportation,
-coalesce(l.FBA_STORAGE_FEE,0)+coalesce(l.fba_long_storage_fee,0) as ledger_fba_storage_fee,
-l.FBA_INVENTORY_PLACEMENT_SERVICE as ledger_FBA_INVENTORY_PLACEMENT_SERVICE,
-l.WAREHOUSE_DAMAGE as ledger_WAREHOUSE_DAMAGE,
-l.WAREHOUSE_LOST_MANUAL as ledger_WAREHOUSE_LOST_MANUAL,
-l.FBA_PER_UNIT_FULFILMENT_FEE as ledger_FBA_PER_UNIT_FULFILMENT_FEE,
-l.disposal_complete as ledger_disposal_complete,
-l.removal_complete as ledger_removal_complete,
-l.REFERRAL_FEE as ledger_referral_fee,
-l.promotion as ledger_promotion,
--- l.SUBSCRIPTION_FEE as ledger_subscription_fee,
-l.tax_principal_collected as ledger_tax_principal,
-l.tax_shipping as ledger_tax_shipping,
-l.TAX_REIMBURSED as ledger_tax_reimbursed,
-l.tax_other as ledger_tax_other,
-case when l.asin is null and (l.sku is null) then 0 else l.other_amount end as ledger_other_amount,
-l.other_amount_distributable as ledger_other_amount_distributable,
-l.other_amount_spot_only,
-l.restocking_fee as ledger_restocking_fee,
-coalesce(l.gross_sales,0) + coalesce(l.REIMBURSED_PRODUCT,0) + coalesce(l.REVERSAL_REIMBURSED,0) as ledger_net_sales,
-coalesce(l.earned_gross_sales,0) + coalesce(l.REIMBURSED_PRODUCT,0) + coalesce(l.REVERSAL_REIMBURSED,0) as earned_net_sales,
-sum(l.EARNED_GROSS_SALES) over (partition by date_trunc(month,l.posted_local_date),l.brand) as monthly_brand_gs,
-case 
-    when l.brand ilike '%cellini%'
-        then -ledger_net_sales*0.1 
-    when l.brand ilike any ('%spot%','%zens%')
-        then -ledger_net_sales*0.15
-    when l.brand ilike '%onanoff 2%'
-        then 
-        case 
-            when l.sku ilike '%storyph%' 
-                then 
-                    case
-                        when monthly_brand_gs <= 50000 then -ledger_net_sales*.1
-                        when monthly_brand_gs < 251000 then -ledger_net_sales *.09
-                        else -ledger_net_sales * .06
-                    end
-            when l.sku ilike any ('%SS-%','%STSH-%','%shield%')
-                then 
-                    case
-                        when monthly_brand_gs < 251000 then -ledger_net_sales *.12
-                        else -ledger_net_sales * .08
-                    end
-            else -ledger_net_sales*.1
-        end 
-    when l.brand = 'Pablo Artists'' Choice' then -ledger_net_SALEs *.15
-    when l.brand = 'Fokus'
-        then 
-        case 
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 79.99 then -ledger_net_sales*.08
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 89.99 then -ledger_net_sales*.12
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 100 then -ledger_net_sales*.18
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 109.99 then -ledger_net_sales*.2
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 119.99 then -ledger_net_sales*.22
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 129.99 then -ledger_net_sales*.24
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 149.99 then -ledger_net_sales*.26
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 159.99 then -ledger_net_sales*.26
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 139.99 then -ledger_net_sales*.25
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 169.99 then -ledger_net_sales*.28
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 179.99 then -ledger_net_sales*.28
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 189.99 then -ledger_net_sales*.29
-            else -ledger_net_sales*.3
-        end
-    else 0 
-end as ledger_brandhut_commission,
-case 
-    when l.brand ilike '%cellini%'
-        then -earned_net_sales*0.1 
-    when l.brand ilike any ('%spot%','%zens%')
-        then -earned_net_sales*0.15
-    when l.brand ilike '%onanoff 2%'
-        then 
-        case 
-            when l.sku ilike '%storyph%' 
-                then 
-                    case
-                        when monthly_brand_gs <= 50000 then -earned_net_sales*.1
-                        when monthly_brand_gs < 251000 then -earned_net_sales *.09
-                        else -earned_net_sales * .06
-                    end
-            when l.sku ilike any ('%SS-%','%STSH-%','%shield%')
-                then 
-                    case
-                        when monthly_brand_gs < 251000 then -earned_net_sales *.12
-                        else -earned_net_sales * .08
-                    end
-            else -earned_net_sales*.1
-        end 
-    when l.brand = 'Fokus'
-        then 
-        case 
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 79.99 then -earned_net_sales*.08
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 89.99 then -earned_net_sales*.12
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 100 then -earned_net_sales*.18
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 109.99 then -earned_net_sales*.2
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 119.99 then -earned_net_sales*.22
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 129.99 then -earned_net_sales*.24
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 149.99 then -earned_net_sales*.26
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 159.99 then -earned_net_sales*.26
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 139.99 then -earned_net_sales*.25
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 169.99 then -earned_net_sales*.28
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 179.99 then -earned_net_sales*.28
-            when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 189.99 then -earned_net_sales*.29
-            else -earned_net_sales*.3
-        end
-    else 0 
-end as EARNED_BRANDHUT_COMMISSION,
-coalesce(o.turner_costs,0) as manual_turner_costs,
--- coalesce(fr.freight,0) as manual_freight,
-coalesce(o.ad_spend_manual,0) as manual_ad_spend,
-coalesce(o.product_samples,0) as manual_product_samples,
-coalesce(o.miscellaneous,0) as manual_miscellaneous_cost,
-coalesce(o.manual_unallocated_costs,0) as manual_unallocated_costs,
-coalesce(o.true_up_invoiced,0) as true_up_invoiced,
-coalesce(-pl.net_units_sold*cogs.productcost,pl.COGS) as MANUAL_COGS,
--sp_sd.sponsoredproductscost/count(*) over (partition by l.posted_local_date,l.brand,l.marketplace_key) as SPONSORED_PRODUCTS_COST,
--sp_sd.sponsoreddisplaycost/count(*) over (partition by l.posted_local_date,l.brand,l.marketplace_key) as sponsored_display_cost,
-coalesce(-non_sp_sd.sponsoredbrands/count(*) over (partition by l.posted_local_date,l.account_key,l.marketplace_key,l.brand),0) as DIST_SPONSORED_BRANDS_COST,
-coalesce(-non_sp_sd.sponsoredbrandsvideo/count(*) over (partition by l.posted_local_date,l.account_key,l.marketplace_key,l.brand),0) as DIST_SPONSORED_BRANDS_VIDEO_COST,
-from {{ref('finance_pl_pivot_new')}} l
-left join datahawk_share_83514.referential.referential_currency_rate cr on l.posted_local_date = cr.date_day and l.currency  = cr.currency
-left join {{ref('category')}} c
-    on c.channel_product_id = l.asin
-left join non_sp_sd
-    on non_sp_sd.marketplace_key = l.marketplace_key
-    and non_sp_sd.account_key = l.account_key
-    and l.brand = non_sp_sd.brand
-    and non_sp_sd.date_day = l.posted_local_date
-left join sp_sd
-    on sp_sd.brand = l.brand
-    and sp_sd.date_day = l.posted_local_date
-    and sp_sd.marketplace_key = l.marketplace_key
-full outer join {{ref('manual_metrics_by_brand_and_month')}} o 
-    on o.brand = l.brand
-    and l.marketplace_key = o.marketplace_key
-    and l.posted_local_date = o.month
-    and l.marketplace_key is null
-left join datahawk_share_83514.finance.finance_product_profit_loss pl
-    on pl.marketplace_key = l.marketplace_key
-    and pl.date_day = l.posted_local_date
-    and pl.account_key = l.account_key
-    and pl.region = l.amazon_region_id
-    and pl.channel_product_id = l.asin
-    and pl.currency = l.currency
-    and pl.sku = l.sku
-left join (select distinct * from {{ref('cogs')}}) cogs
-    on cogs.asin = l.asin
-    and l.account_key = cogs.accountid
-    and l.posted_local_date between cogs.start_date and cogs.end_date
+ WITH all_fields as (select 
+    case when c.category is null and l.brand = 'ZENS' then 'Zens Legacy' else coalesce(l.brand,o.brand) end as brand,
+    l.account_key as account_key,
+    l.amazon_region_id as region,
+    -- case when fr.freight is not null and fr.freight <0 then 'Amazon-CA' else l.marketplace_key end as marketplace_key,
+    coalesce(l.marketplace_key,o.marketplace_key) as marketplace_key,
+    coalesce(l.posted_local_date,o.month) as date_day,
+    l.asin as channel_product_id,
+    l.sku as sku,
+    l.currency as currency,
+    case when l.sku ilike '%blue%' then 'Blue'
+    when l.sku ilike '%red%' then 'Red'
+    when l.sku ilike any ('%white%','%wht%') then 'White'
+    when l.sku ilike any ('%black%','%blk%') then 'Black'
+    when l.sku ilike '%green%' then 'Green'
+    when l.sku ilike '%orange%' then 'Orange'
+    when l.sku ilike '%Brown%' then 'Brown'
+    when l.sku ilike any ('%gry%','%Grey%') then 'Grey'
+    when l.sku ilike '%Yellow%' then 'Yellow'
+    when l.sku ilike '%black%' then 'Black'
+    when l.sku ilike '%purple%' then 'Purple'
+    when l.sku ilike '%pink%' then 'Pink'
+    else 'Other'
+    end as color,
+    cr.rate as rate_to_usd,
+    case 
+        when l.sku = 'ZEDC21B/00' then 'ZENS'
+        when c.category is null and l.brand = 'ZENS' then 'Zens Legacy'
+        when l.brand = 'Onanoff 2' and l.sku ilike any ('%SS-%','%STSH-%','%shield%') then 'StoryShield'
+        when l.brand = 'Onanoff 2' and l.sku ilike '%storyph%' then 'Storyphones'
+        else c.category 
+    end as internal_sku_category,
+    l.gross_sales as ledger_gross_sales,
+    l.earned_gross_sales as EARNED_GROSS_SALES,
+    l.GIFT_WRAP as ledger_gift_wrap,
+    l.REIMBURSED_PRODUCT as ledger_reimbursed_product,
+    l.refund_comission as ledger_REFUND_COMMISSION,
+    l.REFUNDED_REFERRAL_FEES as ledger_REFUNDED_REFERRAL_FEES,
+    l.REIMBURSED_SHIPPING as ledger_REIMBURSED_SHIPPING,
+    l.REFUND_PROMOTION as ledger_REFUND_PROMOTION,
+    l.REFUND_SHIPPING_CHARGEBACK as ledger_REFUND_SHIPPING_CHARGEBACK,
+    l.GOODWILL as ledger_GOODWILL,
+    l.REVERSAL_REIMBURSED as ledger_REVERSAL_REIMBURSED,
+    l.GIFT_WRAP_CHARGEBACK as ledger_GIFT_WRAP_CHARGEBACK,
+    l.shipping as ledger_shipping,
+    l.SHIPPING_CHARGEBACK as ledger_SHIPPING_CHARGEBACK,
+    -- l.inbound_transportation as ledger_inbound_transportation,
+    coalesce(l.FBA_STORAGE_FEE,0)+coalesce(l.fba_long_storage_fee,0) as ledger_fba_storage_fee,
+    l.FBA_INVENTORY_PLACEMENT_SERVICE as ledger_FBA_INVENTORY_PLACEMENT_SERVICE,
+    l.WAREHOUSE_DAMAGE as ledger_WAREHOUSE_DAMAGE,
+    l.WAREHOUSE_LOST_MANUAL as ledger_WAREHOUSE_LOST_MANUAL,
+    l.FBA_PER_UNIT_FULFILMENT_FEE as ledger_FBA_PER_UNIT_FULFILMENT_FEE,
+    l.disposal_complete as ledger_disposal_complete,
+    l.removal_complete as ledger_removal_complete,
+    l.REFERRAL_FEE as ledger_referral_fee,
+    l.promotion as ledger_promotion,
+    -- l.SUBSCRIPTION_FEE as ledger_subscription_fee,
+    l.tax_principal_collected as ledger_tax_principal,
+    l.tax_shipping as ledger_tax_shipping,
+    l.TAX_REIMBURSED as ledger_tax_reimbursed,
+    l.tax_other as ledger_tax_other,
+    case when l.asin is null and (l.sku is null) then 0 else l.other_amount end as ledger_other_amount,
+    l.other_amount_distributable as ledger_other_amount_distributable,
+    l.other_amount_spot_only,
+    l.restocking_fee as ledger_restocking_fee,
+    coalesce(l.gross_sales,0) + coalesce(l.REIMBURSED_PRODUCT,0) + coalesce(l.REVERSAL_REIMBURSED,0) as ledger_net_sales,
+    coalesce(l.earned_gross_sales,0) + coalesce(l.REIMBURSED_PRODUCT,0) + coalesce(l.REVERSAL_REIMBURSED,0) as earned_net_sales,
+    sum(l.EARNED_GROSS_SALES) over (partition by date_trunc(month,l.posted_local_date),l.brand) as monthly_brand_gs,
+    case 
+        when l.brand ilike '%cellini%'
+            then -ledger_net_sales*0.1 
+        when l.brand ilike any ('%spot%','%zens%')
+            then -ledger_net_sales*0.15
+        when l.brand ilike '%onanoff 2%'
+            then 
+            case 
+                when l.sku ilike '%storyph%' 
+                    then 
+                        case
+                            when monthly_brand_gs <= 50000 then -ledger_net_sales*.1
+                            when monthly_brand_gs < 251000 then -ledger_net_sales *.09
+                            else -ledger_net_sales * .06
+                        end
+                when l.sku ilike any ('%SS-%','%STSH-%','%shield%')
+                    then 
+                        case
+                            when monthly_brand_gs < 251000 then -ledger_net_sales *.12
+                            else -ledger_net_sales * .08
+                        end
+                else -ledger_net_sales*.1
+            end 
+        when l.brand = 'Pablo Artists'' Choice' then -ledger_net_SALEs *.15
+        when l.brand = 'Fokus'
+            then 
+            case 
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 79.99 then -ledger_net_sales*.08
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 89.99 then -ledger_net_sales*.12
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 100 then -ledger_net_sales*.18
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 109.99 then -ledger_net_sales*.2
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 119.99 then -ledger_net_sales*.22
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 129.99 then -ledger_net_sales*.24
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 149.99 then -ledger_net_sales*.26
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 159.99 then -ledger_net_sales*.26
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 139.99 then -ledger_net_sales*.25
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 169.99 then -ledger_net_sales*.28
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 179.99 then -ledger_net_sales*.28
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 189.99 then -ledger_net_sales*.29
+                else -ledger_net_sales*.3
+            end
+        else 0 
+    end as ledger_brandhut_commission,
+    case 
+        when l.brand ilike '%cellini%'
+            then -earned_net_sales*0.1 
+        when l.brand ilike any ('%spot%','%zens%')
+            then -earned_net_sales*0.15
+        when l.brand ilike '%onanoff 2%'
+            then 
+            case 
+                when l.sku ilike '%storyph%' 
+                    then 
+                        case
+                            when monthly_brand_gs <= 50000 then -earned_net_sales*.1
+                            when monthly_brand_gs < 251000 then -earned_net_sales *.09
+                            else -earned_net_sales * .06
+                        end
+                when l.sku ilike any ('%SS-%','%STSH-%','%shield%')
+                    then 
+                        case
+                            when monthly_brand_gs < 251000 then -earned_net_sales *.12
+                            else -earned_net_sales * .08
+                        end
+                else -earned_net_sales*.1
+            end 
+        when l.brand = 'Fokus'
+            then 
+            case 
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 79.99 then -earned_net_sales*.08
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 89.99 then -earned_net_sales*.12
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 100 then -earned_net_sales*.18
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 109.99 then -earned_net_sales*.2
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 119.99 then -earned_net_sales*.22
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 129.99 then -earned_net_sales*.24
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 149.99 then -earned_net_sales*.26
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 159.99 then -earned_net_sales*.26
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 139.99 then -earned_net_sales*.25
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 169.99 then -earned_net_sales*.28
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 179.99 then -earned_net_sales*.28
+                when l.EARNED_GROSS_SALES/nullif(greatest(l.earned_units_sold,1),1) <= 189.99 then -earned_net_sales*.29
+                else -earned_net_sales*.3
+            end
+        else 0 
+    end as EARNED_BRANDHUT_COMMISSION,
+    coalesce(o.turner_costs,0) as manual_turner_costs,
+    -- coalesce(fr.freight,0) as manual_freight,
+    -- coalesce(o.ad_spend_manual,0) as manual_ad_spend,
+    coalesce(o.product_samples,0) as manual_product_samples,
+    coalesce(o.miscellaneous,0) as manual_miscellaneous_cost,
+    coalesce(o.manual_unallocated_costs,0) as manual_unallocated_costs,
+    coalesce(o.true_up_invoiced,0) as true_up_invoiced,
+    coalesce(-pl.net_units_sold*cogs.productcost,pl.COGS) as MANUAL_COGS
+    from {{ref('finance_pl_pivot_new')}} l
+    left join datahawk_share_83514.referential.referential_currency_rate cr on l.posted_local_date = cr.date_day and l.currency  = cr.currency
+    left join {{ref('category')}} c
+        on c.channel_product_id = l.asin
+    full outer join {{ref('manual_metrics_by_brand_and_month')}} o 
+        on o.brand = l.brand
+        and l.marketplace_key = o.marketplace_key
+        and l.posted_local_date = o.month
+        and l.marketplace_key is null
+    left join datahawk_share_83514.finance.finance_product_profit_loss pl
+        on pl.marketplace_key = l.marketplace_key
+        and pl.date_day = l.posted_local_date
+        and pl.account_key = l.account_key
+        and pl.region = l.amazon_region_id
+        and pl.channel_product_id = l.asin
+        and pl.currency = l.currency
+        and pl.sku = l.sku
+    left join (select distinct * from {{ref('cogs')}}) cogs
+        on cogs.asin = l.asin
+        and l.account_key = cogs.accountid
+        and l.posted_local_date between cogs.start_date and cogs.end_date
 )
 
 , by_month as (
-select
-BRAND,
-ACCOUNT_KEY,
-REGION,
-MARKETPLACE_KEY,
-date_trunc(month,date_day) as date_day,
-CHANNEL_PRODUCT_ID,
-SKU,
-COLOR,
-CURRENCY,
-internal_sku_category,
-avg(rate_to_usd) as rate_to_usd,
-sum(CAST(ledger_gross_sales AS NUMERIC(18,2))) AS ledger_gross_sales,
-sum(CAST(EARNED_GROSS_SALES AS NUMERIC(18,2))) AS EARNED_GROSS_SALES,
-sum(CAST(ledger_gift_wrap AS NUMERIC(18,2))) AS ledger_gift_wrap,
-sum(CAST(ledger_reimbursed_product AS NUMERIC(18,2))) AS ledger_reimbursed_product,
-sum(CAST(ledger_REFUND_COMMISSION AS NUMERIC(18,2))) AS ledger_REFUND_COMMISSION,
-sum(CAST(ledger_REFUNDED_REFERRAL_FEES AS NUMERIC(18,2))) AS ledger_REFUNDED_REFERRAL_FEES,
-sum(CAST(ledger_REIMBURSED_SHIPPING AS NUMERIC(18,2))) AS ledger_REIMBURSED_SHIPPING,
-sum(CAST(ledger_REFUND_PROMOTION AS NUMERIC(18,2))) AS ledger_REFUND_PROMOTION,
-sum(CAST(ledger_REFUND_SHIPPING_CHARGEBACK AS NUMERIC(18,2))) AS ledger_REFUND_SHIPPING_CHARGEBACK,
-sum(CAST(ledger_GOODWILL AS NUMERIC(18,2))) AS ledger_GOODWILL,
-sum(CAST(ledger_REVERSAL_REIMBURSED AS NUMERIC(18,2))) AS ledger_REVERSAL_REIMBURSED,
-sum(CAST(ledger_GIFT_WRAP_CHARGEBACK AS NUMERIC(18,2))) AS ledger_GIFT_WRAP_CHARGEBACK,
-sum(CAST(ledger_shipping AS NUMERIC(18,2))) AS ledger_shipping,
-sum(CAST(ledger_SHIPPING_CHARGEBACK AS NUMERIC(18,2))) AS ledger_SHIPPING_CHARGEBACK,
--- sum(CAST(ledger_inbound_transportation AS NUMERIC(18,2))) AS ledger_inbound_transportation,
-sum(CAST(ledger_fba_storage_fee AS NUMERIC(18,2))) AS ledger_fba_storage_fee,
-sum(CAST(ledger_FBA_INVENTORY_PLACEMENT_SERVICE AS NUMERIC(18,2))) AS ledger_FBA_INVENTORY_PLACEMENT_SERVICE,
-sum(CAST(ledger_WAREHOUSE_DAMAGE AS NUMERIC(18,2))) AS ledger_WAREHOUSE_DAMAGE,
-sum(CAST(ledger_WAREHOUSE_LOST_MANUAL AS NUMERIC(18,2))) AS ledger_WAREHOUSE_LOST_MANUAL,
-sum(CAST(ledger_FBA_PER_UNIT_FULFILMENT_FEE AS NUMERIC(18,2))) AS ledger_FBA_PER_UNIT_FULFILMENT_FEE,
-sum(CAST(ledger_disposal_complete AS NUMERIC(18,2))) AS ledger_disposal_complete,
-sum(CAST(ledger_removal_complete AS NUMERIC(18,2))) AS ledger_removal_complete,
-sum(CAST(ledger_referral_fee AS NUMERIC(18,2))) AS ledger_referral_fee,
-sum(CAST(ledger_promotion AS NUMERIC(18,2))) AS ledger_promotion,
--- sum(CAST(ledger_subscription_fee AS NUMERIC(18,2))) AS ledger_subscription_fee,
-sum(CAST(ledger_tax_principal AS NUMERIC(18,2))) AS ledger_tax_principal,
-sum(CAST(ledger_tax_shipping AS NUMERIC(18,2))) AS ledger_tax_shipping,
-sum(CAST(ledger_tax_reimbursed AS NUMERIC(18,2))) AS ledger_tax_reimbursed,
-sum(CAST(ledger_tax_other AS NUMERIC(18,2))) AS ledger_tax_other,
-sum(CAST(ledger_other_amount AS NUMERIC(18,2))) AS ledger_other_amount,
-sum(CAST(ledger_other_amount_distributable AS NUMERIC(18,2))) AS ledger_other_amount_distributable,
-sum(CAST(other_amount_spot_only AS NUMERIC(18,2))) AS other_amount_spot_only,
-sum(CAST(ledger_restocking_fee AS NUMERIC(18,2))) AS ledger_restocking_fee,
-sum(CAST(ledger_brandhut_commission AS NUMERIC(18,2))) AS ledger_brandhut_commission,
-sum(CAST(EARNED_BRANDHUT_COMMISSION AS NUMERIC(18,2))) AS EARNED_BRANDHUT_COMMISSION,
-SUM(CAST(manual_turner_costs AS NUMERIC(18,2))) AS manual_turner_costs,
--- SUM(CAST(manual_freight AS NUMERIC(18,2))) AS manual_freight,
-SUM(CAST(manual_product_samples AS NUMERIC(18,2))) AS manual_product_samples,
-SUM(CAST(manual_miscellaneous_cost AS NUMERIC(18,2))) AS manual_miscellaneous_cost,
-SUM(CAST(manual_unallocated_costs AS NUMERIC(18,2))) AS manual_unallocated_costs,
-SUM(CAST(true_up_invoiced AS NUMERIC(18,2))) AS true_up_invoiced,
-SUM(CAST(MANUAL_COGS AS NUMERIC(18,2))) AS MANUAL_COGS,
-SUM(CAST(SPONSORED_PRODUCTS_COST AS NUMERIC(18,2))) AS SPONSORED_PRODUCTS_COST,
-SUM(CAST(DIST_SPONSORED_BRANDS_COST AS NUMERIC(18,2))) AS DIST_SPONSORED_BRANDS_COST,
-SUM(CAST(DIST_SPONSORED_BRANDS_VIDEO_COST AS NUMERIC(18,2))) AS DIST_SPONSORED_BRANDS_VIDEO_COST,
-SUM(CAST(SPONSORED_DISPLAY_COST AS NUMERIC(18,2))) AS SPONSORED_DISPLAY_COST,
-SUM(CAST(SPONSORED_PRODUCTS_COST AS NUMERIC(18,2)))+SUM(CAST(DIST_SPONSORED_BRANDS_COST AS NUMERIC(18,2)))+SUM(CAST(DIST_SPONSORED_BRANDS_VIDEO_COST AS NUMERIC(18,2)))+
-SUM(CAST(SPONSORED_DISPLAY_COST AS NUMERIC(18,2))) as ad_spend_total,
-SUM(CAST(manual_ad_spend AS NUMERIC(18,2))) as manual_ad_spend_temp
-from all_fields
-group by all
+    select
+    BRAND,
+    ACCOUNT_KEY,
+    REGION,
+    MARKETPLACE_KEY,
+    date_trunc(month,date_day) as date_day,
+    CHANNEL_PRODUCT_ID,
+    SKU,
+    COLOR,
+    CURRENCY,
+    internal_sku_category,
+    avg(rate_to_usd) as rate_to_usd,
+    sum(CAST(ledger_gross_sales AS NUMERIC(18,2))) AS ledger_gross_sales,
+    sum(CAST(EARNED_GROSS_SALES AS NUMERIC(18,2))) AS EARNED_GROSS_SALES,
+    sum(CAST(ledger_gift_wrap AS NUMERIC(18,2))) AS ledger_gift_wrap,
+    sum(CAST(ledger_reimbursed_product AS NUMERIC(18,2))) AS ledger_reimbursed_product,
+    sum(CAST(ledger_REFUND_COMMISSION AS NUMERIC(18,2))) AS ledger_REFUND_COMMISSION,
+    sum(CAST(ledger_REFUNDED_REFERRAL_FEES AS NUMERIC(18,2))) AS ledger_REFUNDED_REFERRAL_FEES,
+    sum(CAST(ledger_REIMBURSED_SHIPPING AS NUMERIC(18,2))) AS ledger_REIMBURSED_SHIPPING,
+    sum(CAST(ledger_REFUND_PROMOTION AS NUMERIC(18,2))) AS ledger_REFUND_PROMOTION,
+    sum(CAST(ledger_REFUND_SHIPPING_CHARGEBACK AS NUMERIC(18,2))) AS ledger_REFUND_SHIPPING_CHARGEBACK,
+    sum(CAST(ledger_GOODWILL AS NUMERIC(18,2))) AS ledger_GOODWILL,
+    sum(CAST(ledger_REVERSAL_REIMBURSED AS NUMERIC(18,2))) AS ledger_REVERSAL_REIMBURSED,
+    sum(CAST(ledger_GIFT_WRAP_CHARGEBACK AS NUMERIC(18,2))) AS ledger_GIFT_WRAP_CHARGEBACK,
+    sum(CAST(ledger_shipping AS NUMERIC(18,2))) AS ledger_shipping,
+    sum(CAST(ledger_SHIPPING_CHARGEBACK AS NUMERIC(18,2))) AS ledger_SHIPPING_CHARGEBACK,
+    -- sum(CAST(ledger_inbound_transportation AS NUMERIC(18,2))) AS ledger_inbound_transportation,
+    sum(CAST(ledger_fba_storage_fee AS NUMERIC(18,2))) AS ledger_fba_storage_fee,
+    sum(CAST(ledger_FBA_INVENTORY_PLACEMENT_SERVICE AS NUMERIC(18,2))) AS ledger_FBA_INVENTORY_PLACEMENT_SERVICE,
+    sum(CAST(ledger_WAREHOUSE_DAMAGE AS NUMERIC(18,2))) AS ledger_WAREHOUSE_DAMAGE,
+    sum(CAST(ledger_WAREHOUSE_LOST_MANUAL AS NUMERIC(18,2))) AS ledger_WAREHOUSE_LOST_MANUAL,
+    sum(CAST(ledger_FBA_PER_UNIT_FULFILMENT_FEE AS NUMERIC(18,2))) AS ledger_FBA_PER_UNIT_FULFILMENT_FEE,
+    sum(CAST(ledger_disposal_complete AS NUMERIC(18,2))) AS ledger_disposal_complete,
+    sum(CAST(ledger_removal_complete AS NUMERIC(18,2))) AS ledger_removal_complete,
+    sum(CAST(ledger_referral_fee AS NUMERIC(18,2))) AS ledger_referral_fee,
+    sum(CAST(ledger_promotion AS NUMERIC(18,2))) AS ledger_promotion,
+    -- sum(CAST(ledger_subscription_fee AS NUMERIC(18,2))) AS ledger_subscription_fee,
+    sum(CAST(ledger_tax_principal AS NUMERIC(18,2))) AS ledger_tax_principal,
+    sum(CAST(ledger_tax_shipping AS NUMERIC(18,2))) AS ledger_tax_shipping,
+    sum(CAST(ledger_tax_reimbursed AS NUMERIC(18,2))) AS ledger_tax_reimbursed,
+    sum(CAST(ledger_tax_other AS NUMERIC(18,2))) AS ledger_tax_other,
+    sum(CAST(ledger_other_amount AS NUMERIC(18,2))) AS ledger_other_amount,
+    sum(CAST(ledger_other_amount_distributable AS NUMERIC(18,2))) AS ledger_other_amount_distributable,
+    sum(CAST(other_amount_spot_only AS NUMERIC(18,2))) AS other_amount_spot_only,
+    sum(CAST(ledger_restocking_fee AS NUMERIC(18,2))) AS ledger_restocking_fee,
+    sum(CAST(ledger_brandhut_commission AS NUMERIC(18,2))) AS ledger_brandhut_commission,
+    sum(CAST(EARNED_BRANDHUT_COMMISSION AS NUMERIC(18,2))) AS EARNED_BRANDHUT_COMMISSION,
+    SUM(CAST(manual_turner_costs AS NUMERIC(18,2))) AS manual_turner_costs,
+    -- SUM(CAST(manual_freight AS NUMERIC(18,2))) AS manual_freight,
+    SUM(CAST(manual_product_samples AS NUMERIC(18,2))) AS manual_product_samples,
+    SUM(CAST(manual_miscellaneous_cost AS NUMERIC(18,2))) AS manual_miscellaneous_cost,
+    SUM(CAST(manual_unallocated_costs AS NUMERIC(18,2))) AS manual_unallocated_costs,
+    SUM(CAST(true_up_invoiced AS NUMERIC(18,2))) AS true_up_invoiced,
+    SUM(CAST(MANUAL_COGS AS NUMERIC(18,2))) AS MANUAL_COGS,
+    from all_fields
+    group by all
 )
 
 , fix as (
     select 
     *,
     cast(nullif(sum(ledger_other_amount_distributable) over (partition by date_day,currency)*(ledger_gross_sales/sum(ledger_gross_sales) over (partition by date_day,currency)),0) as NUMERIC(30,2)) as dist_ledger_other_amount,
-    cast(nullif(sum(other_amount_spot_only) over (partition by date_day,currency)*(IFF(brand='SPOT',ledger_gross_sales,0)/nullif(sum(IFF(brand='SPOT',ledger_gross_sales,0)) over (partition by date_day,currency),0)),0) as NUMERIC(30,2)) as dist_other_amount_spot_only,
-    case when coalesce(sum(ad_spend_total) over (partition by date_day, brand),0) = 0 then manual_ad_spend_temp else 0 end as manual_ad_spend
+    cast(nullif(sum(other_amount_spot_only) over (partition by date_day,currency)*(IFF(brand='SPOT',ledger_gross_sales,0)/nullif(sum(IFF(brand='SPOT',ledger_gross_sales,0)) over (partition by date_day,currency),0)),0) as NUMERIC(30,2)) as dist_other_amount_spot_only
     from by_month
-
 )
 
 
@@ -343,62 +301,60 @@ group by all
         internal_sku_category,
         metric_name,
         current_timestamp() as updated_at,
-        -- round(amount/coalesce(rate_to_usd,1),2) as amount
         round(amount,2) as amount
     FROM fix
     UNPIVOT(amount FOR metric_name IN (
-ledger_gross_sales,
-EARNED_GROSS_SALES,
-ledger_gift_wrap,
-ledger_reimbursed_product,
-ledger_REFUND_COMMISSION,
-ledger_REFUNDED_REFERRAL_FEES,
-ledger_REIMBURSED_SHIPPING,
-ledger_REFUND_PROMOTION,
-ledger_REFUND_SHIPPING_CHARGEBACK,
-ledger_GOODWILL,
-ledger_REVERSAL_REIMBURSED,
-ledger_GIFT_WRAP_CHARGEBACK,
-ledger_shipping,
-ledger_SHIPPING_CHARGEBACK,
--- ledger_inbound_transportation,
-ledger_fba_storage_fee,
-ledger_FBA_INVENTORY_PLACEMENT_SERVICE,
-ledger_WAREHOUSE_DAMAGE,
-ledger_WAREHOUSE_LOST_MANUAL,
-ledger_FBA_PER_UNIT_FULFILMENT_FEE,
-ledger_disposal_complete,
-ledger_removal_complete,
-ledger_referral_fee,
-ledger_promotion,
--- ledger_subscription_fee,
--- ledger_tax_principal,
--- ledger_tax_shipping,
--- ledger_tax_reimbursed,
--- ledger_tax_other,
-ledger_other_amount,
-dist_ledger_other_amount,
-dist_other_amount_spot_only,
-ledger_restocking_fee,
-ledger_brandhut_commission,
-EARNED_BRANDHUT_COMMISSION,
-manual_turner_costs,
--- manual_freight,
-manual_ad_spend,
-manual_product_samples,
-manual_miscellaneous_cost,
-manual_unallocated_costs,
-true_up_invoiced,
-MANUAL_COGS,
-SPONSORED_PRODUCTS_COST,
-DIST_SPONSORED_BRANDS_COST,
-DIST_SPONSORED_BRANDS_VIDEO_COST,
-SPONSORED_DISPLAY_COST
-))
+    ledger_gross_sales,
+    EARNED_GROSS_SALES,
+    ledger_gift_wrap,
+    ledger_reimbursed_product,
+    ledger_REFUND_COMMISSION,
+    ledger_REFUNDED_REFERRAL_FEES,
+    ledger_REIMBURSED_SHIPPING,
+    ledger_REFUND_PROMOTION,
+    ledger_REFUND_SHIPPING_CHARGEBACK,
+    ledger_GOODWILL,
+    ledger_REVERSAL_REIMBURSED,
+    ledger_GIFT_WRAP_CHARGEBACK,
+    ledger_shipping,
+    ledger_SHIPPING_CHARGEBACK,
+    -- ledger_inbound_transportation,
+    ledger_fba_storage_fee,
+    ledger_FBA_INVENTORY_PLACEMENT_SERVICE,
+    ledger_WAREHOUSE_DAMAGE,
+    ledger_WAREHOUSE_LOST_MANUAL,
+    ledger_FBA_PER_UNIT_FULFILMENT_FEE,
+    ledger_disposal_complete,
+    ledger_removal_complete,
+    ledger_referral_fee,
+    ledger_promotion,
+    -- ledger_subscription_fee,
+    -- ledger_tax_principal,
+    -- ledger_tax_shipping,
+    -- ledger_tax_reimbursed,
+    -- ledger_tax_other,
+    ledger_other_amount,
+    dist_ledger_other_amount,
+    dist_other_amount_spot_only,
+    ledger_restocking_fee,
+    ledger_brandhut_commission,
+    EARNED_BRANDHUT_COMMISSION,
+    manual_turner_costs,
+    -- manual_freight,
+    -- manual_ad_spend,
+    manual_product_samples,
+    manual_miscellaneous_cost,
+    manual_unallocated_costs,
+    true_up_invoiced,
+    MANUAL_COGS--,
+    -- SPONSORED_PRODUCTS_COST,
+    -- DIST_SPONSORED_BRANDS_COST,
+    -- DIST_SPONSORED_BRANDS_VIDEO_COST,
+    -- SPONSORED_DISPLAY_COST
+    ))
 )
 
-, prefinal AS (
---
+, add_freight AS (
     SELECT
     concat(
         m.brand,
@@ -431,14 +387,128 @@ SPONSORED_DISPLAY_COST
 
 )
 
+, sb as (
+    select
+    concat(
+        coalesce(b.brand,''),
+        b.account_key,
+        b.marketplace_key,
+        b.date_day,
+        b.channel_product_id,
+        b.sku,
+        'DIST_SPONSORED_BRANDS_COST'
+    ) as key,
+    b.brand,
+    b.account_key,
+    NULL as region,
+    b.marketplace_key,
+    b.date_day,
+    b.channel_product_id,
+    b.sku,
+    NULL as color,
+    NULL as currency_original,
+    NULL as currency_rate,
+    NULL as rate_to_usd,
+    b.internal_sku_category,
+    'DIST_SPONSORED_BRANDS_COST'  as metric_name,
+    current_timestamp() as updated_at,
+    coalesce(-sponsored_brands_cost,0)/count(*) over (partition by 
+        b.brand,
+        b.account_key,
+        b.marketplace_key,
+        b.date_day
+    ) as amount
+    from (
+        select distinct
+        coalesce(brand,'') as brand,
+        account_key,
+        marketplace_key,
+        date_day,
+        channel_product_id,
+        internal_sku_category,
+        sku
+        from add_freight
+    ) b
+    left join {{ref('ad_spend_other')}} a
+        on a.date_day = b.date_day
+        and coalesce(a.brand,'') = b.brand
+        and coalesce(a.marketplace_key,'') = coalesce(b.marketplace_key,'')
+        and coalesce(a.account_key,'') = coalesce(b.account_key,'')
+)
+
+, sd as (
+    select
+    concat(
+        coalesce(b.brand,''),
+        b.account_key,
+        b.marketplace_key,
+        b.date_day,
+        b.channel_product_id,
+        b.sku,
+        'DIST_SPONSORED_DISPLAY_COST'
+    ) as key,
+    b.brand,
+    b.account_key,
+    NULL as region,
+    b.marketplace_key,
+    b.date_day,
+    b.channel_product_id,
+    b.sku,
+    NULL as color,
+    NULL as currency_original,
+    NULL as currency_rate,
+    NULL as rate_to_usd,
+    b.internal_sku_category,
+    'DIST_SPONSORED_DISPLAY_COST'  as metric_name,
+    current_timestamp() as updated_at,
+    coalesce(-sponsored_display_cost,0)/count(*) over (partition by 
+        b.brand,
+        b.account_key,
+        b.marketplace_key,
+        b.date_day
+    ) as amount
+    from (
+        select distinct
+        coalesce(brand,'') as brand,
+        account_key,
+        marketplace_key,
+        date_day,
+        channel_product_id,
+        internal_sku_category,
+        sku
+        from add_freight
+    ) b
+    left join {{ref('ad_spend_other')}} a
+        on a.date_day = b.date_day
+        and coalesce(a.brand,'') = b.brand
+        and coalesce(a.marketplace_key,'') = coalesce(b.marketplace_key,'')
+        and coalesce(a.account_key,'') = coalesce(b.account_key,'')
+)
+
+, add_ad_spend as (
+    select * from {{ref('ad_spend_sp')}}
+
+    UNION all 
+
+    select * from sd
+
+    UNION all
+
+    select * from sb
+
+    UNION all 
+    
+    select * from add_freight
+)
+
 , final_without_true_up as (
 select 
 prefinal.*, 
 case 
 when metric_name in (
-    'MANUAL_AD_SPEND',
+    -- 'MANUAL_AD_SPEND',
 'DIST_SPONSORED_BRANDS_COST',
-'SPONSORED_DISPLAY_COST',
+'DIST_SPONSORED_DISPLAY_COST',
 'DIST_SPONOSORED_VIDEO_COST',
 'SPONSORED_PRODUCTS_COST',
 'LEDGER_BRANDHUT_COMMISSION',
@@ -491,9 +561,9 @@ then 'Net Sales'
 end as metric_group_1, 
 case 
     when metric_name in (
-        'MANUAL_AD_SPEND',
+        -- 'MANUAL_AD_SPEND',
     'DIST_SPONSORED_BRANDS_COST',
-    'SPONSORED_DISPLAY_COST',
+    'DIST_SPONSORED_DISPLAY_COST',
     'DIST_SPONOSORED_VIDEO_COST',
     'SPONSORED_PRODUCTS_COST'
     )
@@ -563,7 +633,7 @@ when metric_name in (
 )
 then 'Warehousing'
 end as metric_group_2
-from prefinal
+from add_ad_spend prefinal
 where 1=1 
 and prefinal.amount !=0 
 )
