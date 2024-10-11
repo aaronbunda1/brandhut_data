@@ -6,8 +6,8 @@ and costs>0
 )
 
 , prefinal as (select 
-account_key,
 b.brand as brand,
+account_key,
 NULL as region,
 marketplace_key,
 date_trunc(month,acm.date_day) as date_day,
