@@ -1,7 +1,7 @@
 SELECT 
     COALESCE(COALESCE(ad.account_key, a.account_key),pl.account_key) AS account_key,
     COALESCE(COALESCE(ad.marketplace_key, a.marketplace_key),pl.marketplace_key) AS marketplace_key,
-    COALESCE(COALESCE(COALESCE(ad.brand, a.brand),pl.brand),{{get_brand_from_sku('ad.brand')}}) AS brand,
+    COALESCE(COALESCE(COALESCE(ad.brand, a.brand),pl.brand),{{get_brand_from_sku('ad.campaign_name')}}) AS brand,
     COALESCE(COALESCE(ad.category, a.category),pl.category) AS category,
     COALESCE(COALESCE(ad.ASIN, a.asin),pl.asin) AS asin,
     COALESCE(COALESCE(ad.date_day, a.date_day),pl.date_day) AS date_day,

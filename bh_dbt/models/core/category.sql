@@ -6,7 +6,7 @@ with pre_dedupe as (
   creation_date
   from datahawk_share_83514.REFERENTIAL.REFERENTIAL_PROJECT
   where channel_product_id is not null and project_name not IN  
-  ('Onanoff (from projects)','BuddyPhones','Cellini (from projects)','Zens','Zens Other','cellini','Onanoff','Spot','spot.','Storyphones','Fokus','Pablo Artists'' Choice',
+  ('Onanoff (from projects)','BuddyPhones','Cellini (from projects)','Zens','SPOT','Zens Other','cellini','Onanoff','Spot','spot.','Storyphones','Fokus','Pablo Artists'' Choice',
   'Zens MagSafe')
   
   
@@ -26,5 +26,5 @@ with pre_dedupe as (
 )
 
 SELECT * from pre_dedupe
-WHERE category NOT IN ('ZENS','ONANOFF','Zens BH','roku','CLA','Zens Qi2','OMG','EUCONIC SUPPLEMENT LIFE')
+WHERE category NOT IN ('SPOT','ZENS','ONANOFF','Zens BH','roku','CLA','Zens Qi2','OMG','EUCONIC SUPPLEMENT LIFE')
 order by channel_product_id,creation_date
