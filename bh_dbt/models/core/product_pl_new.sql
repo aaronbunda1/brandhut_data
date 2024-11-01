@@ -87,7 +87,20 @@
     l.other_amount_distributable as ledger_other_amount_distributable,
     l.other_amount_spot_only,
     l.restocking_fee as ledger_restocking_fee,
+    CASE 
+        WHEN l.marketplace_key = 'Amazon-CA' 
+        THEN 
+            CASE 
+                WHEN l.brand ilike any  ('%73%','%onanoff%')
+                THEN -.06*l.gross_sales
+                WHEN l.brand = 'SPOT'
+                THEN -.15*l.gross_sales
+                ELSE 0
+            END
+        ELSE 0 
+    END AS canada_tax_on_gross_sales,
     coalesce(l.gross_sales,0) + coalesce(l.REIMBURSED_PRODUCT,0) + coalesce(l.REVERSAL_REIMBURSED,0) as ledger_net_sales,
+    IFF(l.marketplace_key='Amazon-CA',-0.015*ledger_net_sales,0) AS canada_bank_conversion_fee, 
     coalesce(l.earned_gross_sales,0) + coalesce(l.REIMBURSED_PRODUCT,0) + coalesce(l.REVERSAL_REIMBURSED,0) as earned_net_sales,
     sum(l.EARNED_GROSS_SALES) over (partition by date_trunc(month,l.posted_local_date),l.brand) as monthly_brand_gs,
     case 
@@ -220,6 +233,8 @@
     internal_sku_category,
     avg(rate_to_usd) as rate_to_usd,
     sum(CAST(ledger_gross_sales AS NUMERIC(18,2))) AS ledger_gross_sales,
+    sum(CAST(canada_tax_on_gross_sales AS NUMERIC(18,2))) AS canada_tax_on_gross_sales,
+    sum(CAST(canada_bank_conversion_fee AS NUMERIC(18,2))) AS canada_bank_conversion_fee,
     sum(CAST(EARNED_GROSS_SALES AS NUMERIC(18,2))) AS EARNED_GROSS_SALES,
     sum(CAST(ledger_gift_wrap AS NUMERIC(18,2))) AS ledger_gift_wrap,
     sum(CAST(ledger_reimbursed_product AS NUMERIC(18,2))) AS ledger_reimbursed_product,
@@ -306,6 +321,8 @@
     UNPIVOT(amount FOR metric_name IN (
     ledger_gross_sales,
     EARNED_GROSS_SALES,
+    canada_tax_on_gross_sales,
+    canada_bank_conversion_fee,
     ledger_gift_wrap,
     ledger_reimbursed_product,
     ledger_REFUND_COMMISSION,
@@ -548,7 +565,9 @@ when metric_name in (
 'LEDGER_WAREHOUSE_DAMAGE',
 'LEDGER_WAREHOUSE_LOST_MANUAL',
 'LEDGER_DISPOSAL_COMPLETE',
-'LEDGER_REMOVAL_COMPLETE'
+'LEDGER_REMOVAL_COMPLETE',
+'CANADA_TAX_ON_GROSS_SALES',
+'CANADA_BANK_CONVERSION_FEE'
 )
  then 'Expenses'
 when metric_name in (
@@ -587,7 +606,9 @@ when metric_name IN (
 'MANUAL_PRODUCT_SAMPLES',
 'MANUAL_TURNER_COSTS',
 'LEDGER_REMOVAL_COMPLETE',
-'LEDGER_DISPOSAL_COMPLETE'
+'LEDGER_DISPOSAL_COMPLETE',
+'CANADA_TAX_ON_GROSS_SALES',
+'CANADA_BANK_CONVERSION_FEE'
 )
 then 'Other Expenses'
 when metric_name in (
