@@ -1,27 +1,5 @@
 {{config(materialized='table')}}
 
--- with other_ad_spend as (
---     select 
---     date_day,
---     -- account_key,
---     marketplace_key,
---     case 
---     when campaign_name ilike any ('%73%','%roku%','%siri%') then '73&Sunny'
---     when campaign_name ilike '%storyph%' then 'Onanoff 2'
---     when campaign_name ilike '%cellini%' then 'Cellini'
---     when campaign_name ilike '%fokus%' then 'Fokus'
---     when campaign_name ilike '%pablo%' then 'Pablo Artists'' Choice'
---     when campaign_name ilike '%SPOT%' then 'SPOT'
---     when campaign_name ilike '%ZENS%' then 'ZENS'
---     when campaign_name ilike any ('%onanoff%','%pop%','%on-%','%bp-%','%play%','%fun%','%school%','%onanff%','%Onaonff%','%cosmo%','%explore%','%buddy%','%phones%') then 'ONANOFF'
---     else 'Other'
---     end as brand,
---     coalesce(sum(case when sponsored_type = 'SponsoredBrands' then costs end),0) as SponsoredBrandsCost,
---     coalesce(sum(case when sponsored_type = 'SponsoredDisplay' then costs end),0) as SponsoredDisplayCost
---     from datahawk_share_83514.advertising.advertising_campaign_metrics a
---     group by all
--- )
-
  WITH all_fields as (select 
     case when c.category is null and l.brand = 'ZENS' then 'Zens Legacy' else coalesce(l.brand,o.brand) end as brand,
     l.account_key as account_key,
