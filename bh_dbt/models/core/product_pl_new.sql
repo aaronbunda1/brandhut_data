@@ -1,27 +1,5 @@
 {{config(materialized='table')}}
 
--- with other_ad_spend as (
---     select 
---     date_day,
---     -- account_key,
---     marketplace_key,
---     case 
---     when campaign_name ilike any ('%73%','%roku%','%siri%') then '73&Sunny'
---     when campaign_name ilike '%storyph%' then 'Onanoff 2'
---     when campaign_name ilike '%cellini%' then 'Cellini'
---     when campaign_name ilike '%fokus%' then 'Fokus'
---     when campaign_name ilike '%pablo%' then 'Pablo Artists'' Choice'
---     when campaign_name ilike '%SPOT%' then 'SPOT'
---     when campaign_name ilike '%ZENS%' then 'ZENS'
---     when campaign_name ilike any ('%onanoff%','%pop%','%on-%','%bp-%','%play%','%fun%','%school%','%onanff%','%Onaonff%','%cosmo%','%explore%','%buddy%','%phones%') then 'ONANOFF'
---     else 'Other'
---     end as brand,
---     coalesce(sum(case when sponsored_type = 'SponsoredBrands' then costs end),0) as SponsoredBrandsCost,
---     coalesce(sum(case when sponsored_type = 'SponsoredDisplay' then costs end),0) as SponsoredDisplayCost
---     from datahawk_share_83514.advertising.advertising_campaign_metrics a
---     group by all
--- )
-
  WITH all_fields as (select 
     case when c.category is null and l.brand = 'ZENS' then 'Zens Legacy' else coalesce(l.brand,o.brand) end as brand,
     l.account_key as account_key,
@@ -87,7 +65,20 @@
     l.other_amount_distributable as ledger_other_amount_distributable,
     l.other_amount_spot_only,
     l.restocking_fee as ledger_restocking_fee,
+    CASE 
+        WHEN l.marketplace_key = 'Amazon-CA' 
+        THEN 
+            CASE 
+                WHEN l.brand ilike any  ('%73%','%onanoff%')
+                THEN -.06*l.gross_sales
+                WHEN l.brand = 'SPOT'
+                THEN -.15*l.gross_sales
+                ELSE 0
+            END
+        ELSE 0 
+    END AS canada_tax_on_gross_sales,
     coalesce(l.gross_sales,0) + coalesce(l.REIMBURSED_PRODUCT,0) + coalesce(l.REVERSAL_REIMBURSED,0) as ledger_net_sales,
+    IFF(l.marketplace_key='Amazon-CA',-0.015*ledger_net_sales,0) AS canada_bank_conversion_fee, 
     coalesce(l.earned_gross_sales,0) + coalesce(l.REIMBURSED_PRODUCT,0) + coalesce(l.REVERSAL_REIMBURSED,0) as earned_net_sales,
     sum(l.EARNED_GROSS_SALES) over (partition by date_trunc(month,l.posted_local_date),l.brand) as monthly_brand_gs,
     case 
@@ -220,6 +211,8 @@
     internal_sku_category,
     avg(rate_to_usd) as rate_to_usd,
     sum(CAST(ledger_gross_sales AS NUMERIC(18,2))) AS ledger_gross_sales,
+    sum(CAST(canada_tax_on_gross_sales AS NUMERIC(18,2))) AS canada_tax_on_gross_sales,
+    sum(CAST(canada_bank_conversion_fee AS NUMERIC(18,2))) AS canada_bank_conversion_fee,
     sum(CAST(EARNED_GROSS_SALES AS NUMERIC(18,2))) AS EARNED_GROSS_SALES,
     sum(CAST(ledger_gift_wrap AS NUMERIC(18,2))) AS ledger_gift_wrap,
     sum(CAST(ledger_reimbursed_product AS NUMERIC(18,2))) AS ledger_reimbursed_product,
@@ -306,6 +299,8 @@
     UNPIVOT(amount FOR metric_name IN (
     ledger_gross_sales,
     EARNED_GROSS_SALES,
+    canada_tax_on_gross_sales,
+    canada_bank_conversion_fee,
     ledger_gift_wrap,
     ledger_reimbursed_product,
     ledger_REFUND_COMMISSION,
@@ -548,7 +543,9 @@ when metric_name in (
 'LEDGER_WAREHOUSE_DAMAGE',
 'LEDGER_WAREHOUSE_LOST_MANUAL',
 'LEDGER_DISPOSAL_COMPLETE',
-'LEDGER_REMOVAL_COMPLETE'
+'LEDGER_REMOVAL_COMPLETE',
+'CANADA_TAX_ON_GROSS_SALES',
+'CANADA_BANK_CONVERSION_FEE'
 )
  then 'Expenses'
 when metric_name in (
@@ -587,7 +584,9 @@ when metric_name IN (
 'MANUAL_PRODUCT_SAMPLES',
 'MANUAL_TURNER_COSTS',
 'LEDGER_REMOVAL_COMPLETE',
-'LEDGER_DISPOSAL_COMPLETE'
+'LEDGER_DISPOSAL_COMPLETE',
+'CANADA_TAX_ON_GROSS_SALES',
+'CANADA_BANK_CONVERSION_FEE'
 )
 then 'Other Expenses'
 when metric_name in (
