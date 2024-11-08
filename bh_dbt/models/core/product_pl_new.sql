@@ -514,7 +514,7 @@
     NULL as internal_sku_category,
     'CANADA_BANK_CONVERSION_FEE' as metric_name,
     current_timestamp() as updated_at,
-    sum(amount)*0.015 as amount
+    -sum(amount)*0.015 as amount
     from add_ad_spend
     where marketplace_key = 'Amazon-CA'
     and metric_name not in (
