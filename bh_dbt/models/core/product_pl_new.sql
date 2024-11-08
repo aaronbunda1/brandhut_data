@@ -78,7 +78,6 @@
         ELSE 0 
     END AS canada_tax_on_gross_sales,
     coalesce(l.gross_sales,0) + coalesce(l.REIMBURSED_PRODUCT,0) + coalesce(l.REVERSAL_REIMBURSED,0) as ledger_net_sales,
-    IFF(l.marketplace_key='Amazon-CA',-0.015*ledger_net_sales,0) AS canada_bank_conversion_fee, 
     coalesce(l.earned_gross_sales,0) + coalesce(l.REIMBURSED_PRODUCT,0) + coalesce(l.REVERSAL_REIMBURSED,0) as earned_net_sales,
     sum(l.EARNED_GROSS_SALES) over (partition by date_trunc(month,l.posted_local_date),l.brand) as monthly_brand_gs,
     case 
@@ -212,7 +211,6 @@
     avg(rate_to_usd) as rate_to_usd,
     sum(CAST(ledger_gross_sales AS NUMERIC(18,2))) AS ledger_gross_sales,
     sum(CAST(canada_tax_on_gross_sales AS NUMERIC(18,2))) AS canada_tax_on_gross_sales,
-    sum(CAST(canada_bank_conversion_fee AS NUMERIC(18,2))) AS canada_bank_conversion_fee,
     sum(CAST(EARNED_GROSS_SALES AS NUMERIC(18,2))) AS EARNED_GROSS_SALES,
     sum(CAST(ledger_gift_wrap AS NUMERIC(18,2))) AS ledger_gift_wrap,
     sum(CAST(ledger_reimbursed_product AS NUMERIC(18,2))) AS ledger_reimbursed_product,
@@ -300,7 +298,6 @@
     ledger_gross_sales,
     EARNED_GROSS_SALES,
     canada_tax_on_gross_sales,
-    canada_bank_conversion_fee,
     ledger_gift_wrap,
     ledger_reimbursed_product,
     ledger_REFUND_COMMISSION,
@@ -496,6 +493,51 @@
     select * from add_freight
 )
 
+, add_bank_conversion as (
+    select * from add_ad_spend
+    
+    union all 
+
+    select 
+    concat(date_day,brand,'CANADA_BANK_CONVERSION_FEE') as key,
+    brand,
+    NULL as account_key,
+    NULL as region,
+    marketplace_key,
+    date_day,
+    NULL as channel_product_id,
+    NULL as sku,
+    NULL as color,
+    NULL as currency_original,
+    NULL as currency_rate,
+    NULL as rate_to_usd,
+    NULL as internal_sku_category,
+    'CANADA_BANK_CONVERSION_FEE' as metric_name,
+    current_timestamp() as updated_at,
+    sum(amount)*0.015 as amount
+    from add_ad_spend
+    where marketplace_key = 'Amazon-CA'
+    and metric_name not in (
+        'DIST_SPONSORED_BRANDS_COST',
+        'DIST_SPONSORED_DISPLAY_COST',
+        'SPONSORED_PRODUCTS_COST',
+        'EARNED_BRANDHUT_COMMISSION',
+        'LEDGER_BRANDHUT_COMMISSION',
+        'EARNED_GROSS_SALES',
+        'CANADA_TAX_ON_GROSS_SALES',
+        'DIST_LEDGER_OTHER_AMOUNT',
+        'DIST_OTHER_AMOUNT_SPOT_ONLY',
+        'MANUAL_COGS',
+        'MANUAL_MISCELLANEOUS_COST',
+        'MANUAL_PRODUCT_SAMPLES',
+        'MANUAL_TURNER_COSTS',
+        'MANUAL_UNALLOCATED_COSTS',
+        'TRUE_UP_INVOICED',
+        'TRUE_UP_LIVE_CALCULATED'
+    )
+    group by all
+)
+
 , final_without_true_up as (
 select 
 prefinal.*, 
@@ -632,7 +674,7 @@ when metric_name in (
 )
 then 'Warehousing'
 end as metric_group_2
-from add_ad_spend prefinal
+from add_bank_conversion prefinal
 where 1=1 
 and prefinal.amount !=0 
 )
