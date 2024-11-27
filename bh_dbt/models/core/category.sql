@@ -17,7 +17,7 @@ with pre_dedupe as (
   category as project_name,
   category,
   last_updated::datetime as creation_date
-  from datahawk_writable_83514.brandhut.manual_product_categories
+  from {{ref('manual_product_categories')}}
   left join (
   select distinct sku, asin 
   from datahawk_share_83514.custom_83514.finance_profit_ledger l 
@@ -25,6 +25,9 @@ with pre_dedupe as (
   ) using(sku)
 )
 
-SELECT * from pre_dedupe
+SELECT distinct 
+* from pre_dedupe
 WHERE category NOT IN ('ZENS','ONANOFF','Zens BH','roku','CLA','Zens Qi2','OMG','EUCONIC SUPPLEMENT LIFE')
+and channel_product_id is not null
+QUALIFY rank() over (partition by channel_product_id order by creation_date desc) = 1
 order by channel_product_id,creation_date
