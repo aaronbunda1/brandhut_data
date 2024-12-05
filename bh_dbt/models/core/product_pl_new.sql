@@ -577,7 +577,8 @@
         'MANUAL_TURNER_COSTS',
         'MANUAL_UNALLOCATED_COSTS',
         'TRUE_UP_INVOICED',
-        'TRUE_UP_LIVE_CALCULATED'
+        'TRUE_UP_LIVE_CALCULATED',
+        'MANUAL_FREIGHT'
     )
     group by all
 )
