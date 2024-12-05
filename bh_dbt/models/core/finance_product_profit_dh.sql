@@ -8,17 +8,19 @@ with source as (
       sku,
       currency,
       case when original_description  IN (
-        'Other-ServiceFeeEvent-PaidServicesFee',
-        'Other-ServiceFeeEvent-Subscription',
-        'Other-ServiceFeeEvent-STARStorageFee',
-        'Order-Coupon-CouponRedemptionFee',
         'Other-AdjustmentEvent-FailedDisbursement',
         'Other-AdjustmentEvent-MiscAdjustment',
         'Other-AdjustmentEvent-ReserveCredit',
         'Other-AdjustmentEvent-ReserveDebit',
-        'Other-ItemFee-SellerDealPayment',
-        'Other-ServiceFeeEvent-STARStorageFee',
-        'Other-ServiceFeeEvent-VineFee') then 'other_amount_distributable' 
+        'Other-ServiceFeeEvent-PaidServicesFee',
+        'Other-ServiceFeeEvent-Subscription',
+        'Other-ServiceFeeEvent-FBAInboundTransportationProgramFee',
+        'Other-AdjustmentEvent-PostageBilling_PostageAdjustment',
+        'Other-AdjustmentEvent-PostageRefund_PostageAdjustment',
+        'Other-AdjustmentEvent-ReturnPostageBilling_FuelSurcharge',
+        'Other-AdjustmentEvent-ReturnPostageBilling_Postage',
+        'Other-ServiceFeeEvent-FBAPerUnitFulfillmentFee'
+        ) then 'other_amount_distributable' 
       when original_description IN ('Other-ServiceFeeEvent-AmazonUpstreamProcessingFee','Other-ServiceFeeEvent-AmazonUpstreamStorageTransportationFee') then 'other_amount_spot_only'
       else metric end as metric, 
       amount_usd as amount
