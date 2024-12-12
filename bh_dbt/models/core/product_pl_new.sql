@@ -85,6 +85,8 @@
             then -ledger_net_sales*0.1 
         when l.brand ilike any ('%spot%','%zens%')
             then -ledger_net_sales*0.15
+        when l.brand ilike '%tiny tree%'
+            then -ledger_net_sales*0.2
         when l.brand ilike '%onanoff 2%'
             then 
             case 
@@ -532,7 +534,7 @@
     union all 
 
     select 
-    concat(date_day,brand,'CANADA_BANK_CONVERSION_FEE') as key,
+    concat(date_day,brand,'BANK_CONVERSION_FEE') as key,
     brand,
     NULL as account_key,
     NULL as region,
@@ -545,11 +547,15 @@
     NULL as currency_rate,
     NULL as rate_to_usd,
     NULL as internal_sku_category,
-    'CANADA_BANK_CONVERSION_FEE' as metric_name,
+    'BANK_CONVERSION_FEE' as metric_name,
     current_timestamp() as updated_at,
-    -sum(amount)*0.015 as amount
+    -sum(
+        case when marketplace_key = 'Amazon-CA' THEN  amount*0.015
+        when marketplace_key = 'Amazon-UK' AND brand = 'SPOT' THEN amount*.015
+        when marketplace_key = 'Amazon-UK' AND brand ilike '%tiny tree%' THEN amount*0.015
+        END) as amount
     from add_ad_spend
-    where marketplace_key = 'Amazon-CA'
+    where (marketplace_key = 'Amazon-CA' OR (marketplace_key = 'Amazon-UK' AND brand ilike any ('SPOT','%tiny tree%')))
     and metric_name not in (
         'DIST_SPONSORED_BRANDS_COST',
         'DIST_SPONSORED_DISPLAY_COST',
@@ -644,7 +650,7 @@ when metric_name in (
 'LEDGER_DISPOSAL_COMPLETE',
 'LEDGER_REMOVAL_COMPLETE',
 'CANADA_TAX_ON_GROSS_SALES',
-'CANADA_BANK_CONVERSION_FEE'
+'BANK_CONVERSION_FEE'
 )
  then 'Expenses'
 when metric_name in (
@@ -696,7 +702,7 @@ when metric_name IN (
 'LEDGER_REMOVAL_COMPLETE',
 'LEDGER_DISPOSAL_COMPLETE',
 'CANADA_TAX_ON_GROSS_SALES',
-'CANADA_BANK_CONVERSION_FEE'
+'BANK_CONVERSION_FEE'
 )
 then 'Other Expenses'
 when metric_name in (
