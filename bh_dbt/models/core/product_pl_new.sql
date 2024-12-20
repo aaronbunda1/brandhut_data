@@ -551,11 +551,11 @@
     current_timestamp() as updated_at,
     -sum(
         case when marketplace_key = 'Amazon-CA' THEN  amount*0.015
-        when marketplace_key = 'Amazon-UK' AND brand = 'SPOT' THEN amount*.015
-        when marketplace_key = 'Amazon-UK' AND brand ilike '%tiny tree%' THEN amount*0.015
+        when marketplace_key = 'Amazon-GB' AND brand = 'SPOT' THEN amount*.015
+        when marketplace_key = 'Amazon-GB' AND brand ilike '%tiny tree%' THEN amount*0.015
         END) as amount
     from add_ad_spend
-    where (marketplace_key = 'Amazon-CA' OR (marketplace_key = 'Amazon-UK' AND brand ilike any ('SPOT','%tiny tree%')))
+    where (marketplace_key = 'Amazon-CA' OR (marketplace_key = 'Amazon-GB' AND brand ilike any ('SPOT','%tiny tree%')))
     and metric_name not in (
         'DIST_SPONSORED_BRANDS_COST',
         'DIST_SPONSORED_DISPLAY_COST',
