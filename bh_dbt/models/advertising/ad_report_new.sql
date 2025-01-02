@@ -8,26 +8,26 @@ SELECT
     ad.campaign_id,
     ad.campaign_name,
     ad.sponsored_type,
-    ad.ad_spend,
-    ad.ad_sales,
-    ad.ad_orders,
-    ad.ad_units,
-    ad.clicks,
-    ad.impressions,
-    a.sessions,
-    a.page_views,
-    pl.earned_gross_sales
+    ad.ad_spend--,
+    -- ad.ad_sales,
+    -- ad.ad_orders,
+    -- ad.ad_units,
+    -- ad.clicks,
+    -- ad.impressions,
+    -- a.sessions,
+    -- a.page_views,
+    -- pl.earned_gross_sales
 FROM (
     select * from {{ref('sb_new')}}
     union all
     select * from {{ref('sp_sd_new')}}
 ) ad
-FULL OUTER JOIN {{ref('activities')}} a
-    ON ad.account_key = a.account_key 
-    AND ad.marketplace_key = a.marketplace_key
-    AND ad.asin = a.asin
-    AND ad.date_day = a.date_day
-    and ad.brand is null
+-- FULL OUTER JOIN {{ref('activities')}} a
+--     ON ad.account_key = a.account_key 
+--     AND ad.marketplace_key = a.marketplace_key
+--     AND ad.asin = a.asin
+--     AND ad.date_day = a.date_day
+--     and ad.brand is null
 FULL OUTER JOIN (
     select account_key,
     marketplace_key,
