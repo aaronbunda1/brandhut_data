@@ -12,7 +12,7 @@
         when {{ sku_column }} ilike '%SPOT%' then 'SPOT'
         when {{ sku_column }} ilike '%QI%' then 'Qisten'
         when {{ sku_column }} ilike any ('CL%','%cellini%') then 'Cellini'
-        when {{ sku_column }} like any (
+        when {{ sku_column }} snowflake__get_incremental_default_sql()like any (
             '%pop-fun%','%BP-%','BP-%','%-ON-%','%ON-%','%buddy%','%onanoff%','%onanoff%',
             '%on-%','%bp-%','%play%','%fun%','%school%','%onanff%','%Onaonff%','%cosmo%',
             '%explore%','%buddy%','%phones%') then 'ONANOFF'
