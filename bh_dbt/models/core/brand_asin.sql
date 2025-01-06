@@ -44,11 +44,11 @@ where brand is not null and channel_product_id != 'Unknown'
 )
 
 select * from prededupe
-qualify count(*) over (partition by channel_product_id) =1
+qualify count(*) over (partition by key) =1
 
-union all
-select *
-from (select * from prededupe
-qualify count(*) over (partition by channel_product_id) >1
-)
-where brand = 'Tiny Tree Houses'
+-- union all
+-- select *
+-- from (select * from prededupe
+-- qualify count(*) over (partition by key) >1
+-- )
+-- where brand = 'Tiny Tree Houses'

@@ -1,7 +1,9 @@
 {{config(materialized='table')}}
 
  WITH all_fields as (select 
-    case when c.category is null and l.brand = 'ZENS' then 'Zens Legacy' else coalesce(l.brand,o.brand) end as brand,
+    case when c.category is null and l.brand = 'ZENS' then 'Zens Legacy' 
+    when l.brand = 'Tiny Tree Houses' then {{get_brand_from_sku('l.sku')}}
+    else coalesce(l.brand,o.brand) end as brand,
     l.account_key as account_key,
     l.amazon_region_id as region,
     -- case when fr.freight is not null and fr.freight <0 then 'Amazon-CA' else l.marketplace_key end as marketplace_key,
