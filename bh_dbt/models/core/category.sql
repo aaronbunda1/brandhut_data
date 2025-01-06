@@ -29,5 +29,6 @@ SELECT distinct
 * from pre_dedupe
 WHERE category NOT IN ('ZENS','ONANOFF','Zens BH','roku','CLA','Zens Qi2','OMG','EUCONIC SUPPLEMENT LIFE','Other')
 and channel_product_id is not null
+and category != project_name
 QUALIFY rank() over (partition by channel_product_id order by creation_date desc) = 1
 order by channel_product_id,creation_date
