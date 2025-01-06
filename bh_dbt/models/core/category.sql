@@ -21,13 +21,13 @@ with pre_dedupe as (
   left join (
   select distinct sku, asin 
   from datahawk_share_83514.custom_83514.finance_profit_ledger l 
-  where asin is not null and category != 'Other'
+  where asin is not null 
   ) using(sku)
 )
 
 SELECT distinct 
 * from pre_dedupe
-WHERE category NOT IN ('ZENS','ONANOFF','Zens BH','roku','CLA','Zens Qi2','OMG','EUCONIC SUPPLEMENT LIFE')
+WHERE category NOT IN ('ZENS','ONANOFF','Zens BH','roku','CLA','Zens Qi2','OMG','EUCONIC SUPPLEMENT LIFE','Other')
 and channel_product_id is not null
 QUALIFY rank() over (partition by channel_product_id order by creation_date desc) = 1
 order by channel_product_id,creation_date
