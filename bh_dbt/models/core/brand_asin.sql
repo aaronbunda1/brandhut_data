@@ -6,6 +6,8 @@ with product_report as (
     case 
         when p.brand ilike '%spot%' then 'SPOT'
         when p.brand ilike '%storyph%' then 'Onanoff 2'
+        when p.brand ilike any ('%tiny%','%tree%') then 'Tiny Tree Houses'
+        when p.brand ilike '%zens%' then 'Zens'
         when p.channel_product_id in ('B0CHY732PN','B0CHY57B3X') then 'Fokus'
         when p.brand ilike any ('%buddyph%','%onanoff%') then 'ONANOFF'
         when p.brand ilike '%cellini%' then 'Cellini'
