@@ -46,6 +46,7 @@ where brand is not null and channel_product_id != 'Unknown'
 select * from prededupe
 qualify count(*) over (partition by key) =1
 
+
 union all
 select *
 from (select * from prededupe
