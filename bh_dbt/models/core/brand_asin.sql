@@ -18,6 +18,7 @@ with product_report as (
     else p.brand
     end as brand
     from {{var('readable')['hawkspace']}}.reports.report_product_latest_version p
+    where brand !='Qisten'
     qualify rank() over (partition by channel_product_id,marketplace_key order by observation_time desc) =1 
 )
 
