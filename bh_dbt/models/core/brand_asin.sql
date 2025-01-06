@@ -30,7 +30,7 @@ with product_report as (
     {{ get_brand_from_sku('pl.sku') }} as brand
     from {{var('readable')['hawkspace']}}.finance.finance_product_profit_loss pl
 )
-
+, prededupe as (
 select distinct 
 channel_product_id, marketplace_key,channel_product_id||marketplace_key as key, brand
 from 
@@ -41,3 +41,14 @@ from sku_level s
 full outer join product_report p using(channel_product_id,marketplace_key)
 )
 where brand is not null and channel_product_id != 'Unknown'
+)
+
+select * from prededupe
+qualify count(*) over (partition by channel_product_id) =1
+
+union all
+select *
+from (select * from prededupe
+qualify count(*) over (partition by channel_product_id) >1
+)
+where brand = 'Tiny Tree Houses'
