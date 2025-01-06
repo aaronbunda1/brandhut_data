@@ -21,7 +21,7 @@ with pre_dedupe as (
   left join (
   select distinct sku, asin 
   from datahawk_share_83514.custom_83514.finance_profit_ledger l 
-  where asin is not null
+  where asin is not null and category != 'Other'
   ) using(sku)
 )
 
