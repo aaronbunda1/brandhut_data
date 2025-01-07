@@ -1,10 +1,10 @@
 
 {% macro get_brand_from_sku(sku_column) %}
     case  
-        when {{ sku_column }} ilike '%alora%' then 'Alora'
         when {{ sku_column }} ilike '%shield%' then 'Onanoff 2'
         when {{ sku_column }} ilike any ('%roku%','%sunny%','%siri%') then '73&Sunny'
         when {{ sku_column }} ilike any ('%-TH-%') then 'Tiny Tree Houses'
+        when {{ sku_column }} ilike '%alora%' then 'Alora'
         when {{ sku_column }} ilike '%ZED%' or {{ sku_column }} in (
             'ZEAPM03/00',
             'ZESC08W') 
