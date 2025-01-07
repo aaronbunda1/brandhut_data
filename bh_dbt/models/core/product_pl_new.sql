@@ -2,8 +2,8 @@
 
  WITH all_fields as (select 
     case when c.category is null and l.brand = 'ZENS' then 'Zens Legacy' 
-    when l.brand = 'Tiny Tree Houses' then {{get_brand_from_sku('l.sku')}}
     when l.brand = 'Tiny Tree Houses' and c.category != 'Tiny Tree Houses' THEN c.category
+    when l.brand = 'Tiny Tree Houses' then {{get_brand_from_sku('l.sku')}}
     else coalesce(l.brand,o.brand) end as brand,
     l.account_key as account_key,
     l.amazon_region_id as region,
