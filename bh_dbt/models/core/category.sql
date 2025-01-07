@@ -45,5 +45,5 @@ select
   from datahawk_share_83514.custom_83514.finance_profit_ledger l 
   where asin is not null 
   ) using(sku)
-  where not category ilike any ('Other%','Brandhut-managed','SPOT')
+  where not category ilike any ('Other%','Brandhut-managed','SPOT','Zens Legacy')
   QUALIFY row_number() over (partition by channel_product_id order by creation_date) = 1
