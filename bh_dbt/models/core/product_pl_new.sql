@@ -515,21 +515,57 @@
         and coalesce(a.marketplace_key,'') = coalesce(b.marketplace_key,'')
         and coalesce(a.account_key,'') = coalesce(b.account_key,'')
 )
+, ad_spend_with_currency AS (
+    select
+        ad_data.key,
+        ad_data.brand,
+        ad_data.account_key,
+        ad_data.region,
+        ad_data.marketplace_key,
+        ad_data.date_day,
+        ad_data.channel_product_id,
+        ad_data.sku,
+        ad_data.color,
+        CASE 
+            WHEN ad_data.marketplace_key = 'Amazon-GB' THEN 'GBP'
+            WHEN ad_data.marketplace_key = 'Amazon-US' THEN 'USD'
+            WHEN ad_data.marketplace_key = 'Amazon-CA' THEN 'CAD' 
+        END AS currency_original,
+        ad_data.currency_rate,
+        1/r.rate AS rate_to_usd,
+        ad_data.internal_sku_category,
+        ad_data.metric_name,
+        ad_data.updated_at,
+        ad_data.amount / r.rate AS amount
+    from 
+        (
+            select * from {{ref('ad_spend_sp')}}
 
-, add_ad_spend as (
-    select * from {{ref('ad_spend_sp')}}
+            UNION ALL 
 
-    UNION all 
+            select * from sd
 
-    select * from sd
+            UNION ALL
 
-    UNION all
+            select * from sb
+        ) ad_data
+    left join datahawk_share_83514.referential.referential_currency_rate r
+        ON ad_data.date_day = r.date_day
+        AND r.base = 'USD'
+        AND r.currency = 
+            CASE 
+                WHEN ad_data.marketplace_key = 'Amazon-GB' THEN 'GBP'
+                WHEN ad_data.marketplace_key = 'Amazon-US' THEN 'USD'
+                WHEN ad_data.marketplace_key = 'Amazon-CA' THEN 'CAD' 
+            END
+)
 
-    select * from sb
+, add_ad_spend AS (
+    select * from ad_spend_with_currency
 
-    UNION all 
+    UNION ALL 
     
-    select * from add_freight
+    select * from add_freight -- Ensure add_freight is defined earlier
 )
 
 , add_bank_conversion as (
