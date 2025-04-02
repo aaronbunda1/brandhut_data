@@ -76,6 +76,8 @@
                 THEN -.06*l.gross_sales
                 WHEN l.brand = 'SPOT'
                 THEN -.15*l.gross_sales
+                WHEN l.brand ilike '%tiny tree%'
+                THEN -.15*l.gross_sales
                 ELSE 0
             END
         ELSE 0 
