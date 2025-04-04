@@ -398,7 +398,7 @@
     m.brand,
     '' AS account_key,
     NULL AS Region,
-    'Amazon-CA' AS marketplace_key,
+    m.marketplace_key,
     m.month AS date_day,
     '' AS channel_product_id,
     '' AS sku,
