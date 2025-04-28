@@ -1,0 +1,38 @@
+version: 2
+
+sources: 
+  - name: dh_readable
+    database: DATAHAWK_SHARE_83514
+    schema: finance
+    tables:
+      - name: finance_product_metrics_daily
+      - name: finance_product_profit_loss
+  - name: dh_custom
+    database: DATAHAWK_SHARE_83514
+    schema: CUSTOM_83514
+    tables:
+      - name: finance_profit_ledger
+  - name: dh_referential
+    database: DATAHAWK_SHARE_83514
+    schema: referential
+    tables:
+      - name: referential_currency_rate
+  - name: dh_ads
+    database: datahawk_share_83514
+    schema: advertising
+    tables:
+      - name: advertising_product_campaign_metrics
+      - name: advertising_campaign_metrics
+
+models:
+  - name: stg_finance__manual_cogs
+    columns:
+      - name: key
+        tests:
+          - unique
+          - not null
+  - name: int_finance__ledger_monthly_long
+    description: >
+      Long-format monthly ledger model where each financial metric is a row. 
+    
+    

@@ -1,0 +1,314 @@
+with finance_profit_ledger_source as (
+  select
+      account_key,
+      amazon_region_id,
+      marketplace_key,
+      posted_local_date,
+      asin,
+      sku,
+      currency,
+      case 
+      when original_description  IN (
+        'Other-AdjustmentEvent-FailedDisbursement',
+        'Other-AdjustmentEvent-MiscAdjustment',
+        'Other-AdjustmentEvent-ReserveCredit',
+        'Other-AdjustmentEvent-ReserveDebit',
+        'Other-ServiceFeeEvent-PaidServicesFee',
+        'Other-ServiceFeeEvent-Subscription',
+        'Other-ServiceFeeEvent-FBAInboundTransportationProgramFee',
+        'Other-AdjustmentEvent-PostageBilling_PostageAdjustment',
+        'Other-AdjustmentEvent-PostageRefund_PostageAdjustment',
+        'Other-AdjustmentEvent-ReturnPostageBilling_FuelSurcharge',
+        'Other-AdjustmentEvent-ReturnPostageBilling_Postage',
+        'Other-ServiceFeeEvent-FBAPerUnitFulfillmentFee'
+        ) then 'other_amount_distributable' 
+      when original_description IN (
+        'Other-ServiceFeeEvent-AmazonUpstreamProcessingFee',
+        'Other-ServiceFeeEvent-AmazonUpstreamStorageTransportationFee'
+        ) then 'other_amount_spot_only'
+      else metric end as metric, 
+      amount_usd as amount,
+      quantity
+    from {{source('dh_custom','finance_profit_ledger')}}
+    where coalesce(original_description,'') NOT IN (
+        'Other-AdjustmentEvent-Cellini Caffè Mixed Variety Aluminum Nespresso Pods, 8 Distintive Italian Flavors, 100% Nespresso Original Machine Compatible, 80 Count, Medium to Strong Roast Coffee Capsules',
+        'Other-AdjustmentEvent-Cellini Caffè Mixed Variety Aluminum Nespresso Pods, 8 Distintive Italian Flavors, 100% Nespresso Original Machine Compatible, 120 Count, Medium to Strong Roast Coffee Capsules'
+    )
+),
+pivoted_financial_metrics as (
+  select * 
+  from finance_profit_ledger_source pivot(sum(amount) for metric in (  
+      'gross_sales',
+      'gift_wrap',
+      'units_sold',
+      'reimbursed_product',
+      'refund_commission',
+      'refunded_referral_fees',
+      'reimbursed_shipping',
+      'refund_promotion',
+      'refund_shipping_promotion',
+      'refund_shipping_chargeback',
+      'goodwill',
+      'reversal_reimbursed',
+      'gift_wrap_chargeback',
+
+      'shipping',
+      'shipping_promotion',
+      'shipping_chargeback',
+      'inbound_transportation',
+
+      'fba_storage_fee',
+      'fba_long_storage_fee',
+      'fba_inventory_placement_service',
+      'warehouse_damage',
+      'warehouse_lost_manual',
+
+      'fba_per_unit_fulfilment_fee',
+      'disposal_complete',
+      'removal_complete',
+
+      'sponsored_display_cost',
+      'sponsored_products_cost',
+      'sponsored_brands_cost',
+
+      'referral_fee',
+      'promotion',
+
+      'tax_principal',
+      'tax_principal_collected',
+      'tax_shipping',
+      'tax_reimbursed',
+      'tax_other',
+
+      'other_amount',
+      'other_amount_distributable',
+      'other_amount_spot_only',
+      'restocking_fee'
+
+        )) 
+    as p(  
+      account_key,
+      amazon_region_id,
+      marketplace_key,
+      posted_local_date,
+      asin,
+      sku,
+      currency,
+      gross_sales,
+      gift_wrap,
+        units_sold,
+      reimbursed_product,
+      refund_commission,
+      refunded_referral_fees,
+      reimbursed_shipping,
+      refund_promotion,
+      refund_shipping_promotion,
+      refund_shipping_chargeback,
+      goodwill,
+      reversal_reimbursed,
+      gift_wrap_chargeback,
+      shipping,
+      shipping_promotion,
+      shipping_chargeback,
+      inbound_transportation,
+      fba_storage_fee,
+      fba_long_storage_fee,
+      fba_inventory_placement_service,
+      warehouse_damage,
+      warehouse_lost_manual,
+      fba_per_unit_fulfilment_fee,
+      disposal_complete,
+      removal_complete,
+      sponsored_display_cost,
+      sponsored_products_cost,
+      sponsored_brands_cost,
+      referral_fee,
+      promotion,
+      tax_principal,
+      tax_principal_collected,
+      tax_shipping,
+      tax_reimbursed,
+      tax_other,
+      other_amount,
+      other_amount_distributable,
+      other_amount_spot_only,
+      restocking_fee
+  )
+
+),
+
+
+pivoted_unit_volume as (
+  select 
+  account_key,
+    amazon_region_id,
+    marketplace_key,
+    posted_local_date,
+    asin,
+    sku,
+    currency,
+    coalesce(sum("'gross_sales'"),0) as ledger_units_sold,
+    coalesce(sum("'reimbursed_product'"),0) as ledger_units_returned
+  from finance_profit_ledger_source pivot(sum(quantity)  for metric in (  
+    'gross_sales',
+    'reimbursed_product')) 
+  as p(  
+    account_key,
+    amazon_region_id,
+    marketplace_key,
+    posted_local_date,
+    asin,
+    sku,
+    currency
+  )
+  group by all
+),
+
+order_volume AS (
+
+select 
+account_key,
+  amazon_region_id,
+  marketplace_key,
+  posted_local_date,
+  asin,
+  sku,
+  currency,
+  count(distinct order_id) as orders
+from {{source('dh_custom','finance_profit_ledger')}} 
+where metric in (  
+  'gross_sales',
+  'reimbursed_product')
+group by all
+
+
+), 
+
+daily_product_sales as (
+  select 
+    account_key, 
+    marketplace_key,
+    date_local_day as purchase_local_date,
+    channel_product_id,
+    sku,
+    currency,
+    sales,
+    units_sold
+  from {{source('dh_readable','finance_product_metrics_daily')}} finance_product_metrics_daily
+  where marketplace_key <> 'Unknown' and workspace_id = '83514'
+)
+
+, all_joined as (
+select 
+    coalesce(d.account_key, s.account_key) as account_key,
+    d.amazon_region_id as amazon_region_id,
+    coalesce(d.marketplace_key, s.marketplace_key) as marketplace_key,
+    coalesce(d.posted_local_date, s.purchase_local_date) as posted_local_date,
+    coalesce(d.asin, s.channel_product_id) as asin,
+    coalesce(d.sku, s.sku) as sku, 
+    coalesce(d.currency, s.currency) as currency,
+    
+    max(s.sales) as earned_gross_sales,
+    max(s.units_sold) as earned_units_sold,
+
+    -- Financial Metrics
+    max(gross_sales) as gross_sales,
+    max(case 
+        when d.amazon_region_id != 1 
+          and coalesce(gross_sales, tax_principal_collected) is not null 
+        then coalesce(gross_sales, 0) + coalesce(tax_principal_collected, 0) 
+        else gross_sales 
+    end) as gross_sales_with_tax,
+    
+    max(gift_wrap) as gift_wrap,
+    max(reimbursed_product) as reimbursed_product,
+    max(refund_commission) as refund_comission,
+    max(refunded_referral_fees) as refunded_referral_fees,
+    max(reimbursed_shipping) as reimbursed_shipping,
+    max(refund_promotion) as refund_promotion,
+    max(refund_shipping_promotion) as refund_shipping_promotion,
+    max(refund_shipping_chargeback) as refund_shipping_chargeback,
+    max(goodwill) as goodwill,
+    max(reversal_reimbursed) as reversal_reimbursed,
+    max(gift_wrap_chargeback) as gift_wrap_chargeback,
+    max(shipping) as shipping,
+    max(shipping_promotion) as shipping_promotion,
+    max(shipping_chargeback) as shipping_chargeback,
+    max(inbound_transportation) as inbound_transportation,
+    max(fba_storage_fee) as fba_storage_fee,
+    max(fba_long_storage_fee) as fba_long_storage_fee,
+    max(fba_inventory_placement_service) as fba_inventory_placement_service,
+    max(warehouse_damage) as warehouse_damage,
+    max(warehouse_lost_manual) as warehouse_lost_manual,
+    max(fba_per_unit_fulfilment_fee) as fba_per_unit_fulfilment_fee,
+    max(disposal_complete) as disposal_complete,
+    max(removal_complete) as removal_complete,
+    max(sponsored_display_cost) as sponsored_display_cost,
+    max(sponsored_products_cost) as sponsored_products_cost,
+    max(sponsored_brands_cost) as sponsored_brands_cost,
+    max(referral_fee) as referral_fee,
+    max(promotion) as promotion,
+    max(tax_principal) as tax_principal,
+    max(tax_principal_collected) as tax_principal_collected,
+    max(tax_shipping) as tax_shipping,
+    max(tax_reimbursed) as tax_reimbursed,
+    max(tax_other) as tax_other,
+    max(other_amount) as other_amount,
+    max(other_amount_distributable) as other_amount_distributable,
+    max(other_amount_spot_only) as other_amount_spot_only,
+    max(restocking_fee) as restocking_fee,
+
+    -- Additions from order volume & unit volume CTEs
+    ov.orders,
+    uv.ledger_units_sold,
+    uv.ledger_units_returned
+
+  from pivoted_financial_metrics d
+  full outer join daily_product_sales s
+    on s.channel_product_id = d.asin
+    and s.sku = d.sku 
+    and s.marketplace_key = d.marketplace_key
+    and s.purchase_local_date = d.posted_local_date
+    and s.account_key = d.account_key
+    and s.currency = d.currency
+
+  -- Join order and unit volume
+  left join order_volume ov
+    on ov.account_key = coalesce(d.account_key, s.account_key)
+    and ov.amazon_region_id = d.amazon_region_id
+    and ov.marketplace_key = coalesce(d.marketplace_key, s.marketplace_key)
+    and ov.posted_local_date = coalesce(d.posted_local_date, s.purchase_local_date)
+    and ov.asin = coalesce(d.asin, s.channel_product_id)
+    and ov.sku = coalesce(d.sku, s.sku)
+    and ov.currency = coalesce(d.currency, s.currency)
+
+  left join pivoted_unit_volume uv
+    on uv.account_key = coalesce(d.account_key, s.account_key)
+    and uv.amazon_region_id = d.amazon_region_id
+    and uv.marketplace_key = coalesce(d.marketplace_key, s.marketplace_key)
+    and uv.posted_local_date = coalesce(d.posted_local_date, s.purchase_local_date)
+    and uv.asin = coalesce(d.asin, s.channel_product_id)
+    and uv.sku = coalesce(d.sku, s.sku)
+    and uv.currency = coalesce(d.currency, s.currency)
+
+  group by
+    coalesce(d.account_key, s.account_key),
+    d.amazon_region_id,
+    coalesce(d.marketplace_key, s.marketplace_key),
+    coalesce(d.posted_local_date, s.purchase_local_date),
+    coalesce(d.asin, s.channel_product_id),
+    coalesce(d.sku, s.sku),
+    coalesce(d.currency, s.currency),
+    ov.orders,
+    uv.ledger_units_sold,
+    uv.ledger_units_returned
+) 
+
+select 
+l.*,
+coalesce(us.brand,coalesce(b.brand,{{fuzzy_match_brand('l.sku')}})) as brand
+from all_joined l
+left join {{ref('brand_asin')}} b
+    on b.channel_product_id = l.asin
+    and b.marketplace_key = l.marketplace_key
+left join {{ref('uncommingled_skus')}} us on l.sku = us.sku

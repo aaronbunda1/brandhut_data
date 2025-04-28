@@ -1,0 +1,62 @@
+{{ config(materialized='ephemeral') }}
+
+SELECT
+md5(concat_ws('|', 
+    coalesce(BRAND,''),
+    coalesce(ACCOUNT_KEY,''),
+    coalesce(cast(REGION as varchar(12)),''),
+    coalesce(MARKETPLACE_KEY,''),
+    coalesce(cast(REPORT_MONTH as varchar(12)),''),
+    coalesce(asin,''),
+    coalesce(SKU,''),
+    coalesce(metric_name,''),
+    coalesce(original_currency,'')
+)) as key,
+BRAND,
+ACCOUNT_KEY,
+REGION,
+MARKETPLACE_KEY,
+report_month,
+asin,
+SKU,
+original_currency,
+internal_sku_category,
+metric_name,
+round(amount,2) as amount
+FROM {{ref('int_finance__ledger_monthly')}}
+UNPIVOT(amount FOR metric_name IN (
+ledger_gross_sales,
+EARNED_GROSS_SALES,
+canada_tax_on_gross_sales,
+ledger_gift_wrap,
+ledger_reimbursed_product,
+ledger_REFUND_COMMISSION,
+ledger_REFUNDED_REFERRAL_FEES,
+ledger_REIMBURSED_SHIPPING,
+ledger_REFUND_PROMOTION,
+ledger_REFUND_SHIPPING_CHARGEBACK,
+ledger_GOODWILL,
+ledger_REVERSAL_REIMBURSED,
+ledger_GIFT_WRAP_CHARGEBACK,
+ledger_shipping,
+ledger_SHIPPING_CHARGEBACK,
+ledger_fba_storage_fee,
+ledger_FBA_INVENTORY_PLACEMENT_SERVICE,
+ledger_WAREHOUSE_DAMAGE,
+ledger_WAREHOUSE_LOST_MANUAL,
+ledger_FBA_PER_UNIT_FULFILMENT_FEE,
+ledger_disposal_complete,
+ledger_removal_complete,
+ledger_referral_fee,
+ledger_promotion,
+ledger_other_amount,
+ledger_restocking_fee,
+ledger_brandhut_commission,
+EARNED_BRANDHUT_COMMISSION,
+orders,
+ledger_units_sold,
+ledger_units_returned,
+net_units_sold
+)
+)
+WHERE amount!=0

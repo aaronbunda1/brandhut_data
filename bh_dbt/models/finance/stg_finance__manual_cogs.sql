@@ -1,0 +1,4 @@
+SELECT 
+*,
+concat(ACCOUNTID,ASIN,START_DATE,END_DATE) AS key
+FROM {{ref('cogs')}}

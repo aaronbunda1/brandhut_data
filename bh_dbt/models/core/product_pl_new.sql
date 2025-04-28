@@ -410,7 +410,7 @@
     'MANUAL_FREIGHT' as metric_name,
     current_timestamp() AS updated_at,
     m.freight AS amount
-    FROM datahawk_writable_83514.brandhut.manual_metrics_by_brand_and_month m
+    FROM {{ref('manual_metrics_by_brand_and_month')}} m
     WHERE m.freight <0
  
 
