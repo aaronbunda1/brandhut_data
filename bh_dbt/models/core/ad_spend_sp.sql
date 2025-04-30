@@ -3,6 +3,7 @@ select distinct COALESCE(channel_product_id,'na') as channel_product_id,campaign
 from datahawk_share_83514.advertising.advertising_product_campaign_metrics
 where sponsored_type = 'SponsoredProducts'
 and costs>0
+and channel_product_id is not null
 )
 
 , prefinal as (select 
