@@ -1,3 +1,5 @@
+{{config(materialized = 'table')}}
+
 with asins as (
 select distinct COALESCE(channel_product_id,'na') as channel_product_id,campaign_id
 from datahawk_share_83514.advertising.advertising_product_campaign_metrics
