@@ -633,96 +633,19 @@
 )
 
 , final_without_true_up as (
-select 
-prefinal.*, 
-case 
-when metric_name in (
-    -- 'MANUAL_AD_SPEND',
-'DIST_SPONSORED_BRANDS_COST',
-'DIST_SPONSORED_DISPLAY_COST',
-'DIST_SPONOSORED_VIDEO_COST',
-'SPONSORED_PRODUCTS_COST',
-'LEDGER_BRANDHUT_COMMISSION',
-'EARNED_BRANDHUT_COMMISSION',
-'MANUAL_COGS',
-'MANUAL_MISCELLANEOUS_COST', -- adding new worksheet metric location 5
-'ORDERCOUPONCOUPONREDEMPTIONFEE',
-'OTHERITEMFEESELLERDEALPAYMENT',
-'OTHERSERVICEFEEEVENTVINEFEE',
-'OTHERSERVICEFEEEVENTAMAZONUPSTREAMPROCESSINGFEE',
-'OTHERSERVICEFEEEVENTAMAZONUPSTREAMSTORAGETRANSPORTATIONFEE',
-'OTHERSERVICEFEEEVENTFBAINBOUNDTRANSPORTATIONFEE',
-'OTHERSERVICEFEEEVENTCUSTOMERRETURNHRRUNITFEE',
-'OTHERSERVICEFEEEVENTGLOBALINBOUNDTRANSPORTATIONDUTY',
-'OTHERSERVICEFEEEVENTGLOBALINBOUNDTRANSPORTATIONFREIGHT',
-'OTHERSERVICEFEEEVENTSTARSTORAGEBILLING',
-'OTHERSERVICEFEEEVENTFBAINBOUNDCONVENIENCEFEE',
-'MANUAL_UNALLOCATED_COSTS',
-'TRUE_UP_INVOICED',
--- 'LEDGER_SUBSCRIPTION_FEE',
-'DIST_LEDGER_OTHER_AMOUNT',
-'DIST_OTHER_AMOUNT_SPOT_ONLY',
-'LEDGER_OTHER_AMOUNT',
-'MANUAL_PRODUCT_SAMPLES',
-'LEDGER_GIFT_WRAP',
-'LEDGER_GIFT_WRAP_CHARGEBACK',
-'LEDGER_GOODWILL',
-'LEDGER_PROMOTION',
-'LEDGER_REFUND_PROMOTION',
-'LEDGER_REFERRAL_FEE',
-'LEDGER_REFUND_COMMISSION',
-'LEDGER_REFUNDED_REFERRAL_FEES',
-'LEDGER_FBA_PER_UNIT_FULFILMENT_FEE',
--- 'LEDGER_INBOUND_TRANSPORTATION',
-'LEDGER_REFUND_SHIPPING_CHARGEBACK',
-'LEDGER_REIMBURSED_SHIPPING',
-'LEDGER_SHIPPING',
-'LEDGER_SHIPPING_CHARGEBACK',
-'MANUAL_FREIGHT',
-'LEDGER_TAX_OTHER',
-'LEDGER_TAX_PRINCIPAL',
-'LEDGER_TAX_REIMBURSED',
-'LEDGER_TAX_SHIPPING',
-'MANUAL_TURNER_COSTS',
-'LEDGER_FBA_INVENTORY_PLACEMENT_SERVICE',
-'LEDGER_FBA_STORAGE_FEE',
-'LEDGER_RESTOCKING_FEE',
-'LEDGER_WAREHOUSE_DAMAGE',
-'LEDGER_WAREHOUSE_LOST_MANUAL',
-'LEDGER_DISPOSAL_COMPLETE',
-'LEDGER_REMOVAL_COMPLETE',
-'CANADA_TAX_ON_GROSS_SALES',
-'BANK_CONVERSION_FEE'
-)
- then 'Expenses'
-when metric_name in (
-'EARNED_GROSS_SALES',
-'LEDGER_GROSS_SALES',
-'LEDGER_REIMBURSED_PRODUCT',
-'LEDGER_REVERSAL_REIMBURSED'
-)
-then 'Net Sales'
-end as metric_group_1, 
-case 
+    select 
+    prefinal.*, 
+    case 
     when metric_name in (
         -- 'MANUAL_AD_SPEND',
     'DIST_SPONSORED_BRANDS_COST',
     'DIST_SPONSORED_DISPLAY_COST',
     'DIST_SPONOSORED_VIDEO_COST',
-    'SPONSORED_PRODUCTS_COST'
-    )
-then 'Ad Spend'
-when metric_name in (
-'LEDGER_BRANDHUT_COMMISSION',
-'EARNED_BRANDHUT_COMMISSION'
-)
-then 'Brandhut Commission'
-when metric_name in ('EARNED_GROSS_SALES',
-'LEDGER_GROSS_SALES')
-then 'Gross Sales'
-when metric_name IN (
-    'MANUAL_COGS' ,
-    'MANUAL_MISCELLANEOUS_COST', -- adding new worksheet metric location 6
+    'SPONSORED_PRODUCTS_COST',
+    'LEDGER_BRANDHUT_COMMISSION',
+    'EARNED_BRANDHUT_COMMISSION',
+    'MANUAL_COGS',
+    'MANUAL_MISCELLANEOUS_COST', -- adding new worksheet metric location 5
     'ORDERCOUPONCOUPONREDEMPTIONFEE',
     'OTHERITEMFEESELLERDEALPAYMENT',
     'OTHERSERVICEFEEEVENTVINEFEE',
@@ -736,101 +659,178 @@ when metric_name IN (
     'OTHERSERVICEFEEEVENTFBAINBOUNDCONVENIENCEFEE',
     'MANUAL_UNALLOCATED_COSTS',
     'TRUE_UP_INVOICED',
-'DIST_LEDGER_OTHER_AMOUNT',
-'DIST_OTHER_AMOUNT_SPOT_ONLY',
-'LEDGER_OTHER_AMOUNT',
-'MANUAL_PRODUCT_SAMPLES',
-'MANUAL_TURNER_COSTS',
-'LEDGER_REMOVAL_COMPLETE',
-'LEDGER_DISPOSAL_COMPLETE',
-'CANADA_TAX_ON_GROSS_SALES',
-'BANK_CONVERSION_FEE'
-)
-then 'Other Expenses'
-when metric_name in (
-'LEDGER_GIFT_WRAP',
-'LEDGER_GIFT_WRAP_CHARGEBACK',
-'LEDGER_GOODWILL',
-'LEDGER_PROMOTION',
-'LEDGER_REFUND_PROMOTION'
-)
-then 'Other Marketing'
-when metric_name in (
-
-'LEDGER_REFERRAL_FEE',
-'LEDGER_REFUND_COMMISSION',
-'LEDGER_REFUNDED_REFERRAL_FEES'
-) then 'Referral Fees'
-when metric_name in (
-    'LEDGER_REIMBURSED_PRODUCT',
-'LEDGER_REVERSAL_REIMBURSED'
-)
-then 'Returns'
-when metric_name in (
+    -- 'LEDGER_SUBSCRIPTION_FEE',
+    'DIST_LEDGER_OTHER_AMOUNT',
+    'DIST_OTHER_AMOUNT_SPOT_ONLY',
+    'LEDGER_OTHER_AMOUNT',
+    'MANUAL_PRODUCT_SAMPLES',
+    'LEDGER_GIFT_WRAP',
+    'LEDGER_GIFT_WRAP_CHARGEBACK',
+    'LEDGER_GOODWILL',
+    'LEDGER_PROMOTION',
+    'LEDGER_REFUND_PROMOTION',
+    'LEDGER_REFERRAL_FEE',
+    'LEDGER_REFUND_COMMISSION',
+    'LEDGER_REFUNDED_REFERRAL_FEES',
     'LEDGER_FBA_PER_UNIT_FULFILMENT_FEE',
-'LEDGER_REFUND_SHIPPING_CHARGEBACK',
-'LEDGER_REIMBURSED_SHIPPING',
-'LEDGER_SHIPPING',
-'LEDGER_SHIPPING_CHARGEBACK',
-'MANUAL_FREIGHT'
-)
-then 'Shipping'
-when metric_name in ('LEDGER_TAX_OTHER',
-'LEDGER_TAX_PRINCIPAL',
-'LEDGER_TAX_REIMBURSED',
-'LEDGER_TAX_SHIPPING')
-then 'Taxes'
-when metric_name in (
     -- 'LEDGER_INBOUND_TRANSPORTATION',
-'LEDGER_FBA_INVENTORY_PLACEMENT_SERVICE',
-'LEDGER_FBA_STORAGE_FEE',
-'LEDGER_RESTOCKING_FEE',
-'LEDGER_WAREHOUSE_DAMAGE',
-'LEDGER_WAREHOUSE_LOST_MANUAL'
-)
-then 'Warehousing'
-end as metric_group_2
-from add_bank_conversion prefinal
-where 1=1 
-and prefinal.amount !=0 
-)
+    'LEDGER_REFUND_SHIPPING_CHARGEBACK',
+    'LEDGER_REIMBURSED_SHIPPING',
+    'LEDGER_SHIPPING',
+    'LEDGER_SHIPPING_CHARGEBACK',
+    'MANUAL_FREIGHT',
+    'LEDGER_TAX_OTHER',
+    'LEDGER_TAX_PRINCIPAL',
+    'LEDGER_TAX_REIMBURSED',
+    'LEDGER_TAX_SHIPPING',
+    'MANUAL_TURNER_COSTS',
+    'LEDGER_FBA_INVENTORY_PLACEMENT_SERVICE',
+    'LEDGER_FBA_STORAGE_FEE',
+    'LEDGER_RESTOCKING_FEE',
+    'LEDGER_WAREHOUSE_DAMAGE',
+    'LEDGER_WAREHOUSE_LOST_MANUAL',
+    'LEDGER_DISPOSAL_COMPLETE',
+    'LEDGER_REMOVAL_COMPLETE',
+    'CANADA_TAX_ON_GROSS_SALES',
+    'BANK_CONVERSION_FEE'
+    )
+    then 'Expenses'
+    when metric_name in (
+    'EARNED_GROSS_SALES',
+    'LEDGER_GROSS_SALES',
+    'LEDGER_REIMBURSED_PRODUCT',
+    'LEDGER_REVERSAL_REIMBURSED'
+    )
+    then 'Net Sales'
+    end as metric_group_1, 
+    case 
+        when metric_name in (
+            -- 'MANUAL_AD_SPEND',
+        'DIST_SPONSORED_BRANDS_COST',
+        'DIST_SPONSORED_DISPLAY_COST',
+        'DIST_SPONOSORED_VIDEO_COST',
+        'SPONSORED_PRODUCTS_COST'
+        )
+    then 'Ad Spend'
+    when metric_name in (
+    'LEDGER_BRANDHUT_COMMISSION',
+    'EARNED_BRANDHUT_COMMISSION'
+    )
+    then 'Brandhut Commission'
+    when metric_name in ('EARNED_GROSS_SALES',
+    'LEDGER_GROSS_SALES')
+    then 'Gross Sales'
+    when metric_name IN (
+        'MANUAL_COGS' ,
+        'MANUAL_MISCELLANEOUS_COST', -- adding new worksheet metric location 6
+        'ORDERCOUPONCOUPONREDEMPTIONFEE',
+        'OTHERITEMFEESELLERDEALPAYMENT',
+        'OTHERSERVICEFEEEVENTVINEFEE',
+        'OTHERSERVICEFEEEVENTAMAZONUPSTREAMPROCESSINGFEE',
+        'OTHERSERVICEFEEEVENTAMAZONUPSTREAMSTORAGETRANSPORTATIONFEE',
+        'OTHERSERVICEFEEEVENTFBAINBOUNDTRANSPORTATIONFEE',
+        'OTHERSERVICEFEEEVENTCUSTOMERRETURNHRRUNITFEE',
+        'OTHERSERVICEFEEEVENTGLOBALINBOUNDTRANSPORTATIONDUTY',
+        'OTHERSERVICEFEEEVENTGLOBALINBOUNDTRANSPORTATIONFREIGHT',
+        'OTHERSERVICEFEEEVENTSTARSTORAGEBILLING',
+        'OTHERSERVICEFEEEVENTFBAINBOUNDCONVENIENCEFEE',
+        'MANUAL_UNALLOCATED_COSTS',
+        'TRUE_UP_INVOICED',
+    'DIST_LEDGER_OTHER_AMOUNT',
+    'DIST_OTHER_AMOUNT_SPOT_ONLY',
+    'LEDGER_OTHER_AMOUNT',
+    'MANUAL_PRODUCT_SAMPLES',
+    'MANUAL_TURNER_COSTS',
+    'LEDGER_REMOVAL_COMPLETE',
+    'LEDGER_DISPOSAL_COMPLETE',
+    'CANADA_TAX_ON_GROSS_SALES',
+    'BANK_CONVERSION_FEE'
+    )
+    then 'Other Expenses'
+    when metric_name in (
+    'LEDGER_GIFT_WRAP',
+    'LEDGER_GIFT_WRAP_CHARGEBACK',
+    'LEDGER_GOODWILL',
+    'LEDGER_PROMOTION',
+    'LEDGER_REFUND_PROMOTION'
+    )
+    then 'Other Marketing'
+    when metric_name in (
+
+    'LEDGER_REFERRAL_FEE',
+    'LEDGER_REFUND_COMMISSION',
+    'LEDGER_REFUNDED_REFERRAL_FEES'
+    ) then 'Referral Fees'
+    when metric_name in (
+        'LEDGER_REIMBURSED_PRODUCT',
+    'LEDGER_REVERSAL_REIMBURSED'
+    )
+    then 'Returns'
+    when metric_name in (
+        'LEDGER_FBA_PER_UNIT_FULFILMENT_FEE',
+    'LEDGER_REFUND_SHIPPING_CHARGEBACK',
+    'LEDGER_REIMBURSED_SHIPPING',
+    'LEDGER_SHIPPING',
+    'LEDGER_SHIPPING_CHARGEBACK',
+    'MANUAL_FREIGHT'
+    )
+    then 'Shipping'
+    when metric_name in ('LEDGER_TAX_OTHER',
+    'LEDGER_TAX_PRINCIPAL',
+    'LEDGER_TAX_REIMBURSED',
+    'LEDGER_TAX_SHIPPING')
+    then 'Taxes'
+    when metric_name in (
+        -- 'LEDGER_INBOUND_TRANSPORTATION',
+    'LEDGER_FBA_INVENTORY_PLACEMENT_SERVICE',
+    'LEDGER_FBA_STORAGE_FEE',
+    'LEDGER_RESTOCKING_FEE',
+    'LEDGER_WAREHOUSE_DAMAGE',
+    'LEDGER_WAREHOUSE_LOST_MANUAL'
+    )
+    then 'Warehousing'
+    end as metric_group_2
+    from add_bank_conversion prefinal
+    where 1=1 
+    and prefinal.amount !=0 
+    )
 
 , pl_brand_month as (
-    select date_day,
-    brand,
-    sum(amount) as pl
-    from final_without_true_up f
-    where metric_group_1 in ('Net Sales','Expenses') and metric_name NOT IN ('EARNED_GROSS_SALES','EARNED_BRANDHUT_COMMISSION')
-    group by all
-)
+        select date_day,
+        brand,
+        sum(amount) as pl
+        from final_without_true_up f
+        where metric_group_1 in ('Net Sales','Expenses') and metric_name NOT IN ('EARNED_GROSS_SALES','EARNED_BRANDHUT_COMMISSION')
+        group by all
+    )
 
 
 , data_movements as (
-select
-concat(i.brand,i.month,'DATA_MOVEMENTS') as key,
-        p.BRAND,
-        null as ACCOUNT_KEY,
-        null as REGION,
-        null as MARKETPLACE_KEY,
-        p.DATE_DAY as date_day,
-        null as CHANNEL_PRODUCT_ID,
-        null as SKU,
-        null as COLOR,
-        null as currency_original,
-        'USD' as CURRENCY,
-        null as rate_to_usd,
-        null as internal_sku_category,
-        'DATA_MOVEMENTS' as metric_name,
-        current_timestamp() as updated_at,
-        i.invoice_amount - p.pl as amount,
-        'Expenses' as metric_group_1,
-        'Other Expenses' as metric_group_2
-from pl_brand_month p
-left join {{ref('invoice_amounts')}} i
-    on i.month = p.date_day
-    and i.brand = p.brand
-where i.brand is not null 
-and date_day >= '2024-01-01'
+    select
+    concat(i.brand,i.month,'DATA_MOVEMENTS') as key,
+            p.BRAND,
+            null as ACCOUNT_KEY,
+            null as REGION,
+            null as MARKETPLACE_KEY,
+            p.DATE_DAY as date_day,
+            null as CHANNEL_PRODUCT_ID,
+            null as SKU,
+            null as COLOR,
+            null as currency_original,
+            'USD' as CURRENCY,
+            null as rate_to_usd,
+            null as internal_sku_category,
+            'DATA_MOVEMENTS' as metric_name,
+            current_timestamp() as updated_at,
+            i.invoice_amount - p.pl as amount,
+            'Expenses' as metric_group_1,
+            'Other Expenses' as metric_group_2
+    from pl_brand_month p
+    left join {{ref('invoice_amounts')}} i
+        on i.month = p.date_day
+        and i.brand = p.brand
+    where i.brand is not null 
+    and date_day >= '2024-01-01'
 )
 
 , final_without_true_up_with_data_movements as (

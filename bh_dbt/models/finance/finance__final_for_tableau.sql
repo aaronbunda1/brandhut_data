@@ -1,6 +1,7 @@
 {{config(
     materialized='table'
 )}}
+
 select 
 *,
 '' AS color
