@@ -1,4 +1,4 @@
-month,brand,marketplace_key,freight,turner_costs,ad_spend_manual,product_samples,total_invoice_amount,true_up_invoiced,miscellaneous,manual_unallocated_costs,OrderCouponCouponRedemptionFee,OtherItemFeeSellerDealPayment,OtherServiceFeeEventVineFee,OtherServiceFeeEventAmazonUpstreamProcessingFee,OtherServiceFeeEventAmazonUpstreamStorageTransportationFee,OtherServiceFeeEventFBAInboundTransportationFee,OtherServiceFeeEventCustomerReturnHRRUnitFee,OtherServiceFeeEventGlobalInboundTransportationDuty,OtherServiceFeeEventGlobalInboundTransportationFreight,OtherServiceFeeEventSTARStorageBilling,OtherServiceFeeEventFBAInboundConvenienceFee
+month,brand,marketplace_key,freight,turner_costs,ad_spend_manual,product_samples,total_invoice_amount,true_up_invoiced,miscellaneous,manual_unallocated_costs,Order-Coupon-CouponRedemptionFee,Other-ItemFee-SellerDealPayment,Other-ServiceFeeEvent-VineFee,OtherServiceFeeEventAmazonUpstreamProcessingFee,OtherServiceFeeEventAmazonUpstreamStorageTransportationFee,Other-ServiceFeeEvent-FBAInboundTransportationFee,Other-ServiceFeeEvent-CustomerReturnHRRUnitFee,Other-ServiceFeeEvent-GlobalInboundTransportationDuty,Other-ServiceFeeEvent-GlobalInboundTransportationFreight,Other-ServiceFeeEvent-STARStorageBilling,Other-ServiceFeeEvent-FBAInboundConvenienceFee
 2023-01-01,Cellini,Amazon-US,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 2023-01-01,ONANOFF,Amazon-US,0,0,-3727.32,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 2023-01-01,Onanoff2,Amazon-US,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -207,3 +207,20 @@ month,brand,marketplace_key,freight,turner_costs,ad_spend_manual,product_samples
 2025-03-01,Tiny Tree Houses,Amazon-CA,0,0,0,0,0,0,0,0,-0.65878187848903,0,0,0,0,0,0,0,0,0,0
 2025-03-01,Alora,Amazon-US,0,0,0,0,0,0,0,0,-18.6,0,-75,0,0,0,0,0,0,-78.13,0
 2025-03-01,PabloArtists'Choice,Amazon-US,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-3.7,0,0,0,0
+2025-04-01,73&Sunny,Amazon-US,0,0,-32,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0
+2025-04-01,73&Sunny,Amazon-CA,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2025-04-01,ONANOFF,Amazon-US,0,0,0,0,0,0,0,0,0,-128.25471638146,0,0,0,0,0,0,0,0,-1.3
+2025-04-01,ONANOFF,Amazon-CA,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2025-04-01,Spot,Amazon-US,0,0,-44,0,0,0,0,-2279.91,0,0,0,0,0,0,0,0,0,0,0
+2025-04-01,Spot,Amazon-CA,0,0,-51,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2025-04-01,Spot,Amazon-GB,0,0,0,0,0,0,0,-2056.97,0,0,0,0,0,0,0,0,0,0,0
+2025-04-01,Onanoff2,Amazon-US,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.64
+2025-04-01,Onanoff2,Amazon-CA,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2025-04-01,ZENS,Amazon-US,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2025-04-01,Cellini,Amazon-US,0,0,-105,0,0,0,-5.48,0,0,0,0,-33.94,-53.85,0,0,0,0,-56,0
+2025-04-01,Fokus,Amazon-US,0,0,0,0,0,0,0,0,-1.8,0,0,0,0,0,0,0,0,0,0
+2025-04-01,Fokus,Amazon-CA,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2025-04-01,Tiny Tree Houses,Amazon-GB,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2025-04-01,Tiny Tree Houses,Amazon-CA,0,0,0,0,0,0,0,0,-2.17,0,-100,0,0,0,0,0,0,0,0
+2025-04-01,Alora,Amazon-US,0,0,0,0,0,0,0,0,0,0,-150,-5,-2.08,0,0,0,0,-206,0
+2025-04-01,PabloArtists'Choice,Amazon-US,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
