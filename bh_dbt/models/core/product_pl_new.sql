@@ -800,7 +800,16 @@ and prefinal.amount !=0
     brand,
     sum(amount) as pl
     from final_without_true_up f
-    where metric_group_1 in ('Net Sales','Expenses') and metric_name NOT IN ('EARNED_GROSS_SALES','EARNED_BRANDHUT_COMMISSION')
+    where (metric_group_1 in ('Net Sales','Expenses') and metric_name NOT IN ('EARNED_GROSS_SALES','EARNED_BRANDHUT_COMMISSION')) OR metric_name in (
+'MANUAL_MISCELLANEOUS_COST',
+'BANK_CONVERSION_FEE',
+'CANADA_TAX_ON_GROSS_SALES',
+'LEDGER_DISPOSAL_COMPLETE',
+'MANUAL_UNALLOCATED_COSTS',
+'ORDERCOUPONCOUPONREDEMPTIONFEE',
+'OTHERITEMFEESELLERDEALPAYMENT',
+'OTHERSERVICEFEEEVENTSTARSTORAGEBILLING'
+    )
     group by all
 )
 
@@ -847,7 +856,8 @@ from data_movements
     brand,
     sum(amount) as pl
     from final_without_true_up_with_data_movements f
-    where metric_group_1 in ('Net Sales','Expenses') and metric_name NOT IN ('EARNED_GROSS_SALES','EARNED_BRANDHUT_COMMISSION','DATA_MOVEMENTS','TRUE_UP_INVOICED','MANUAL_UNALLOCATED_COSTS')
+    where (metric_group_1 in ('Net Sales','Expenses') and metric_name NOT IN ('EARNED_GROSS_SALES','EARNED_BRANDHUT_COMMISSION','DATA_MOVEMENTS','TRUE_UP_INVOICED','MANUAL_UNALLOCATED_COSTS'))
+    
     group by all
 )
 
