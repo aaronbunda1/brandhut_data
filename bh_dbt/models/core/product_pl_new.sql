@@ -66,7 +66,7 @@
     l.tax_other as ledger_tax_other,
     case when l.asin is null and (l.sku is null) then 0 else l.other_amount end as ledger_other_amount,
     l.other_amount_distributable as ledger_other_amount_distributable,
-    l.other_amount_spot_only,
+    -- l.other_amount_spot_only,
     l.restocking_fee as ledger_restocking_fee,
     CASE 
         WHEN l.marketplace_key = 'Amazon-CA' 
@@ -190,7 +190,7 @@
     coalesce(o.OtherServiceFeeEventGlobalInboundTransportationDuty, 0) as OtherServiceFeeEventGlobalInboundTransportationDuty,
     coalesce(o.OtherServiceFeeEventGlobalInboundTransportationFreight, 0) as OtherServiceFeeEventGlobalInboundTransportationFreight,
     coalesce(o.OtherServiceFeeEventSTARStorageBilling, 0) as OtherServiceFeeEventSTARStorageBilling,
-    coalesce(o.OtherServiceFeeEventFBAInboundConvenienceFee, 0) as OtherServiceFeeEventFBAInboundConvenienceFee,
+    coalesce(o.OtherServiceFeeEventFBAInboundConvenienceFee, 0) as OtherServiceFeeEventFBAInboundConvenienceFee
     coalesce(-pl.net_units_sold*cogs.productcost,pl.COGS) as MANUAL_COGS
     from {{ref('finance_pl_pivot_new')}} l
     left join datahawk_share_83514.referential.referential_currency_rate cr on l.posted_local_date = cr.date_day and l.currency  = cr.currency
@@ -260,7 +260,7 @@
     sum(CAST(ledger_tax_other AS NUMERIC(18,2))) AS ledger_tax_other,
     sum(CAST(ledger_other_amount AS NUMERIC(18,2))) AS ledger_other_amount,
     sum(CAST(ledger_other_amount_distributable AS NUMERIC(18,2))) AS ledger_other_amount_distributable,
-    sum(CAST(other_amount_spot_only AS NUMERIC(18,2))) AS other_amount_spot_only,
+    -- sum(CAST(other_amount_spot_only AS NUMERIC(18,2))) AS other_amount_spot_only,
     sum(CAST(ledger_restocking_fee AS NUMERIC(18,2))) AS ledger_restocking_fee,
     sum(CAST(ledger_brandhut_commission AS NUMERIC(18,2))) AS ledger_brandhut_commission,
     sum(CAST(EARNED_BRANDHUT_COMMISSION AS NUMERIC(18,2))) AS EARNED_BRANDHUT_COMMISSION,
@@ -289,8 +289,8 @@
 , fix as (
     select 
     *,
-    cast(nullif(sum(ledger_other_amount_distributable) over (partition by date_day,currency)*(ledger_gross_sales/sum(ledger_gross_sales) over (partition by date_day,currency)),0) as NUMERIC(30,2)) as dist_ledger_other_amount,
-    cast(nullif(sum(other_amount_spot_only) over (partition by date_day,currency)*(IFF(brand='SPOT',ledger_gross_sales,0)/nullif(sum(IFF(brand='SPOT',ledger_gross_sales,0)) over (partition by date_day,currency),0)),0) as NUMERIC(30,2)) as dist_other_amount_spot_only
+    cast(nullif(sum(ledger_other_amount_distributable) over (partition by date_day,currency)*(ledger_gross_sales/sum(ledger_gross_sales) over (partition by date_day,currency)),0) as NUMERIC(30,2)) as dist_ledger_other_amount--,
+    -- cast(nullif(sum(other_amount_spot_only) over (partition by date_day,currency)*(IFF(brand='SPOT',ledger_gross_sales,0)/nullif(sum(IFF(brand='SPOT',ledger_gross_sales,0)) over (partition by date_day,currency),0)),0) as NUMERIC(30,2)) as dist_other_amount_spot_only
     from by_month
 )
 
@@ -357,7 +357,7 @@
     -- ledger_tax_other,
     ledger_other_amount,
     dist_ledger_other_amount,
-    dist_other_amount_spot_only,
+    -- dist_other_amount_spot_only,
     ledger_restocking_fee,
     ledger_brandhut_commission,
     EARNED_BRANDHUT_COMMISSION,
@@ -607,7 +607,7 @@
         'EARNED_GROSS_SALES',
         'CANADA_TAX_ON_GROSS_SALES',
         'DIST_LEDGER_OTHER_AMOUNT',
-        'DIST_OTHER_AMOUNT_SPOT_ONLY',
+        -- 'DIST_OTHER_AMOUNT_SPOT_ONLY',
         'MANUAL_COGS',
         'MANUAL_FREIGHT',
         'MANUAL_MISCELLANEOUS_COST', -- adding new worksheet metric location 4
@@ -661,7 +661,7 @@ when metric_name in (
 'TRUE_UP_INVOICED',
 -- 'LEDGER_SUBSCRIPTION_FEE',
 'DIST_LEDGER_OTHER_AMOUNT',
-'DIST_OTHER_AMOUNT_SPOT_ONLY',
+-- 'DIST_OTHER_AMOUNT_SPOT_ONLY',
 'LEDGER_OTHER_AMOUNT',
 'MANUAL_PRODUCT_SAMPLES',
 'LEDGER_GIFT_WRAP',
@@ -737,7 +737,7 @@ when metric_name IN (
     'MANUAL_UNALLOCATED_COSTS',
     'TRUE_UP_INVOICED',
 'DIST_LEDGER_OTHER_AMOUNT',
-'DIST_OTHER_AMOUNT_SPOT_ONLY',
+-- 'DIST_OTHER_AMOUNT_SPOT_ONLY',
 'LEDGER_OTHER_AMOUNT',
 'MANUAL_PRODUCT_SAMPLES',
 'MANUAL_TURNER_COSTS',
