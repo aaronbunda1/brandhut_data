@@ -190,7 +190,7 @@
     coalesce(o.OtherServiceFeeEventGlobalInboundTransportationDuty, 0) as OtherServiceFeeEventGlobalInboundTransportationDuty,
     coalesce(o.OtherServiceFeeEventGlobalInboundTransportationFreight, 0) as OtherServiceFeeEventGlobalInboundTransportationFreight,
     coalesce(o.OtherServiceFeeEventSTARStorageBilling, 0) as OtherServiceFeeEventSTARStorageBilling,
-    coalesce(o.OtherServiceFeeEventFBAInboundConvenienceFee, 0) as OtherServiceFeeEventFBAInboundConvenienceFee
+    coalesce(o.OtherServiceFeeEventFBAInboundConvenienceFee, 0) as OtherServiceFeeEventFBAInboundConvenienceFee,
     coalesce(-pl.net_units_sold*cogs.productcost,pl.COGS) as MANUAL_COGS
     from {{ref('finance_pl_pivot_new')}} l
     left join datahawk_share_83514.referential.referential_currency_rate cr on l.posted_local_date = cr.date_day and l.currency  = cr.currency
