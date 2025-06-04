@@ -9,7 +9,7 @@ and channel_product_id is not null
 )
 
 , prefinal as (select 
-b.brand as brand,
+{{get_brand_from_sku('b.brand')}} as brand,
 account_key,
 NULL as region,
 marketplace_key,
