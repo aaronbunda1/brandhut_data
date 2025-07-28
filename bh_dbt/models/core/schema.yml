@@ -1,5 +1,12 @@
 version: 2
 
+sources:
+  - name: sharepoint
+    database: datahawk_writable_83514
+    schema: share_point
+    tables:
+      - name: invoice_amounts
+      - name: manual_metrics
 models:
   - name: brand_asin
     columns:

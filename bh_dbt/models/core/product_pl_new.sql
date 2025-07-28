@@ -180,26 +180,26 @@
     coalesce(o.miscellaneous,0) as manual_miscellaneous_cost,
     coalesce(o.manual_unallocated_costs,0) as manual_unallocated_costs,
     coalesce(o.true_up_invoiced,0) as true_up_invoiced, -- adding new worksheet metric location 1
-    coalesce(o.OrderCouponCouponRedemptionFee, 0) as OrderCouponCouponRedemptionFee,
-    coalesce(o.OtherItemFeeSellerDealPayment, 0) as OtherItemFeeSellerDealPayment,
-    coalesce(o.OtherServiceFeeEventVineFee, 0) as OtherServiceFeeEventVineFee,
-    coalesce(o.OtherServiceFeeEventAmazonUpstreamProcessingFee, 0) as OtherServiceFeeEventAmazonUpstreamProcessingFee,
-    coalesce(o.OtherServiceFeeEventAmazonUpstreamStorageTransportationFee, 0) as OtherServiceFeeEventAmazonUpstreamStorageTransportationFee,
-    coalesce(o.OtherServiceFeeEventFBAInboundTransportationFee, 0) as OtherServiceFeeEventFBAInboundTransportationFee,
-    coalesce(o.OtherServiceFeeEventCustomerReturnHRRUnitFee, 0) as OtherServiceFeeEventCustomerReturnHRRUnitFee,
-    coalesce(o.OtherServiceFeeEventGlobalInboundTransportationDuty, 0) as OtherServiceFeeEventGlobalInboundTransportationDuty,
-    coalesce(o.OtherServiceFeeEventGlobalInboundTransportationFreight, 0) as OtherServiceFeeEventGlobalInboundTransportationFreight,
-    coalesce(o.OtherServiceFeeEventSTARStorageBilling, 0) as OtherServiceFeeEventSTARStorageBilling,
-    coalesce(o.OtherServiceFeeEventFBAInboundConvenienceFee, 0) as OtherServiceFeeEventFBAInboundConvenienceFee,
+    coalesce(o.Order_Coupon_Coupon_Redemption_Fee, 0) as OrderCouponCouponRedemptionFee,
+    coalesce(o.Other_Item_Fee_Seller_Deal_Payment, 0) as OtherItemFeeSellerDealPayment,
+    coalesce(o.Other_Service_Fee_Event_Vine_Fee, 0) as OtherServiceFeeEventVineFee,
+    coalesce(o.Other_Service_Fee_Event_Amazon_Upstream_Processing_Fee, 0) as OtherServiceFeeEventAmazonUpstreamProcessingFee,
+    coalesce(o.Other_Service_Fee_Event_Amazon_Upstream_Storage_Transportation_Fee, 0) as OtherServiceFeeEventAmazonUpstreamStorageTransportationFee,
+    coalesce(o.Other_Service_Fee_Event_FBAInbound_Transportation_Fee, 0) as OtherServiceFeeEventFBAInboundTransportationFee,
+    coalesce(o.Other_Service_Fee_Event_Customer_Return_HRRUnit_Fee, 0) as OtherServiceFeeEventCustomerReturnHRRUnitFee,
+    coalesce(o.Other_Service_Fee_Event_Global_Inbound_Transportation_Duty, 0) as OtherServiceFeeEventGlobalInboundTransportationDuty,
+    coalesce(o.Other_Service_Fee_Event_Global_Inbound_Transportation_Freight, 0) as OtherServiceFeeEventGlobalInboundTransportationFreight,
+    coalesce(o.Other_Service_Fee_Event_STARStorage_Billing, 0) as OtherServiceFeeEventSTARStorageBilling,
+    coalesce(o.Other_Service_Fee_Event_FBAInbound_Convenience_Fee, 0) as OtherServiceFeeEventFBAInboundConvenienceFee,
     coalesce(-pl.net_units_sold*cogs.productcost,pl.COGS) as MANUAL_COGS
     from {{ref('finance_pl_pivot_new')}} l
     left join datahawk_share_83514.referential.referential_currency_rate cr on l.posted_local_date = cr.date_day and l.currency  = cr.currency
     left join {{ref('category')}} c
         on c.channel_product_id = l.asin
-    full outer join {{ref('manual_metrics_by_brand_and_month')}} o 
+    full outer join {{ref('stg_manual_metrics')}} o 
         on o.brand = l.brand
         and l.marketplace_key = o.marketplace_key
-        and l.posted_local_date = o.month
+        and l.posted_local_date = o.month_date
         and l.marketplace_key is null
     left join datahawk_share_83514.finance.finance_product_profit_loss pl
         on pl.marketplace_key = l.marketplace_key
@@ -221,7 +221,7 @@
     ACCOUNT_KEY,
     REGION,
     MARKETPLACE_KEY,
-    date_trunc(month,date_day) as date_day,
+    date_trunc(month,date_day)::DATE as date_day,
     CHANNEL_PRODUCT_ID,
     SKU,
     COLOR,
@@ -392,14 +392,14 @@
     concat(
         m.brand,
         'Amazon-CA',
-        m.month,
+        m.month_date,
         'MANUAL_FREIGHT'
     ) AS key,
     m.brand,
     '' AS account_key,
     NULL AS Region,
     m.marketplace_key,
-    m.month AS date_day,
+    m.month_date AS date_day,
     '' AS channel_product_id,
     '' AS sku,
     '' AS color,
@@ -410,7 +410,7 @@
     'MANUAL_FREIGHT' as metric_name,
     current_timestamp() AS updated_at,
     m.freight AS amount
-    FROM datahawk_writable_83514.brandhut.manual_metrics_by_brand_and_month m
+    FROM {{ref('stg_manual_metrics')}} m
     WHERE m.freight <0
  
 
@@ -816,7 +816,7 @@ and prefinal.amount !=0
 
 , data_movements as (
 select
-concat(i.brand,i.month,'DATA_MOVEMENTS') as key,
+concat(i.brand,i.month_date,'DATA_MOVEMENTS') as key,
         p.BRAND,
         null as ACCOUNT_KEY,
         null as REGION,
@@ -835,8 +835,8 @@ concat(i.brand,i.month,'DATA_MOVEMENTS') as key,
         'Expenses' as metric_group_1,
         'Other Expenses' as metric_group_2
 from pl_brand_month p
-left join {{ref('invoice_amounts')}} i
-    on i.month = p.date_day
+left join {{ref('stg_invoice_amounts')}} i
+    on i.month_date = p.date_day
     and i.brand = p.brand
 where i.brand is not null 
 and date_day >= '2024-01-01'
@@ -863,12 +863,12 @@ from data_movements
 
 , true_up_live as (
 select
-concat(i.brand,i.month,'TRUE_UP') as key,
+concat(i.brand,i.month_date,'TRUE_UP') as key,
         p.BRAND,
         null as ACCOUNT_KEY,
         null as REGION,
         null as MARKETPLACE_KEY,
-        dateadd(month,1,max(i.month) over (partition by i.brand)) as date_day,
+        dateadd(month,1,max(i.month_date) over (partition by i.brand)) as date_day,
         null as CHANNEL_PRODUCT_ID,
         null as SKU,
         null as COLOR,
@@ -882,8 +882,8 @@ concat(i.brand,i.month,'TRUE_UP') as key,
         'Expenses' as metric_group_1,
         'Other Expenses' as metric_group_2
 from pl_brand_month_with_data_movements p
-left join {{ref('invoice_amounts')}} i
-    on i.month = p.date_day
+left join {{ref('stg_invoice_amounts')}} i
+    on i.month_date = p.date_day
     and i.brand = p.brand
 where i.brand is not null 
 and p.date_day >= '2024-01-01'
