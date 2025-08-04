@@ -157,7 +157,7 @@ group by ALL
 ,true_up_calc as (
 select a.brand, a.date_day, a.pl, 'USD' as currency, b.invoice_amount, b.invoice_amount - a.pl as true_up 
 from by_brand a 
-inner join {{ref('invoice_amounts')}} b
+inner join {{ref('stg_invoice_amounts')}} b
     on a.brand = b.brand 
     and a.date_day = b.month
 )
