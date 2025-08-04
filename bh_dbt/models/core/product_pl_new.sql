@@ -431,11 +431,11 @@
         b.sku,
         'DIST_SPONSORED_BRANDS_COST'
     ) as key,
-    b.brand,
-    b.account_key,
+    coalesce(b.brand,a.brand) as brand,
+    coalesce(b.account_key,a.account_key) as account_key,
     NULL as region,
-    b.marketplace_key,
-    b.date_day,
+    coalesce(b.marketplace_key,a.marketplace_key) as marketplace_key,
+    coalesce(b.date_day,a.date_day) as date_day,
     b.channel_product_id,
     b.sku,
     NULL as color,
@@ -462,7 +462,7 @@
         sku
         from add_freight
     ) b
-    left join {{ref('ad_spend_other')}} a
+    full outer join {{ref('ad_spend_other')}} a
         on a.date_day = b.date_day
         and coalesce(a.brand,'') = b.brand
         and coalesce(a.marketplace_key,'') = coalesce(b.marketplace_key,'')
@@ -480,11 +480,11 @@
         b.sku,
         'DIST_SPONSORED_DISPLAY_COST'
     ) as key,
-    b.brand,
-    b.account_key,
+    coalesce(b.brand,a.brand) as brand,
+    coalesce(b.account_key,a.account_key) as account_key,
     NULL as region,
-    b.marketplace_key,
-    b.date_day,
+    coalesce(b.marketplace_key,a.marketplace_key) as marketplace_key,
+    coalesce(b.date_day,a.date_day) as date_day,
     b.channel_product_id,
     b.sku,
     NULL as color,
@@ -511,7 +511,7 @@
         sku
         from add_freight
     ) b
-    left join {{ref('ad_spend_other')}} a
+    full outer join {{ref('ad_spend_other')}} a
         on a.date_day = b.date_day
         and coalesce(a.brand,'') = b.brand
         and coalesce(a.marketplace_key,'') = coalesce(b.marketplace_key,'')
@@ -532,6 +532,7 @@
             WHEN ad_data.marketplace_key = 'Amazon-GB' THEN 'GBP'
             WHEN ad_data.marketplace_key = 'Amazon-US' THEN 'USD'
             WHEN ad_data.marketplace_key = 'Amazon-CA' THEN 'CAD' 
+            WHEN ad_data.marketplace_key IN ('Amazon-DE','Amazon-ES','Amazon-FR','Amazon-IT') THEN 'EUR'
         END AS currency_original,
         ad_data.currency_rate,
         1/r.rate AS rate_to_usd,
@@ -559,6 +560,7 @@
                 WHEN ad_data.marketplace_key = 'Amazon-GB' THEN 'GBP'
                 WHEN ad_data.marketplace_key = 'Amazon-US' THEN 'USD'
                 WHEN ad_data.marketplace_key = 'Amazon-CA' THEN 'CAD' 
+                WHEN ad_data.marketplace_key IN ('Amazon-DE','Amazon-ES','Amazon-FR','Amazon-IT') THEN 'EUR'
             END
 )
 
@@ -595,6 +597,7 @@
         case when marketplace_key = 'Amazon-CA' THEN  amount*0.015
         when marketplace_key = 'Amazon-GB' AND brand = 'SPOT' THEN amount*.015
         when marketplace_key = 'Amazon-GB' AND brand ilike '%tiny tree%' THEN amount*0.015
+        when marketplace_key = 'Amazon-DE' and brand ilike '%spot5' then amount*0.015
         END) as amount
     from add_ad_spend
     where (marketplace_key = 'Amazon-CA' OR (marketplace_key = 'Amazon-GB' AND brand ilike any ('SPOT','%tiny tree%')))

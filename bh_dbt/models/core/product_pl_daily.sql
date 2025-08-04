@@ -221,7 +221,7 @@ left join {{ref('brand_asin')}} p
     and p.MARKETPLACE_KEY = pl.MARKETPLACE_KEY
 left join {{ref('category')}} c
     on c.channel_product_id = p.channel_product_id
-full outer join {{ref('manual_metrics_by_brand_and_month')}} o 
+full outer join {{ref('stg_manual_metrics')}} o 
     on o.brand = p.brand
     and o.marketplace_key = p.marketplace_key
     and pl.date_day = o.month
